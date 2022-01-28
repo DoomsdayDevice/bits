@@ -1,0 +1,103 @@
+import { BadRequestException, Injectable, NotFoundException, Type } from '@nestjs/common';
+import {
+  Repository,
+  DeepPartial,
+  FindOneOptions,
+  FindConditions,
+  UpdateResult,
+  FindManyOptions,
+  DeleteResult,
+} from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { SaveOptions } from 'typeorm/repository/SaveOptions';
+import { NestedQuery } from './nested-query';
+import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
+
+export function ReadableRepo<Entity, TBase extends Type>(
+  EntityCls: Type<Entity>,
+  BaseCls: TBase,
+): Type<IReadableRepo<Entity> & InstanceType<TBase>> {
+  @Injectable()
+  class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
+    @InjectRepository(EntityCls) protected readonly repository!: Repository<Entity>;
+
+    public count(filter?: FindManyOptions<Entity>): Promise<number> {
+      return this.repository.count(filter);
+    }
+
+    public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
+      const obj = this.repository.create(newEntity);
+
+      return this.repository.save(obj);
+    }
+
+    public findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]> {
+      return this.repository.find(filter);
+    }
+
+    public findAllWithDeleted(
+      filter: FindManyOptions<Entity> = { withDeleted: true },
+    ): Promise<Entity[]> {
+      filter.withDeleted = true;
+      return this.repository.find(filter);
+    }
+
+    public async findOne(
+      id: string | FindOneOptions<Entity> | FindConditions<Entity>,
+      options?: FindOneOptions<Entity>,
+    ): Promise<Entity> {
+      const record = await this.repository.findOne(id as any, options);
+      if (!record) {
+        throw new NotFoundException('the requested record was not found');
+      }
+      return record;
+    }
+
+    /** adds nested filter */
+    public async findNested({
+      relations,
+      where,
+      take,
+      skip,
+      orderBy,
+    }: NestedFindManyOpts<Entity>): Promise<Entity[]> {
+      const complexQuery = new NestedQuery<Entity>(
+        this.repository.metadata.discriminatorValue as any,
+        this.repository,
+      );
+
+      const { items } = await complexQuery.execute({
+        relations,
+        where,
+        take,
+        skip,
+        orderBy,
+      });
+      return items;
+    }
+
+    public async findNestedAndCount({
+      relations,
+      where,
+      take,
+      skip,
+      orderBy,
+    }: NestedFindManyOpts<Entity>): Promise<any> {
+      const complexQuery = new NestedQuery<Entity>(
+        this.repository.metadata.discriminatorValue as any,
+        this.repository,
+      );
+
+      const { totalCount, items } = await complexQuery.execute({
+        relations,
+        where,
+        take,
+        skip,
+        orderBy,
+      });
+      return { totalCount, items };
+    }
+  }
+  return ReadableRepo;
+}
