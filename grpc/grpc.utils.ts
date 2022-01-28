@@ -1,9 +1,7 @@
-export const promisify = <T extends object>(service: T) => {
-  return new Proxy(service, {
-    get: (service: any, methodName: string) => {
-      return async (...params) => {
-        return await service[methodName](...params).toPromise();
-      };
-    },
+export const promisify = <T extends object>(service: T) =>
+  new Proxy(service, {
+    get:
+      (svc: any, methodName: string) =>
+      (...params: any[]) =>
+        svc[methodName](...params).toPromise(),
   });
-};

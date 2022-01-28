@@ -11,7 +11,7 @@ export function WritableRepo<Entity, TBase extends Type>(
 ): Type<IWritableRepo<Entity> & InstanceType<TBase>> {
   @Injectable()
   class WritableRepo extends BaseCls implements IWritableRepo<Entity> {
-    @InjectRepository(EntityCls) protected readonly repository: Repository<Entity>;
+    @InjectRepository(EntityCls) protected readonly repository!: Repository<Entity>;
 
     public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
       const obj = this.repository.create(newEntity);
