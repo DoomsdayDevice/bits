@@ -4,6 +4,7 @@ import {
   FindConditions,
   FindManyOptions,
   FindOneOptions,
+  Repository,
   UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -19,6 +20,8 @@ export interface NestedFindManyOpts<T> extends FindManyOptions<T> {
 }
 
 export interface IReadableRepo<Entity> {
+  repository: Repository<Entity>;
+
   count(filter?: FindManyOptions<Entity>): Promise<number>;
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
   findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
@@ -44,6 +47,8 @@ export interface IReadableRepo<Entity> {
 }
 
 export interface IWritableRepo<Entity> {
+  repository: Repository<Entity>;
+
   update(
     idOrConditions: string | FindConditions<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,

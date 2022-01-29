@@ -9,8 +9,6 @@ import {
   DeleteResult,
 } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { SaveOptions } from 'typeorm/repository/SaveOptions';
 import { NestedQuery } from './nested-query';
 import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
 
@@ -20,7 +18,7 @@ export function ReadableRepo<Entity, TBase extends Type>(
 ): Type<IReadableRepo<Entity> & InstanceType<TBase>> {
   @Injectable()
   class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
-    @InjectRepository(EntityCls) protected readonly repository!: Repository<Entity>;
+    @InjectRepository(EntityCls) public readonly repository!: Repository<Entity>;
 
     public count(filter?: FindManyOptions<Entity>): Promise<number> {
       return this.repository.count(filter);
