@@ -1,4 +1,4 @@
-import { GMessageInput, GMethodInput } from '../grpc.interface';
+import { GMessageInput } from '../grpc.interface';
 import { messageReflector, methodReflector } from './decorators';
 import { Type } from '@nestjs/common';
 
