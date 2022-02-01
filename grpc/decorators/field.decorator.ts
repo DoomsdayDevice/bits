@@ -19,6 +19,7 @@ export function GrpcFieldDef(
       typeFn: isArr ? () => typeFn()[0] : typeFn,
       messageName: '',
       nullable: opts?.nullable,
+      rule: opts?.nullable ? 'optional' : 'required',
     };
     if (isArr) field.rule = 'repeated';
     fieldReflector.append(target.constructor, field);
@@ -27,17 +28,23 @@ export function GrpcFieldDef(
 
 export function getFieldType(type: any, nullable: boolean): string {
   if (type === String) {
-    return nullable ? 'StringValue' : 'string';
+    // return nullable ? 'google.protobuf.StringValue' : 'string';
+    return 'string';
   } else if (type === 'uint32') {
-    return nullable ? 'UInt32Value' : 'uint32';
+    // return nullable ? 'google.protobuf.UInt32Value' : 'uint32';
+    return 'uint32';
   } else if (type === 'int32') {
-    return nullable ? 'Int32Value' : 'int32';
+    // return nullable ? 'google.protobuf.Int32Value' : 'int32';
+    return 'int32';
   } else if (type === 'bytes') {
-    return nullable ? 'BytesValue' : 'bytes';
+    return 'bytes';
+    // return nullable ? 'google.protobuf.BytesValue' : 'bytes';
   } else if (type === 'float') {
-    return nullable ? 'FloatValue' : 'float';
+    // return nullable ? 'google.protobuf.FloatValue' : 'float';
+    return 'float';
   } else if (type === 'bool' || type === Boolean) {
-    return nullable ? 'BoolValue' : 'bool';
+    return 'bool';
+    // return nullable ? 'BoolValue' : 'bool';
   } else if (typeof type === 'string') return type;
   else {
     const name = messageReflector.get<unknown, GMessageInput>(type)?.name;
