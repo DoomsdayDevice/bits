@@ -1,6 +1,5 @@
 import { fieldReflector } from './decorators/decorators';
 import { Type } from '@nestjs/common';
-import { Msg } from '../../../src/app.interface';
 import { getFieldDataForClass } from '@bits/grpc/decorators/message.decorator';
 
 export function PartialType<T extends Type>(MsgClass: T): Type<Partial<InstanceType<T>>> {

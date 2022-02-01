@@ -1,6 +1,6 @@
+import { Type } from '@nestjs/common';
 import { GMessageInput } from '../grpc.interface';
 import { messageReflector, methodReflector } from './decorators';
-import { Type } from '@nestjs/common';
 
 type MethodOptions = {
   name?: string;

@@ -1,6 +1,6 @@
-import { fieldReflector, messageReflector } from './decorators';
 import { GFieldInput, GMessageInput } from '@bits/grpc/grpc.interface';
 import { Type } from '@nestjs/common';
+import { fieldReflector, messageReflector } from './decorators';
 
 export type GrpcFieldOpts = {
   name?: string;
@@ -40,6 +40,8 @@ export function getFieldType(type: any, nullable: boolean): string {
     return nullable ? 'BoolValue' : 'bool';
   } else if (typeof type === 'string') return type;
   else {
-    return messageReflector.get<unknown, GMessageInput>(type)?.name;
+    const name = messageReflector.get<unknown, GMessageInput>(type)?.name;
+    if (!name) throw new Error('wrong detected type');
+    return name;
   }
 }
