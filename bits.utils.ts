@@ -7,6 +7,11 @@ export function formatValErrors(errors: ValidationError[]): string {
   return errors.map((e, i) => valErrorToStr(e, i === 0)).join('');
 }
 
+// eslint-disable-next-line
+export function renameFunc(func: Function, newName: string): any {
+  Object.defineProperty(func, 'name', { value: newName });
+}
+
 function valErrorToStr(
   err: ValidationError,
   printClass = true,

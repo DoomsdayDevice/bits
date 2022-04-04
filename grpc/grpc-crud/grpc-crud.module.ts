@@ -20,6 +20,7 @@ import { GrpcFieldDef } from '@bits/grpc/decorators/field.decorator';
 import { OffsetPagination } from '@domain/user/dto/pagination.dto';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OmitType, PartialType } from '@bits/grpc/mapped-types';
+import { renameFunc } from '../../bits.utils';
 
 type IWRRepo<M> = IWritableRepo<M> & IReadableRepo<M>;
 
@@ -74,6 +75,10 @@ export class GRPCCrudModule {
   static getReadableRepo<M>(Model: Type<M>): any {
     @Injectable()
     class EntityRepo extends ReadableRepo(Model, Object) {}
+
+    const repoName = `${Model.name}Repo`;
+    renameFunc(EntityRepo, repoName);
+
     return EntityRepo;
   }
 
