@@ -12,9 +12,10 @@ export interface GqlWritableCrudConfig<M> {
   Model: Type<M>;
   modelName: string;
   pagination?: boolean;
-  grpcServiceName: string;
+  grpcServiceName?: string;
+  ModelResolver?: any;
   // Controller?: Type<IGrpcController<M>>;
-  // Service?: Type<any>;
+  Service?: Type<any>;
 }
 
 export interface Connection<T> {
