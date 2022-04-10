@@ -46,9 +46,10 @@ export interface IReadableRepo<Entity> {
   }: NestedFindManyOpts<Entity>): Promise<any>;
 }
 
-export interface IWritableRepo<Entity> {
+export interface IWritableRepo<Entity> extends IReadableRepo<Entity> {
   repository: Repository<Entity>;
 
+  create(newEntity: DeepPartial<Entity>): Promise<Entity>;
   update(
     idOrConditions: string | FindConditions<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,

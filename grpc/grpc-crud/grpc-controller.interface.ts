@@ -1,10 +1,11 @@
 import { FindManyUserInput } from '@domain/user/dto/find-many-user.input';
 import { OffsetPagination } from '@domain/user/dto/pagination.dto';
 import { DeepPartial } from 'typeorm';
+import { FindOneInput } from '@domain/user/dto/find-one.input';
 
 export interface IGrpcController<M> {
-  findOne(): Promise<M>;
-  findMany(input: FindManyUserInput): Promise<FindManyResponse<M>>;
+  findOne(input: FindOneInput): Promise<M>;
+  findMany(input: FindManyInput<M>): Promise<FindManyResponse<M>>;
   createOne(newUser: CreateInput<M>): Promise<M>;
   updateOne(user: UpdateInput<M>): Promise<M>;
   deleteOne(user: DeleteOneInput): Promise<DeleteOneResponse>;
