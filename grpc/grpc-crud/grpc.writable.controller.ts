@@ -63,7 +63,7 @@ export function WritableGrpcController<M>(
 
   @Controller()
   class ModelController
-    extends ReadableGrpcController(ModelCls, RepoCls, defineService)
+    extends ReadableGrpcController(ModelCls, RepoCls, false)
     implements IGrpcWriteController<M>
   {
     @Inject(RepoCls) private repo: IWritableRepo<M>;

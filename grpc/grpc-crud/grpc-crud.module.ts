@@ -23,6 +23,7 @@ export interface GrpcReadableCrudConfig<M> {
   Repo?: Type<IReadableRepo<M>>;
   Controller?: Type<IGrpcWriteController<M>>;
   Service?: Type;
+  imports?: any[];
 }
 
 export class GRPCCrudModule {
@@ -31,7 +32,7 @@ export class GRPCCrudModule {
     Repo,
     Controller,
     Service,
-    imports,
+    imports = [],
   }: GrpcWritableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || WritableRepoMixin(Model)();
     const FinalController = Controller || WritableGrpcController(Model, FinalRepo);
@@ -39,7 +40,7 @@ export class GRPCCrudModule {
 
     return {
       module: GRPCCrudModule,
-      providers: [FinalRepo, Service, FinalController, FinalService],
+      providers: [FinalRepo, FinalController, FinalService],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports: [FinalRepo],
@@ -50,23 +51,17 @@ export class GRPCCrudModule {
     Model,
     Repo,
     Controller,
+    imports = [],
   }: GrpcReadableCrudConfig<any>): DynamicModule {
-    const FinalRepo = Repo || this.getReadableRepo(Model);
+    const FinalRepo = Repo || ReadableRepoMixin(Model)();
     const FinalController = Controller || ReadableGrpcController(Model, FinalRepo);
+
     return {
       module: GRPCCrudModule,
       providers: [FinalRepo],
       controllers: [FinalController],
-      imports: [TypeOrmModule.forFeature([Model])],
+      imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports: [FinalRepo],
     };
-  }
-
-  static getReadableRepo<M>(Model: Type<M>): any {
-    class EntityRepo extends ReadableRepoMixin(Model)() {}
-
-    const repoName = `${Model.name}Repo`;
-    renameFunc(EntityRepo, repoName);
-    return EntityRepo;
   }
 }
