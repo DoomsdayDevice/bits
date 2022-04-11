@@ -1,9 +1,9 @@
-import { FilterableRelation } from '@nestjs-query/query-graphql';
 import {
   RelationClassDecorator,
   RelationDecoratorOpts,
   RelationTypeFunc,
-} from '@nestjs-query/query-graphql/dist/src/decorators/relation.decorator';
+} from './relation/relation.interface';
+import { FilterableRelation } from './relation/relation.decorator';
 
 export function GqlRelation<DTO, Relation>(
   name: string,

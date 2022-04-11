@@ -1,4 +1,4 @@
-import { DynamicModule, Inject, Injectable, Module, Type } from '@nestjs/common';
+import { DynamicModule, Global, Inject, Injectable, Module, Type } from '@nestjs/common';
 import {
   GqlWritableCrudConfig,
   Connection,
@@ -43,14 +43,17 @@ export class GqlCrudModule<T> {
 
   makeReadableCrud(): any {
     const GenericService =
-      this.Service || getGenericGrpcWrapper('CORE_PACKAGE', this.grpcServiceName || 'GenericSvc');
+      this.Service ||
+      getGenericGrpcWrapper('CORE_PACKAGE', this.grpcServiceName || 'GenericSvc', this.Model);
     const GenericResolver =
       this.Resolver ||
       ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName);
 
+    @Global()
     @Module({
       providers: [GenericService, GenericResolver],
       imports: [CoreClientModule],
+      exports: [GenericService],
     })
     class GenericModule {}
 
