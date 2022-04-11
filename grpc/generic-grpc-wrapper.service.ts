@@ -41,8 +41,6 @@ export function getGenericGrpcWrapper<Service extends IService, T>(
     //   return this.svc.createOne(input);
     // }
   }
-  // assign service to Entity
-  crudServiceReflector.set(Model, GenericGrpcService);
   renameFunc(GenericGrpcService, serviceName);
 
   return GenericGrpcService as any;

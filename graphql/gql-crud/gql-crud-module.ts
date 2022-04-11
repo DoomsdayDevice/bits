@@ -11,6 +11,7 @@ import * as core from '@apis/core';
 import { getGenericGrpcWrapper, IService } from '@bits/grpc/generic-grpc-wrapper.service';
 import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.resolver';
+import { crudServiceReflector } from '@bits/services/crud.constants';
 
 export class GqlCrudModule<T> {
   private modelName: string;
@@ -49,6 +50,9 @@ export class GqlCrudModule<T> {
       this.Resolver ||
       ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName);
 
+    // assign service to Entity
+    crudServiceReflector.set(this.Model, GenericService);
+
     @Global()
     @Module({
       providers: [GenericService, GenericResolver],
@@ -66,23 +70,6 @@ export class GqlCrudModule<T> {
     return Service;
   }
 
-  getUpdate(): any {
-    // @InputType(`UpdateOne${Entity.name}Input`)
-    // class UpdateOneInput {
-    //   @Field(() => GraphQLUUID)
-    //   id!: string;
-    //
-    //   @Field(() => UpdateDTOClass)
-    //   @CTType(() => UpdateDTOClass)
-    //   @ValidateNested()
-    //   update!: any;
-    // }
-    // UpdateDTOClass = PartialType(
-    //   OmitType(Entity, ['deletedAt', 'createdAt', 'updatedAt', 'id'] as const),
-    //   InputType.bind(null, `Update${Entity.name}`),
-    // ),
-  }
-
   getSort(): any {
     // @InputType()
     // @ArgsType()
@@ -90,13 +77,5 @@ export class GqlCrudModule<T> {
     //   @Field(() => Int)
     //   field!: number;
     // }
-  }
-
-  getCreate(): any {
-    // CreateDTOClass = OmitType(
-    //   Entity,
-    //   ['deletedAt', 'createdAt', 'updatedAt', 'id'] as const,
-    //   InputType.bind(null, `Create${Entity.name}`),
-    // ),
   }
 }
