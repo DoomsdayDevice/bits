@@ -9,7 +9,7 @@ import {
   Filter,
   FindManyInput,
   FindManyResponse,
-  IGrpcController,
+  IGrpcWriteController,
   UpdateInput,
 } from './grpc-controller.interface';
 import { IWritableRepo } from '../../db/repo.interface';
@@ -17,44 +17,7 @@ import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
 import { OffsetPagination } from '../../../../src/domain/user/dto/pagination.dto';
 import { OmitType, PartialType } from '../mapped-types';
-
-function getDefaultFindManyInput<M>(ModelCls: Type<M>): Type<FindManyInput<M>> {
-  const F = getDefaultFilter(ModelCls);
-  @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
-  class GenericFindManyInput {
-    @GrpcFieldDef(() => OffsetPagination)
-    paging: OffsetPagination;
-
-    @GrpcFieldDef(() => F)
-    filter: Filter<M>;
-  }
-  return GenericFindManyInput;
-}
-
-function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
-  @GrpcMessageDef({ name: `${ModelCls.name}Filter` })
-  class GenericFilter {
-    @GrpcFieldDef(() => String, { nullable: true })
-    id!: string;
-
-    @GrpcFieldDef(() => String, { nullable: true })
-    username!: string;
-
-    @GrpcFieldDef(() => String, { nullable: true })
-    email!: string;
-  }
-  return GenericFilter as any;
-}
-
-function getDefaultFindManyResponse<M>(ModelCls: Type<M>): any {
-  @GrpcMessageDef({ name: `FindMany${ModelCls.name}Response` })
-  class GenericFindManyResponse {
-    @GrpcFieldDef(() => [ModelCls])
-    nodes: M[];
-  }
-
-  return GenericFindManyResponse;
-}
+import { ReadableGrpcController } from '@bits/grpc/grpc-crud/grpc.readable.controller';
 
 function getDefaultUpdateInput<M>(ModelCls: Type<M>): Type<UpdateInput<M>> {
   @GrpcMessageDef({ name: `Update${ModelCls.name}Input` })
@@ -88,34 +51,22 @@ function getDefaultCreateInput<M>(ModelCls: Type<M>): Type<CreateInput<M>> {
   return GenericCreateInput as any;
 }
 
-export function GrpcController<M>(
+export function WritableGrpcController<M>(
   ModelCls: Type<M>,
   RepoCls: Type<IWritableRepo<M>>,
   defineService = true,
-): Type<IGrpcController<M>> {
-  const FindMany = getDefaultFindManyInput(ModelCls);
-  const FindManyResp = getDefaultFindManyResponse(ModelCls);
+): Type<IGrpcWriteController<M>> {
   const GenericUpdate = getDefaultUpdateInput(ModelCls);
   const GenericCreateInput = getDefaultCreateInput(ModelCls);
   const GenericDeleteResp = getDefaultDeleteResponse(ModelCls);
   const GenericDeleteInput = getDefaultDeleteInput(ModelCls);
 
   @Controller()
-  class ModelController implements IGrpcController<M> {
+  class ModelController
+    extends ReadableGrpcController(ModelCls, RepoCls, defineService)
+    implements IGrpcWriteController<M>
+  {
     @Inject(RepoCls) private repo: IWritableRepo<M>;
-
-    @GrpcMethodDef({ requestType: () => FindOneInput, responseType: () => ModelCls })
-    async findOne(input: FindOneInput): Promise<M> {
-      return this.repo.findOne(input.id);
-    }
-
-    @GrpcMethodDef({
-      requestType: () => FindMany,
-      responseType: () => FindManyResp,
-    })
-    async findMany(input: FindManyInput<M>): Promise<FindManyResponse<M>> {
-      return { nodes: await this.repo.repository.find(input.filter) };
-    }
 
     @GrpcMethodDef({ requestType: () => GenericCreateInput, responseType: () => ModelCls })
     async createOne(newEntity: CreateInput<M>): Promise<M> {
