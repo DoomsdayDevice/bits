@@ -7,5 +7,3 @@ export function GrpcEnumDef(keys: string[]): PropertyDecorator {
 export function registerEnum(e: Record<string, number | string>, name: string) {
   grpcEnums.push({ enum: e, name });
 }
-
-console.log({ grpcEnums });
