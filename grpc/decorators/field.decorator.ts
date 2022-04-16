@@ -64,7 +64,7 @@ export function getFieldType(type: any, nullable: boolean): string {
   } else if (typeof type === 'string') return type;
   else {
     const name = messageReflector.get<unknown, GMessageInput>(type)?.name;
-    if (!name) throw new Error('wrong detected type');
+    if (!name) throw new Error("GRPC: Couldn't find the correct type for field");
     return name;
   }
 }

@@ -10,10 +10,16 @@ export type GMethodInput = {
 export type GServiceInput = { name: string };
 
 export type GMessageInput = { name: string };
+
 export type GFieldInput = {
   name: string;
   messageName: string;
   typeFn: () => any;
   rule?: string;
   nullable: boolean;
+};
+
+export type GEnumInput = {
+  enum: any;
+  name: string;
 };
