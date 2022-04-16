@@ -3,14 +3,13 @@ import { Repository, DeepPartial, FindConditions, UpdateResult, DeleteResult } f
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
-import { ReadableRepoMixin } from '@bits/db/readable.repo';
 import { IWritableRepo } from '@bits/db/repo.interface';
 
-export const WritableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
-  return (BaseCls: Base = class {} as Base): Type<IWritableRepo<Entity> & InstanceType<Base>> => {
+export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
+  return <B extends {}>(BaseCls: Type<B> = class {} as any): Type<IWritableRepo<Entity> & B> => {
     @Injectable()
-    class WritableRepo extends ReadableRepoMixin(EntityCls)(BaseCls) {
-      @InjectRepository(EntityCls) public readonly repository!: Repository<Entity>;
+    class WritableRepo extends (BaseCls as any) {
+      @InjectRepository(EntityCls) public readonly writeRepo!: Repository<Entity>;
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
         const obj = this.repository.create(newEntity);
@@ -35,7 +34,7 @@ export const WritableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         options?: SaveOptions,
       ): Promise<T | T[]> {
         try {
-          return this.repository.save<T>(entityOrEntities as any, options);
+          return this.writeRepo.save<T>(entityOrEntities as any, options);
         } catch (err) {
           throw new BadRequestException(err);
         }
