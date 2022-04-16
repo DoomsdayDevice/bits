@@ -11,7 +11,7 @@ import {
   IGrpcWriteController,
   UpdateInput,
 } from './grpc-controller.interface';
-import { IWritableRepo } from '../../db/repo.interface';
+import { IWritableRepo, IWRRepo } from '../../db/repo.interface';
 import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
 import { OmitType, PartialType } from '../mapped-types';
@@ -49,21 +49,19 @@ function getDefaultCreateInput<M>(ModelCls: Type<M>): Type<CreateInput<M>> {
   return GenericCreateInput as any;
 }
 
-export function WritableGrpcController<M>(
+export function WritableGrpcController<M, B extends Type>(
   ModelCls: Type<M>,
-  RepoCls: Type<IWritableRepo<M>>,
+  RepoCls: Type<IWRRepo<M>>,
   defineService = true,
-): Type<IGrpcWriteController<M>> {
+  Base: B = class {} as any,
+): Type<IGrpcWriteController<M> & InstanceType<B>> {
   const GenericUpdate = getDefaultUpdateInput(ModelCls);
   const GenericCreateInput = getDefaultCreateInput(ModelCls);
   const GenericDeleteResp = getDefaultDeleteResponse(ModelCls);
   const GenericDeleteInput = getDefaultDeleteInput(ModelCls);
 
   @Controller()
-  class ModelController
-    extends ReadableGrpcController(ModelCls, RepoCls, false)
-    implements IGrpcWriteController<M>
-  {
+  class ModelController extends Base implements IGrpcWriteController<M> {
     @Inject(RepoCls) private repo: IWritableRepo<M>;
 
     @GrpcMethodDef({ requestType: () => GenericCreateInput, responseType: () => ModelCls })

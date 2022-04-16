@@ -20,7 +20,7 @@ export interface NestedFindManyOpts<T> extends FindManyOptions<T> {
 }
 
 export interface IReadableRepo<Entity> {
-  repository: Repository<Entity>;
+  readRepo: Repository<Entity>;
 
   count(filter?: FindManyOptions<Entity>): Promise<number>;
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
@@ -46,7 +46,7 @@ export interface IReadableRepo<Entity> {
   }: NestedFindManyOpts<Entity>): Promise<any>;
 }
 
-export interface IWritableRepo<Entity> extends IReadableRepo<Entity> {
+export interface IWritableRepo<Entity> {
   repository: Repository<Entity>;
 
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
@@ -66,3 +66,5 @@ export interface IWritableRepo<Entity> extends IReadableRepo<Entity> {
     /* ...options: any[] */
   ): Promise<DeleteResult>;
 }
+
+export type IWRRepo<T> = IWritableRepo<T> & IReadableRepo<T>;

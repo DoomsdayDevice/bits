@@ -1,7 +1,7 @@
 import { DeepPartial } from 'typeorm';
 import { FindOneInput, OffsetPagination } from '../grpc.dto';
 
-export interface IGrpcWriteController<M> extends IGrpcReadController<M> {
+export interface IGrpcWriteController<M> {
   createOne(newUser: CreateInput<M>): Promise<M>;
   updateOne(user: UpdateInput<M>): Promise<M>;
   deleteOne(user: DeleteOneInput): Promise<DeleteOneResponse>;

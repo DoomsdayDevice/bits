@@ -8,34 +8,34 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
     @Injectable()
     class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
-      @InjectRepository(EntityCls) public readonly repository!: Repository<Entity>;
+      @InjectRepository(EntityCls) public readonly readRepo!: Repository<Entity>;
 
       public count(filter?: FindManyOptions<Entity>): Promise<number> {
-        return this.repository.count(filter);
+        return this.readRepo.count(filter);
       }
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
-        const obj = this.repository.create(newEntity);
+        const obj = this.readRepo.create(newEntity);
 
-        return this.repository.save(obj);
+        return this.readRepo.save(obj);
       }
 
       public findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]> {
-        return this.repository.find(filter);
+        return this.readRepo.find(filter);
       }
 
       public findAllWithDeleted(
         filter: FindManyOptions<Entity> = { withDeleted: true },
       ): Promise<Entity[]> {
         filter.withDeleted = true;
-        return this.repository.find(filter);
+        return this.readRepo.find(filter);
       }
 
       public async findOne(
         id: string | FindOneOptions<Entity> | FindConditions<Entity>,
         options?: FindOneOptions<Entity>,
       ): Promise<Entity> {
-        const record = await this.repository.findOne(id as any, options);
+        const record = await this.readRepo.findOne(id as any, options);
         if (!record) {
           throw new NotFoundException('the requested record was not found');
         }
@@ -51,8 +51,8 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         orderBy,
       }: NestedFindManyOpts<Entity>): Promise<Entity[]> {
         const complexQuery = new NestedQuery<Entity>(
-          this.repository.metadata.discriminatorValue as any,
-          this.repository,
+          this.readRepo.metadata.discriminatorValue as any,
+          this.readRepo,
         );
 
         const { items } = await complexQuery.execute({
@@ -73,8 +73,8 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         orderBy,
       }: NestedFindManyOpts<Entity>): Promise<any> {
         const complexQuery = new NestedQuery<Entity>(
-          this.repository.metadata.discriminatorValue as any,
-          this.repository,
+          this.readRepo.metadata.discriminatorValue as any,
+          this.readRepo,
         );
 
         const { totalCount, items } = await complexQuery.execute({
