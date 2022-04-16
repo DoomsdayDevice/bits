@@ -75,6 +75,8 @@ export type ResolverRelation<Relation> = {
    */
   DTO: Type<Relation>;
 
+  simpleArray?: boolean;
+
   /**
    * The name of the relation to use when fetching from the QueryService
    */

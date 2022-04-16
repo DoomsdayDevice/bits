@@ -10,7 +10,7 @@ import * as core from '@apis/core';
 
 import { getGenericGrpcWrapper, IService } from '@bits/grpc/generic-grpc-wrapper.service';
 import { CoreClientModule } from '@core/grpc/clients';
-import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.resolver';
+import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
 
 export class GqlCrudModule<T> {

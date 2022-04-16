@@ -5,6 +5,9 @@ import { crudServiceReflector } from '../../services/crud.constants';
 
 const toInject: { dto: any; resolver: any; svcName: string }[] = [];
 
+/**
+ * launched from main.ts after all classes and decorators load
+ */
 export function injectServices() {
   for (const { dto, resolver, svcName } of toInject) {
     const cls = crudServiceReflector.get(dto);
@@ -40,6 +43,8 @@ export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
       CrudResolver.prototype[r] = async function (par: any) {
         // get the corresponding service and run
         const svc = this[svcName];
+        // IF simpleArray - join with the other table
+        // ELSE only return the joinEntity
         const roles = await svc.findMany({});
 
         return roles.nodes;
