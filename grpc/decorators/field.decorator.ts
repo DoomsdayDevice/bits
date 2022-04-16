@@ -1,22 +1,35 @@
 import { GFieldInput, GMessageInput } from '@bits/grpc/grpc.interface';
 import { Type } from '@nestjs/common';
 import { fieldReflector, messageReflector } from './decorators';
+import { Float, Int64 } from '@bits/grpc/grpc.scalars';
 
 export type GrpcFieldOpts = {
   name?: string;
   nullable?: boolean;
 };
+
+type TypeFn = () => Type | [Type] | string | [string];
+
+export function GrpcFieldDef(): PropertyDecorator;
+export function GrpcFieldDef(typeFn: TypeFn): PropertyDecorator;
+export function GrpcFieldDef(opts: GrpcFieldOpts): PropertyDecorator;
+export function GrpcFieldDef(typeFn: TypeFn, opts: GrpcFieldOpts): PropertyDecorator;
 export function GrpcFieldDef(
-  typeFn: () => Type | [Type] | string | [string],
+  typeFnOrOpts?: TypeFn | GrpcFieldOpts,
   opts?: GrpcFieldOpts,
 ): PropertyDecorator {
   // get decorators on prototype and add them to fields
 
   return (target: any, propertyKey: string) => {
-    const isArr = Array.isArray(typeFn());
+    if (typeFnOrOpts instanceof Function) {
+    } else {
+      const t = Reflect.getMetadata('design:type', target, propertyKey);
+      typeFnOrOpts = () => t;
+    }
+    const isArr = Array.isArray(typeFnOrOpts());
     const field: GFieldInput = {
       name: opts?.name || propertyKey,
-      typeFn: isArr ? () => typeFn()[0] : typeFn,
+      typeFn: isArr ? () => (typeFnOrOpts as TypeFn)()[0] : typeFnOrOpts,
       messageName: '',
       nullable: opts?.nullable,
       rule: opts?.nullable ? 'optional' : 'required',
@@ -27,7 +40,7 @@ export function GrpcFieldDef(
 }
 
 export function getFieldType(type: any, nullable: boolean): string {
-  if (type === String) {
+  if (type === String || type === Date) {
     // return nullable ? 'google.protobuf.StringValue' : 'string';
     return 'string';
   } else if (type === 'uint32') {
@@ -36,10 +49,13 @@ export function getFieldType(type: any, nullable: boolean): string {
   } else if (type === 'int32') {
     // return nullable ? 'google.protobuf.Int32Value' : 'int32';
     return 'int32';
+  } else if (type === 'int64' || type === Int64) {
+    // return nullable ? 'google.protobuf.Int32Value' : 'int32';
+    return 'int64';
   } else if (type === 'bytes') {
     return 'bytes';
     // return nullable ? 'google.protobuf.BytesValue' : 'bytes';
-  } else if (type === 'float') {
+  } else if (type === 'float' || type === Float) {
     // return nullable ? 'google.protobuf.FloatValue' : 'float';
     return 'float';
   } else if (type === 'bool' || type === Boolean) {

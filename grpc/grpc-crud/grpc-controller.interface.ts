@@ -1,7 +1,5 @@
-import { FindManyUserInput } from '@domain/user/dto/find-many-user.input';
-import { OffsetPagination } from '@domain/user/dto/pagination.dto';
 import { DeepPartial } from 'typeorm';
-import { FindOneInput } from '@domain/user/dto/find-one.input';
+import { FindOneInput, OffsetPagination } from '../grpc.dto';
 
 export interface IGrpcWriteController<M> extends IGrpcReadController<M> {
   createOne(newUser: CreateInput<M>): Promise<M>;

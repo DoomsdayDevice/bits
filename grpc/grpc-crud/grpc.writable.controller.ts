@@ -1,7 +1,6 @@
-import { Controller, Inject, Injectable, Type } from '@nestjs/common';
+import { Controller, Inject, Type } from '@nestjs/common';
 import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMethodDef } from '../decorators/method.decorator';
-import { FindOneInput } from '../../../../src/domain/user/dto/find-one.input';
 import {
   CreateInput,
   DeleteOneInput,
@@ -15,7 +14,6 @@ import {
 import { IWritableRepo } from '../../db/repo.interface';
 import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
-import { OffsetPagination } from '../../../../src/domain/user/dto/pagination.dto';
 import { OmitType, PartialType } from '../mapped-types';
 import { ReadableGrpcController } from '@bits/grpc/grpc-crud/grpc.readable.controller';
 

@@ -1,5 +1,5 @@
 import { validateSync, ValidationError } from 'class-validator';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { Type } from '@nestjs/common';
 import { Cfg } from '../../config/config.dto';
 
@@ -75,7 +75,7 @@ export function transformAndValidateArraySync<T extends Record<string, any>>(
     if (array[i] === undefined) array[i] = null;
   }
 
-  const transformed = plainToClass(Model, { ...array } as any, {
+  const transformed = plainToInstance(Model, { ...array } as any, {
     enableImplicitConversion: true,
   });
   const valErrors = validateSync(transformed);
@@ -84,6 +84,16 @@ export function transformAndValidateArraySync<T extends Record<string, any>>(
     throw new Error(formatValErrors(valErrors));
   }
   return transformed;
+}
+
+export function transformAndValidate<T extends Record<string, any>>(Model: Type<T>, object: T): T {
+  const inst = plainToInstance(Model, object);
+
+  const valErrors = validateSync(inst);
+  if (valErrors.length > 0) {
+    throw new Error(formatValErrors(valErrors));
+  }
+  return inst;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

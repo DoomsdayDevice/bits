@@ -8,11 +8,10 @@ import {
 } from './grpc-controller.interface';
 import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
 import { GrpcMethodDef } from '../decorators/method.decorator';
-import { FindOneInput } from '../../../../src/domain/user/dto/find-one.input';
 import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
-import { OffsetPagination } from '../../../../src/domain/user/dto/pagination.dto';
+import { FindOneInput, OffsetPagination } from '../grpc.dto';
 
 function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
   @GrpcMessageDef({ name: `${ModelCls.name}Filter` })
@@ -74,7 +73,13 @@ export function ReadableGrpcController<M>(
       responseType: () => FindManyResp,
     })
     async findMany(input: FindManyInput<M>): Promise<FindManyResponse<M>> {
-      return { nodes: await this.repo.repository.find(input.filter) };
+      const resp = { nodes: await this.repo.repository.find(input.filter) };
+      resp.nodes.forEach(n => {
+        for (const key of Object.keys(n)) {
+          if (n[key] instanceof Date) n[key] = n[key].toISOString();
+        }
+      });
+      return resp;
     }
   }
 
