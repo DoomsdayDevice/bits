@@ -35,7 +35,14 @@ export class GRPCCrudModule {
     imports = [],
   }: GrpcWritableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || WritableRepoMixin(Model)(ReadableRepoMixin(Model)());
-    const FinalController = Controller || WritableGrpcController(Model, FinalRepo);
+    const FinalController =
+      Controller ||
+      WritableGrpcController(
+        Model,
+        FinalRepo,
+        true,
+        ReadableGrpcController(Model, FinalRepo, false),
+      );
     const FinalService = Service || WritableCrudService(FinalRepo);
 
     return {

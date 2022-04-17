@@ -3,7 +3,7 @@ import { GrpcFieldDef } from './decorators/field.decorator';
 
 @GrpcMessageDef()
 export class FindOneInput {
-  @GrpcFieldDef(() => String)
+  @GrpcFieldDef()
   id!: string;
 }
 
