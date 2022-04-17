@@ -67,8 +67,8 @@ function valErrorToStr(
 }
 
 export function transformAndValidateArraySync<T extends Record<string, any>>(
-  array: any[],
   Model: Type<T>,
+  array: any[],
 ): T {
   // replace undefined with null for cases like excelJS
   for (let i = 0; i < array.length; i++) {
@@ -87,7 +87,7 @@ export function transformAndValidateArraySync<T extends Record<string, any>>(
 }
 
 export function transformAndValidate<T extends Record<string, any>>(Model: Type<T>, object: T): T {
-  const inst = plainToInstance(Model, object);
+  const inst = plainToInstance(Model, object, { enableImplicitConversion: true });
 
   const valErrors = validateSync(inst);
   if (valErrors.length > 0) {
@@ -113,3 +113,14 @@ export function createEnumFromArr<T extends string>(o: readonly T[]): { [K in T]
     return res;
   }, Object.create(null));
 }
+
+type UnpackedPromise<T> = T extends Promise<infer U> ? U : T;
+type GenericFunction<TS extends any[], R> = (...args: TS) => R;
+
+export type Promisify<T> = {
+  [K in keyof T]: T[K] extends GenericFunction<infer TS, infer R>
+    ? (...args: TS) => Promise<UnpackedPromise<R>>
+    : never;
+};
+
+export type Maybe<T> = T | null;

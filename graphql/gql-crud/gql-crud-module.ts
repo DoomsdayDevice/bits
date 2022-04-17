@@ -1,14 +1,7 @@
-import { DynamicModule, Global, Inject, Injectable, Module, Type } from '@nestjs/common';
-import {
-  GqlWritableCrudConfig,
-  Connection,
-  FindOneInput,
-} from '@bits/graphql/gql-crud/gql-crud.interface';
-import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
-import * as _ from 'lodash';
-import * as core from '@apis/core';
+import { Global, Module, Type } from '@nestjs/common';
+import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/gql-crud.interface';
 
-import { getGenericGrpcWrapper, IService } from '@bits/grpc/generic-grpc-wrapper.service';
+import { getGenericGrpcWrapper } from '@bits/grpc/generic-grpc-wrapper.service';
 import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
@@ -24,7 +17,7 @@ export class GqlCrudModule<T> {
 
   private pagination: boolean;
 
-  private grpcServiceName?: string;
+  private grpcServiceName: string;
 
   constructor({
     Model,
@@ -34,18 +27,17 @@ export class GqlCrudModule<T> {
     ModelResolver,
     Service,
   }: GqlWritableCrudConfig<T>) {
-    this.modelName = modelName;
     this.Model = Model;
+    this.modelName = modelName || Model.name;
     this.pagination = pagination;
-    this.grpcServiceName = grpcServiceName;
+    this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
     this.Resolver = ModelResolver;
     this.Service = Service;
   }
 
   makeReadableCrud(): any {
     const GenericService =
-      this.Service ||
-      getGenericGrpcWrapper('CORE_PACKAGE', this.grpcServiceName || 'GenericSvc', this.Model);
+      this.Service || getGenericGrpcWrapper('CORE_PACKAGE', this.grpcServiceName, this.Model);
     const GenericResolver =
       this.Resolver ||
       ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName);
@@ -62,20 +54,5 @@ export class GqlCrudModule<T> {
     class GenericModule {}
 
     return GenericModule;
-  }
-
-  getService(): any {
-    @Injectable()
-    class Service {}
-    return Service;
-  }
-
-  getSort(): any {
-    // @InputType()
-    // @ArgsType()
-    // class MySortType {
-    //   @Field(() => Int)
-    //   field!: number;
-    // }
   }
 }
