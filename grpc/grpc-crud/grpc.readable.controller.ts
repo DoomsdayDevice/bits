@@ -16,13 +16,13 @@ import { FindOneInput, OffsetPagination } from '../grpc.dto';
 function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
   @GrpcMessageDef({ name: `${ModelCls.name}Filter` })
   class GenericFilter {
-    @GrpcFieldDef(() => String, { nullable: true })
+    @GrpcFieldDef({ nullable: true })
     id!: string;
 
-    @GrpcFieldDef(() => String, { nullable: true })
+    @GrpcFieldDef({ nullable: true })
     username!: string;
 
-    @GrpcFieldDef(() => String, { nullable: true })
+    @GrpcFieldDef({ nullable: true })
     email!: string;
   }
   return GenericFilter as any;

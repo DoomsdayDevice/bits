@@ -27,7 +27,7 @@ function getDefaultUpdateInput<M>(ModelCls: Type<M>): Type<UpdateInput<M>> {
 function getDefaultDeleteInput<M>(ModelCls: Type<M>): Type<DeleteOneInput> {
   @GrpcMessageDef({ name: `Delete${ModelCls.name}Input` })
   class GenericDeleteInput {
-    @GrpcFieldDef(() => String)
+    @GrpcFieldDef()
     id: string;
   }
   return GenericDeleteInput;
@@ -36,7 +36,7 @@ function getDefaultDeleteInput<M>(ModelCls: Type<M>): Type<DeleteOneInput> {
 function getDefaultDeleteResponse<M>(ModelCls: Type<M>): Type<DeleteOneResponse> {
   @GrpcMessageDef({ name: `Delete${ModelCls.name}Response` })
   class GenericDeleteResponse {
-    @GrpcFieldDef(() => Boolean)
+    @GrpcFieldDef()
     success: boolean;
   }
   return GenericDeleteResponse;
@@ -62,16 +62,16 @@ export function WritableGrpcController<M, B extends Type>(
 
   @Controller()
   class ModelController extends Base implements IGrpcWriteController<M> {
-    @Inject(RepoCls) private repo: IWritableRepo<M>;
+    @Inject(RepoCls) private writeRepo: IWritableRepo<M>;
 
     @GrpcMethodDef({ requestType: () => GenericCreateInput, responseType: () => ModelCls })
     async createOne(newEntity: CreateInput<M>): Promise<M> {
-      return this.repo.repository.save(newEntity as any);
+      return this.writeRepo.save(newEntity as any);
     }
 
     @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => ModelCls })
     async updateOne(entity: UpdateInput<M>): Promise<M> {
-      return this.repo.repository.save(entity as any);
+      return this.writeRepo.save(entity as any);
     }
 
     @GrpcMethodDef({
@@ -79,7 +79,7 @@ export function WritableGrpcController<M, B extends Type>(
       responseType: () => GenericDeleteResp,
     })
     async deleteOne(entity: DeleteOneInput): Promise<DeleteOneResponse> {
-      return { success: Boolean(await this.repo.repository.delete(entity.id)) };
+      return { success: Boolean(await this.writeRepo.deleteOne(entity.id)) };
     }
   }
   if (defineService) GrpcServiceDef(`${ModelCls.name}Service`)(ModelController);
