@@ -5,4 +5,7 @@ import { Field, InputType, ObjectType } from '@nestjs/graphql';
 export class BaseModel {
   @Field()
   id!: string;
+
+  @Field()
+  createdAt!: Date;
 }

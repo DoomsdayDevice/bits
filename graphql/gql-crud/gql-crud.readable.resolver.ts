@@ -2,17 +2,18 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import * as _ from 'lodash';
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
+import { transformAndValidate } from '@bits/bits.utils';
 import { IService } from '../../grpc/generic-grpc-wrapper.service';
 import { Connection, FindOneInput } from './gql-crud.interface';
 
 export function getPlural(modelName: string) {
   if (modelName[modelName.length - 1] === 'y')
-    return `${_.lowerCase(modelName.slice(0, modelName.length - 1))}ies`;
-  return `${_.lowerCase(modelName)}s`;
+    return `${_.camelCase(modelName.slice(0, modelName.length - 1))}ies`;
+  return `${_.camelCase(modelName)}s`;
 }
 
 export function getSingular(modelName: string) {
-  return `${_.lowerCase(modelName)}`;
+  return `${_.camelCase(modelName)}`;
 }
 
 function getDefaultModelConnection<T>(Model: Type<T>, modelName: string): any {
@@ -46,12 +47,13 @@ export function ReadResolverMixin<T>(
 
     @Query(() => Model)
     [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
-      return this.svc.findOne(input);
+      return transformAndValidate(Model, this.svc.findOne(input));
     }
 
     @Query(() => FindManyType)
     async [plural](): Promise<Connection<T> | T[]> {
       const { nodes } = await this.svc.findMany({});
+      // const newNodes = transformAndValidate(Model, nodes);
       if (!pagination) return nodes;
       return {
         totalCount: 1,

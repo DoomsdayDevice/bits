@@ -74,6 +74,7 @@ export function getRelationNames<DTO>(DTOCls: Type<DTO>): (keyof DTO)[] {
   return rels as any;
 }
 
+/*
 export function Rel<DTO, Relation>(
   name: string,
   relationTypeFunc: RelationTypeFunc<Relation>,
@@ -86,6 +87,8 @@ export function Rel<DTO, Relation>(
     return DTOClass;
   };
 }
+
+ */
 
 export function GqlRelation<DTO extends Object, Relation>(
   relationTypeFunc: RelationTypeFunc<Relation>,
@@ -107,6 +110,7 @@ export function FilterableGqlRelation<DTO extends Type<unknown>, Relation>(
   return GqlRelation<DTO, Relation>(relationTypeFunc, { ...options, allowFiltering: true });
 }
 
+/*
 export function FilterableRelation<DTO, Relation>(
   name: string,
   relationTypeFunc: RelationTypeFunc<Relation>,
@@ -114,6 +118,8 @@ export function FilterableRelation<DTO, Relation>(
 ): RelationClassDecorator<DTO> {
   return Rel<DTO, Relation>(name, relationTypeFunc, { ...options, allowFiltering: true });
 }
+
+ */
 
 export function Connection<DTO, Relation>(
   name: string,

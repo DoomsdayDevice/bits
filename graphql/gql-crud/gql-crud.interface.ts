@@ -10,11 +10,10 @@ export class DeleteByIDInput {
 
 export interface GqlWritableCrudConfig<M> {
   Model: Type<M>;
-  modelName: string;
+  modelName?: string;
   pagination?: boolean;
   grpcServiceName?: string;
   ModelResolver?: any;
-  // Controller?: Type<IGrpcController<M>>;
   Service?: Type<any>;
 }
 
