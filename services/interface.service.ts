@@ -6,12 +6,10 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm';
-import { IReadableRepo, IWritableRepo, NestedFindManyOpts } from '../db/repo.interface';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 export interface IReadableCrudService<Entity> {
-  createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
+  findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
   findOne(
     id: string | FindOneOptions<Entity> | FindConditions<Entity>,
     options?: FindOneOptions<Entity>,

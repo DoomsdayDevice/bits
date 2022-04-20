@@ -3,7 +3,7 @@ import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import * as _ from 'lodash';
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
 import { transformAndValidate } from '@bits/bits.utils';
-import { IService } from '../../grpc/generic-grpc-wrapper.service';
+import { IGrpcService } from '../../grpc/generic-grpc-wrapper.service';
 import { Connection, FindOneInput } from './gql-crud.interface';
 
 export function getPlural(modelName: string) {
@@ -43,11 +43,11 @@ export function ReadResolverMixin<T>(
 
   @Resolver(() => Model)
   class GenericResolver {
-    @Inject(Service) private svc!: IService;
+    @Inject(Service) private svc!: IGrpcService;
 
     @Query(() => Model)
-    [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
-      return transformAndValidate(Model, this.svc.findOne(input));
+    async [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
+      return transformAndValidate(Model, await this.svc.findOne(input));
     }
 
     @Query(() => FindManyType)

@@ -1,6 +1,5 @@
 import { Inject, Type } from '@nestjs/common';
 import { Parent, ResolveField } from '@nestjs/graphql';
-import { RelationTypeMap, ResolverRelation } from '@bits/graphql/relation/relation.interface';
 import { getRelations } from './relation.decorator';
 import { crudServiceReflector } from '../../services/crud.constants';
 
