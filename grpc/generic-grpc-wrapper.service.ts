@@ -2,16 +2,14 @@ import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { CreateUserInput } from '@apis/core';
 import { promisify } from '@bits/grpc/grpc.utils';
-import { crudServiceReflector } from '@bits/services/crud.constants';
 import { renameFunc } from '@bits/bits.utils';
 
-export interface IService {
-  findOne(opts: { id: string }): any;
-  findMany(input: any): any;
-  createOne(input: CreateUserInput): any;
+export interface IGrpcService<T = any> {
+  findOne(opts: { id: string }): Promise<T>;
+  findMany(input: any): Promise<{ nodes: T[] }>;
 }
 
-export function getGenericGrpcWrapper<Service extends IService, T>(
+export function getGenericGrpcWrapper<Service extends IGrpcService, T>(
   packageToken: string,
   serviceName: string,
   Model: Type<T>,
