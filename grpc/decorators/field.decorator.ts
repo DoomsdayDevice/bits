@@ -6,6 +6,7 @@ import { Float, Int64 } from '@bits/grpc/grpc.scalars';
 export type GrpcFieldOpts = {
   name?: string;
   nullable?: boolean;
+  filterable?: boolean;
 };
 
 type TypeFn = () => Type | [Type] | string | [string];
@@ -24,6 +25,7 @@ export function GrpcFieldDef(
     if (typeFnOrOpts instanceof Function) {
     } else {
       const t = Reflect.getMetadata('design:type', target, propertyKey);
+      opts = typeFnOrOpts as GrpcFieldOpts;
       typeFnOrOpts = () => t;
     }
     const isArr = Array.isArray(typeFnOrOpts());
@@ -32,6 +34,7 @@ export function GrpcFieldDef(
       typeFn: isArr ? () => (typeFnOrOpts as TypeFn)()[0] : typeFnOrOpts,
       messageName: '',
       nullable: opts?.nullable,
+      filterable: opts?.filterable,
       rule: opts?.nullable ? 'optional' : 'required',
     };
     if (isArr) field.rule = 'repeated';

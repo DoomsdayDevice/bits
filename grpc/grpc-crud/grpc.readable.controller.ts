@@ -4,27 +4,33 @@ import {
   FindManyInput,
   FindManyResponse,
   IGrpcReadController,
-  IGrpcWriteController,
 } from './grpc-controller.interface';
-import { IReadableRepo, IWritableRepo, IWRRepo } from '../../db/repo.interface';
+import { IReadableRepo } from '../../db/repo.interface';
 import { GrpcMethodDef } from '../decorators/method.decorator';
 import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
 import { FindOneInput, OffsetPagination } from '../grpc.dto';
+import { fieldReflector } from '@bits/grpc/decorators/decorators';
+import { GFieldInput } from '@bits/grpc/grpc.interface';
 
-function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
-  @GrpcMessageDef({ name: `${ModelCls.name}Filter` })
-  class GenericFilter {
-    @GrpcFieldDef({ nullable: true })
-    id!: string;
+export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
+  // get filterable fields TODO make a separate function to get fields and filterable fields
+  const foundFields = fieldReflector.get<unknown, GFieldInput>(ModelCls as any) || [];
+  const filterable = foundFields.filter(f => f.filterable);
 
-    @GrpcFieldDef({ nullable: true })
-    username!: string;
+  class GenericFilter {}
+  // GrpcFieldDef({ nullable: true })(GenericFilter, 'username');
 
-    @GrpcFieldDef({ nullable: true })
-    email!: string;
+  for (const f of filterable) {
+    console.log({ f });
+    GrpcFieldDef(f.typeFn, { name: f.name, filterable: f.filterable, nullable: true })(
+      GenericFilter.prototype,
+      f.name,
+    );
   }
+
+  GrpcMessageDef({ name: `${ModelCls.name}Filter` })(GenericFilter);
   return GenericFilter as any;
 }
 

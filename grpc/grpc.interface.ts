@@ -16,6 +16,7 @@ export type GFieldInput = {
   messageName: string;
   typeFn: () => any;
   rule?: string;
+  filterable?: boolean;
   nullable: boolean;
 };
 
