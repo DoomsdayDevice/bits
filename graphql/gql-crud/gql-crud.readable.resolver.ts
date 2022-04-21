@@ -2,9 +2,9 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import * as _ from 'lodash';
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
-import { transformAndValidate } from '@bits/bits.utils';
 import { IGrpcService } from '../../grpc/generic-grpc-wrapper.service';
 import { Connection, FindOneInput } from './gql-crud.interface';
+import { transformAndValidate } from '@bits/dto.utils';
 
 export function getPlural(modelName: string) {
   if (modelName[modelName.length - 1] === 'y')
