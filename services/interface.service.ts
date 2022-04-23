@@ -9,6 +9,7 @@ import {
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 export interface IReadableCrudService<Entity> {
+  count(filter?: FindManyOptions<Entity>): Promise<number>;
   findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
   findOne(
     id: string | FindOneOptions<Entity> | FindConditions<Entity>,
@@ -18,7 +19,7 @@ export interface IReadableCrudService<Entity> {
 
 export interface IWritableCrudService<Entity> {
   createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  deleteOne(id: string): Promise<boolean>;
+  deleteOne(id: string | FindConditions<Entity>): Promise<boolean>;
   updateOne(
     idOrConditions: string | FindConditions<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
