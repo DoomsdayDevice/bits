@@ -5,81 +5,53 @@ import {
   CreateInput,
   DeleteOneInput,
   DeleteOneResponse,
-  Filter,
-  FindManyInput,
-  FindManyResponse,
   IGrpcWriteController,
   UpdateInput,
 } from './grpc-controller.interface';
-import { IWritableRepo, IWRRepo } from '../../db/repo.interface';
-import { GrpcMessageDef } from '../decorators/message.decorator';
-import { GrpcFieldDef } from '../decorators/field.decorator';
-import { OmitType, PartialType } from '../mapped-types';
-import { ReadableGrpcController } from '@bits/grpc/grpc-crud/grpc.readable.controller';
-
-function getDefaultUpdateInput<M>(ModelCls: Type<M>): Type<UpdateInput<M>> {
-  @GrpcMessageDef({ name: `Update${ModelCls.name}Input` })
-  class GenericUpdateInput extends PartialType(ModelCls as Type) {}
-
-  return GenericUpdateInput as any;
-}
-
-function getDefaultDeleteInput<M>(ModelCls: Type<M>): Type<DeleteOneInput> {
-  @GrpcMessageDef({ name: `Delete${ModelCls.name}Input` })
-  class GenericDeleteInput {
-    @GrpcFieldDef()
-    id: string;
-  }
-  return GenericDeleteInput;
-}
-
-function getDefaultDeleteResponse<M>(ModelCls: Type<M>): Type<DeleteOneResponse> {
-  @GrpcMessageDef({ name: `Delete${ModelCls.name}Response` })
-  class GenericDeleteResponse {
-    @GrpcFieldDef()
-    success: boolean;
-  }
-  return GenericDeleteResponse;
-}
-
-function getDefaultCreateInput<M>(ModelCls: Type<M>): Type<CreateInput<M>> {
-  @GrpcMessageDef({ name: `Create${ModelCls.name}Input` })
-  class GenericCreateInput extends (OmitType(ModelCls, ['createdAt', 'id'] as const) as Type) {}
-
-  return GenericCreateInput as any;
-}
+import { IWritableCrudService } from '@bits/services/interface.service';
+import {
+  getDefaultCreateInput,
+  getDefaultDeleteInput,
+  getDefaultDeleteResponse,
+  getDefaultUpdateInput,
+  StatusMsg,
+} from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
+import { FindConditions } from 'typeorm';
 
 export function WritableGrpcController<M, B extends Type>(
   ModelCls: Type<M>,
-  RepoCls: Type<IWRRepo<M>>,
+  ServiceCls: Type<IWritableCrudService<M>>,
+  CreateDTO?: Type,
+  DeleteDTO?: Type,
   defineService = true,
   Base: B = class {} as any,
 ): Type<IGrpcWriteController<M> & InstanceType<B>> {
   const GenericUpdate = getDefaultUpdateInput(ModelCls);
-  const GenericCreateInput = getDefaultCreateInput(ModelCls);
+  const CreateInput = CreateDTO || getDefaultCreateInput(ModelCls);
   const GenericDeleteResp = getDefaultDeleteResponse(ModelCls);
-  const GenericDeleteInput = getDefaultDeleteInput(ModelCls);
+  const GenericDeleteInput = DeleteDTO || getDefaultDeleteInput(ModelCls);
 
   @Controller()
   class ModelController extends Base implements IGrpcWriteController<M> {
-    @Inject(RepoCls) private writeRepo: IWritableRepo<M>;
+    @Inject(ServiceCls) private writeSvc: IWritableCrudService<M>;
 
-    @GrpcMethodDef({ requestType: () => GenericCreateInput, responseType: () => ModelCls })
+    @GrpcMethodDef({ requestType: () => CreateInput, responseType: () => ModelCls })
     async createOne(newEntity: CreateInput<M>): Promise<M> {
-      return this.writeRepo.save(newEntity as any);
+      return this.writeSvc.createOne(newEntity as any);
     }
 
-    @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => ModelCls })
-    async updateOne(entity: UpdateInput<M>): Promise<M> {
-      return this.writeRepo.save(entity as any);
+    @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => StatusMsg })
+    async updateOne(entity: UpdateInput<M>): Promise<StatusMsg> {
+      const res = (await this.writeSvc.updateOne((entity as any).id, entity as any)) as Promise<M>;
+      return { success: true };
     }
 
     @GrpcMethodDef({
       requestType: () => GenericDeleteInput,
-      responseType: () => GenericDeleteResp,
+      responseType: () => StatusMsg,
     })
-    async deleteOne(entity: DeleteOneInput): Promise<DeleteOneResponse> {
-      return { success: Boolean(await this.writeRepo.deleteOne(entity.id)) };
+    async deleteOne(input: FindConditions<M>): Promise<StatusMsg> {
+      return { success: Boolean(await this.writeSvc.deleteOne(input)) };
     }
   }
   if (defineService) GrpcServiceDef(`${ModelCls.name}Service`)(ModelController);

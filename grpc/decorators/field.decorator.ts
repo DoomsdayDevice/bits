@@ -1,7 +1,7 @@
 import { GFieldInput, GMessageInput } from '@bits/grpc/grpc.interface';
 import { Type } from '@nestjs/common';
 import { fieldReflector, messageReflector } from './decorators';
-import { Float, Int64 } from '@bits/grpc/grpc.scalars';
+import { Float, Int64, UInt32 } from '@bits/grpc/grpc.scalars';
 
 export type GrpcFieldOpts = {
   name?: string;
@@ -35,18 +35,18 @@ export function GrpcFieldDef(
       messageName: '',
       nullable: opts?.nullable,
       filterable: opts?.filterable,
-      rule: opts?.nullable ? 'optional' : 'required',
     };
     if (isArr) field.rule = 'repeated';
     fieldReflector.append(target.constructor, field);
   };
 }
 
-export function getFieldType(type: any, nullable: boolean): string {
+/** wrapped for nullables and such */
+export function getFieldType(type: any, wrapped = false): string {
   if (type === String || type === Date) {
     // return nullable ? 'google.protobuf.StringValue' : 'string';
     return 'string';
-  } else if (type === 'uint32') {
+  } else if (type === 'uint32' || type === UInt32) {
     // return nullable ? 'google.protobuf.UInt32Value' : 'uint32';
     return 'uint32';
   } else if (type === 'int32') {
@@ -62,6 +62,7 @@ export function getFieldType(type: any, nullable: boolean): string {
     // return nullable ? 'google.protobuf.FloatValue' : 'float';
     return 'float';
   } else if (type === 'bool' || type === Boolean) {
+    if (wrapped) return 'BoolValue';
     return 'bool';
     // return nullable ? 'BoolValue' : 'bool';
   } else if (typeof type === 'string') return type;

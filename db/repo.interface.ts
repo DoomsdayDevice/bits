@@ -59,7 +59,7 @@ export interface IWritableRepo<Entity> {
     entityOrEntities: T | T[],
     options?: SaveOptions,
   ): Promise<T | T[]>;
-  deleteOne(id: string): Promise<boolean>;
+  deleteOne(id: string | FindConditions<Entity>): Promise<boolean>;
   restoreOne(id: string): Promise<boolean>;
   hardDelete(
     criteria: string | number | FindConditions<Entity>,

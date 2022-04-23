@@ -12,9 +12,9 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
       @InjectRepository(EntityCls) public readonly writeRepo!: Repository<Entity>;
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
-        const obj = this.repository.create(newEntity);
+        const obj = this.writeRepo.create(newEntity);
 
-        return this.repository.save(obj);
+        return this.writeRepo.save(obj);
       }
 
       public async update(
@@ -23,7 +23,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         // ...options: any[]
       ): Promise<UpdateResult | Entity> {
         try {
-          return await this.repository.update(idOrConditions, partialEntity);
+          return await this.writeRepo.update(idOrConditions, partialEntity);
         } catch (err) {
           throw new BadRequestException(err);
         }
@@ -40,14 +40,15 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         }
       }
 
-      public async deleteOne(id: string): Promise<boolean> {
-        const result = await this.repository.softDelete(id);
+      public async deleteOne(id: string | FindConditions<Entity>): Promise<boolean> {
+        const result = await this.hardDelete(id);
+        // const result = await this.writeRepo.softDelete(id);
         if (!result.affected) throw new Error('The record was not found');
         return Boolean(result.affected);
       }
 
       public async restoreOne(id: string): Promise<boolean> {
-        const result = await this.repository.restore(id);
+        const result = await this.writeRepo.restore(id);
         if (!result.affected) throw new Error('The record was not found');
         return Boolean(result.affected);
       }
@@ -57,7 +58,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         /* ...options: any[] */
       ): Promise<DeleteResult> {
         try {
-          return this.repository.delete(criteria);
+          return this.writeRepo.delete(criteria);
         } catch (err) {
           throw new NotFoundException('The record was not found', JSON.stringify(err));
         }

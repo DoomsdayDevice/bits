@@ -12,7 +12,7 @@ export type GMethodInput = {
 
 export type GServiceInput = { name: string };
 
-export type GMessageInput = { name: string };
+export type GMessageInput = { name: string; oneOf?: boolean };
 
 export type GFieldInput = {
   name: string;
