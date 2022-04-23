@@ -7,6 +7,7 @@ const toInject: { dto: any; resolver: any; svcName: string }[] = [];
 
 /**
  * launched from main.ts after all classes and decorators load
+ * TODO use ModuleRef instead of injecting all these services, also remove @Global from generic modules
  */
 export function injectServices() {
   for (const { dto, resolver, svcName } of toInject) {
@@ -44,14 +45,30 @@ export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
 
   if (many)
     for (const relName of Object.keys(many)) {
-      CrudResolver.prototype[relName] = async function findMany(par: any) {
+      CrudResolver.prototype[relName] = async function findMany(parent: any) {
         // get the corresponding service and run
         const svc = this[svcName(relName)];
+        const opts = many[relName];
         // IF simpleArray - join with the other table
-        // ELSE only return the joinEntity
-        const roles = await svc.findMany({});
 
-        return roles.nodes;
+        let connection;
+
+        if (opts.joinByOwnArray) {
+          const refArray = parent[opts.fieldName!];
+          const refField = opts.referencedFieldName!;
+          connection = await svc.findMany({
+            filter: { [refField]: { in: { list: refArray } } },
+          });
+        } else {
+          const refField = opts.ownFieldThatIsReferenced!;
+          const ownIdField = opts?.ownIdField || 'id';
+          connection = await svc.findMany({
+            filter: { [refField]: { eq: parent[ownIdField] } },
+          });
+        }
+        // ELSE only return the joinEntity
+
+        return connection.nodes;
       };
       buildRel<T>(false, relName, CrudResolver, many[relName].DTO, svcName(relName));
     }

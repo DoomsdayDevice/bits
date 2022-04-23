@@ -5,6 +5,7 @@ import { getGenericGrpcWrapper } from '@bits/grpc/generic-grpc-wrapper.service';
 import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
+import { ModuleImportElem } from '@bits/bits.types';
 
 export class GqlCrudModule<T> {
   private modelName: string;
@@ -19,6 +20,8 @@ export class GqlCrudModule<T> {
 
   private grpcServiceName: string;
 
+  private imports: ModuleImportElem[];
+
   constructor({
     Model,
     modelName,
@@ -26,6 +29,7 @@ export class GqlCrudModule<T> {
     grpcServiceName,
     ModelResolver,
     Service,
+    imports,
   }: GqlWritableCrudConfig<T>) {
     this.Model = Model;
     this.modelName = modelName || Model.name;
@@ -33,6 +37,7 @@ export class GqlCrudModule<T> {
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
     this.Resolver = ModelResolver;
     this.Service = Service;
+    this.imports = imports || [];
   }
 
   makeReadableCrud(): any {
@@ -48,7 +53,7 @@ export class GqlCrudModule<T> {
     @Global()
     @Module({
       providers: [GenericService, GenericResolver],
-      imports: [CoreClientModule],
+      imports: [CoreClientModule, ...this.imports],
       exports: [GenericService],
     })
     class GenericModule {}

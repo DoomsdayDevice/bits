@@ -77,6 +77,16 @@ export type ResolverRelation<Relation> = {
 
   simpleArray?: boolean;
 
+  joinByOwnArray?: boolean;
+
+  referencedFieldName?: string;
+
+  ownFieldThatIsReferenced?: string;
+
+  ownIdField?: string;
+
+  fieldName?: string;
+
   /**
    * The name of the relation to use when fetching from the QueryService
    */
