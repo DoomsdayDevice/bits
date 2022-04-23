@@ -1,5 +1,5 @@
 import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
-import { StatusMsg } from '@apis/core';
+import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 
 export type GMethodInput = {
   name: string;
