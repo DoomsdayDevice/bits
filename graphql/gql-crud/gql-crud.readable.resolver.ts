@@ -1,39 +1,19 @@
 import { Inject, Type } from '@nestjs/common';
-import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
-import * as _ from 'lodash';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
-import { IGrpcService } from '../../grpc/generic-grpc-wrapper.service';
-import { Connection, FindOneInput } from './gql-crud.interface';
 import { transformAndValidate } from '@bits/dto.utils';
+import { IBaseServiceRead } from '@ext-types/types';
+import { getPlural, getSingular } from '@bits/bits.utils';
+import { FindOneInput, getDefaultModelConnection } from '@bits/graphql/gql-crud/gql-crud.dto';
+import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { Connection } from './gql-crud.interface';
 
-export function getPlural(modelName: string) {
-  if (modelName[modelName.length - 1] === 'y')
-    return `${_.camelCase(modelName.slice(0, modelName.length - 1))}ies`;
-  return `${_.camelCase(modelName)}s`;
-}
-
-export function getSingular(modelName: string) {
-  return `${_.camelCase(modelName)}`;
-}
-
-function getDefaultModelConnection<T>(Model: Type<T>, modelName: string): any {
-  @ObjectType(`${modelName}Connection`)
-  class DtoConnectionCls {
-    @Field(() => Int)
-    totalCount = 0;
-
-    @Field(() => [Model])
-    nodes!: T[];
-  }
-  return DtoConnectionCls;
-}
-
-export function ReadResolverMixin<T>(
+export function ReadResolverMixin<T, N extends string>(
   Model: Type<T>,
   Service: Type,
   pagination: boolean,
-  modelName: string,
-): any {
+  modelName: N,
+): Type<IBaseServiceRead<T, N>> {
   const plural = getPlural(modelName);
   const singular = getSingular(modelName);
 
@@ -64,5 +44,5 @@ export function ReadResolverMixin<T>(
 
   buildRelations(Model, GenericResolver);
 
-  return GenericResolver;
+  return GenericResolver as any;
 }

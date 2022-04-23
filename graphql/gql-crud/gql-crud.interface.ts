@@ -1,14 +1,8 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { GraphQLUUID } from 'graphql-scalars';
 import { Type } from '@nestjs/common';
-
-@InputType({ isAbstract: true })
-export class DeleteByIDInput {
-  @Field(() => GraphQLUUID)
-  id!: string;
-}
+import { ModuleImportElem } from '@bits/bits.types';
 
 export interface GqlWritableCrudConfig<M> {
+  imports?: ModuleImportElem[];
   Model: Type<M>;
   modelName?: string;
   pagination?: boolean;
@@ -22,8 +16,7 @@ export interface Connection<T> {
   nodes: T[];
 }
 
-@InputType()
-export class FindOneInput {
-  @Field(() => GraphQLUUID)
-  id!: string;
+export interface IUpdateOneInput<T> {
+  id: string;
+  update: Partial<T>;
 }

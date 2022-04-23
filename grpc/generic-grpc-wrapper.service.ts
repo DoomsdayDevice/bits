@@ -3,11 +3,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
 import { renameFunc } from '@bits/bits.utils';
 import { transformAndValidate } from '@bits/dto.utils';
-
-export interface IGrpcService<T = any> {
-  findOne(opts: { id: string }): Promise<T>;
-  findMany(input: any): Promise<{ nodes: T[] }>;
-}
+import { IGrpcService } from '@bits/grpc/grpc.interface';
 
 export function getGenericGrpcWrapper<Service extends IGrpcService, T>(
   packageToken: string,
@@ -37,11 +33,11 @@ export function getGenericGrpcWrapper<Service extends IGrpcService, T>(
     //   return this.svc.findOne(input);
     // }
     //
-    // findMany(input: any) {
-    //   const many = this.svc.findMany(input);
-    //   console.log({ many });
-    //   return many;
-    // }
+    findMany(input: any) {
+      const many = this.svc.findMany(input);
+      console.log({ many });
+      return many;
+    }
     //
     // createOne(input: CreateUserInput): Promise<User> {
     //   return this.svc.createOne(input);
