@@ -59,7 +59,6 @@ export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
   for (const f of filterable) {
     let filterTypeFn;
     if (f.typeFn() === String) {
-      console.log('ITS A STRING', f.typeFn());
       filterTypeFn = () => StringFieldComparison;
     } else {
       const enumName = f.typeFn();
@@ -68,7 +67,6 @@ export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
         enumName,
       );
       filterTypeFn = () => enumComp;
-      console.log({ type: f.typeFn() });
     }
     GrpcFieldDef(filterTypeFn, { name: f.name, filterable: f.filterable, nullable: true })(
       GenericFilter.prototype,
