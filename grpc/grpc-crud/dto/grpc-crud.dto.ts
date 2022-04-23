@@ -20,7 +20,7 @@ export function getDefaultDeleteInput<M>(ModelCls: Type<M>): Type<DeleteOneInput
   @GrpcMessageDef({ name: `Delete${ModelCls.name}Input` })
   class GenericDeleteInput {
     @GrpcFieldDef()
-    id: string;
+    id!: string;
   }
   return GenericDeleteInput;
 }
@@ -29,7 +29,7 @@ export function getDefaultDeleteResponse<M>(ModelCls: Type<M>): Type<DeleteOneRe
   @GrpcMessageDef({ name: `Delete${ModelCls.name}Response` })
   class GenericDeleteResponse {
     @GrpcFieldDef()
-    success: boolean;
+    success!: boolean;
   }
   return GenericDeleteResponse;
 }
@@ -48,5 +48,5 @@ export function getDefaultCreateInput<M>(ModelCls: Type<M>): Type<CreateInput<M>
 @GrpcMessageDef()
 export class StatusMsg {
   @GrpcFieldDef()
-  success: boolean;
+  success!: boolean;
 }
