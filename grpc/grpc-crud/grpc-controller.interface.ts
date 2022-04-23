@@ -1,6 +1,6 @@
 import { DeepPartial, FindConditions } from 'typeorm';
-import { FindOneInput, OffsetPagination } from '../grpc.dto';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
+import { FindOneInput, OffsetPagination } from '../grpc.dto';
 
 export interface IGrpcWriteController<M> {
   createOne(newUser: CreateInput<M>): Promise<M>;

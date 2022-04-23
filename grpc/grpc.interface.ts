@@ -20,7 +20,7 @@ export type GFieldInput = {
   typeFn: () => any;
   rule?: string;
   filterable?: boolean;
-  nullable: boolean;
+  nullable?: boolean;
 };
 
 export type GEnumInput = {
