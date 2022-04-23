@@ -35,7 +35,7 @@ export function GrpcFieldDef(
     const isArr = Array.isArray(typeFnOrOpts());
     const field: GFieldInput = {
       name: opts?.name || propertyKey,
-      typeFn: isArr ? typeArrayFn : typeFn,
+      typeFn: isArr ? () => typeArrayFn()[0] : typeFn,
       messageName: '',
       nullable: opts?.nullable,
       filterable: opts?.filterable,
@@ -47,6 +47,7 @@ export function GrpcFieldDef(
 
 /** wrapped for nullables and such */
 export function getFieldType(type: any, wrapped = false): string {
+  console.log({ type });
   switch (type) {
     case String:
     case Date:
@@ -68,9 +69,8 @@ export function getFieldType(type: any, wrapped = false): string {
     case Boolean:
       if (wrapped) return 'BoolValue';
       return 'bool';
-    case 'string':
-      return type;
     default: {
+      if (typeof type === 'string') return type;
       const name = messageReflector.get<unknown, GMessageInput>(type)?.name;
       if (!name) throw new Error("GRPC: Couldn't find the correct type for field");
       return name;

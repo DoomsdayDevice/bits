@@ -1,11 +1,12 @@
 import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
+import { Type } from '@nestjs/common';
 
 export type GMethodInput = {
   name: string;
   service: string;
-  requestType: () => string;
-  responseType: () => string;
+  requestType: () => Type | string;
+  responseType: () => Type | string;
   propertyKey: string;
   descriptor: any;
 };
