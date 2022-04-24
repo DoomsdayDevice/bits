@@ -77,7 +77,12 @@ export function transformAndValidateArraySync<T extends Record<string, any>>(
   return transformed;
 }
 
-export function transformAndValidate<T extends Record<string, any>>(Model: Type<T>, object: T): T {
+export function transformAndValidate<T extends Record<string, any>>(Model: Type<T>, object: T): T;
+export function transformAndValidate<T extends Record<string, any>>(Model: Type<T>, arr: T[]): T[];
+export function transformAndValidate<T extends Record<string, any>>(
+  Model: Type<T>,
+  object: T | T[],
+): T | T[] {
   const inst = plainToInstance(Model, object, { enableImplicitConversion: true });
 
   const valErrors = validateSync(inst);

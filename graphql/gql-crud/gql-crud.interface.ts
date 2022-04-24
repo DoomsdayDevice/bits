@@ -1,5 +1,6 @@
 import { Type } from '@nestjs/common';
 import { ModuleImportElem } from '@bits/bits.types';
+import { IFilter } from '@bits/graphql/filter/filter.interface';
 
 export interface GqlWritableCrudConfig<M> {
   imports?: ModuleImportElem[];
@@ -19,4 +20,8 @@ export interface Connection<T> {
 export interface IUpdateOneInput<T> {
   id: string;
   update: Partial<T>;
+}
+
+export interface IFindManyArgs<T> {
+  filter?: IFilter<T>;
 }

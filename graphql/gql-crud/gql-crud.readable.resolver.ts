@@ -4,9 +4,13 @@ import { buildRelations } from '@bits/graphql/relation/relation-builder';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IBaseServiceRead } from '@ext-types/types';
 import { getPlural, getSingular } from '@bits/bits.utils';
-import { FindOneInput, getDefaultModelConnection } from '@bits/graphql/gql-crud/gql-crud.dto';
+import {
+  FindOneInput,
+  getDefaultFindManyArgs,
+  getDefaultModelConnection,
+} from '@bits/graphql/gql-crud/gql-crud.dto';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
-import { Connection } from './gql-crud.interface';
+import { Connection, IFindManyArgs } from './gql-crud.interface';
 
 export function ReadResolverMixin<T, N extends string>(
   Model: Type<T>,
@@ -20,6 +24,7 @@ export function ReadResolverMixin<T, N extends string>(
   const DefaultConnection = getDefaultModelConnection(Model, modelName);
 
   const FindManyType = pagination ? DefaultConnection : [Model];
+  const FindManyInput = getDefaultFindManyArgs(Model, modelName);
 
   @Resolver(() => Model)
   class GenericResolver {
@@ -31,12 +36,14 @@ export function ReadResolverMixin<T, N extends string>(
     }
 
     @Query(() => FindManyType)
-    async [plural](): Promise<Connection<T> | T[]> {
-      const { nodes } = await this.svc.findMany({});
+    async [plural](
+      @Args({ type: () => FindManyInput }) { filter }: IFindManyArgs<T>,
+    ): Promise<Connection<T> | T[]> {
+      const { nodes, totalCount } = await this.svc.findMany({ filter });
       // const newNodes = transformAndValidate(Model, nodes);
       if (!pagination) return nodes;
       return {
-        totalCount: 1,
+        totalCount,
         nodes,
       };
     }

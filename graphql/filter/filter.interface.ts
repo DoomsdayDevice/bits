@@ -1,4 +1,9 @@
-import { FilterFieldComparison } from './filter-field-comparison.interface';
+import {
+  FilterComparisonOperators,
+  FilterFieldComparison,
+} from './filter-field-comparison.interface';
+import { Type } from '@nestjs/common';
+import { FieldOptions, ReturnTypeFunc } from '@nestjs/graphql';
 
 /**
  * A comparison for fields in T.
@@ -57,11 +62,11 @@ type FilterGrouping<T> = {
   /**
    * Group an array of filters with an AND operation.
    */
-  and?: Filter<T>[];
+  and?: IFilter<T>[];
   /**
    * Group an array of filters with an OR operation.
    */
-  or?: Filter<T>[];
+  or?: IFilter<T>[];
 };
 
 /**
@@ -112,4 +117,16 @@ type FilterGrouping<T> = {
  *
  * @typeparam T - the type of object to filter on.
  */
-export type Filter<T> = FilterGrouping<T> & FilterComparisons<T>;
+export type IFilter<T> = FilterGrouping<T> & FilterComparisons<T>;
+
+export type FilterableFieldOptions = {
+  allowedComparisons?: FilterComparisonOperators<unknown>[];
+  filterRequired?: boolean;
+} & FieldOptions;
+
+export interface FilterableFieldDescriptor {
+  propertyName: string;
+  target: Type<unknown>;
+  returnTypeFunc?: ReturnTypeFunc;
+  advancedOptions?: FilterableFieldOptions;
+}

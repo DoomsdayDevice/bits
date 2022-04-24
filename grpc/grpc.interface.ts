@@ -1,6 +1,7 @@
 import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { Type } from '@nestjs/common';
+import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 
 export type GMethodInput = {
   name: string;
@@ -32,7 +33,7 @@ export type GEnumInput = {
 /** for clients */
 export interface IGrpcService<T = any> {
   findOne(opts: { id: string }): Promise<T>;
-  findMany(input: any): Promise<Connection<T>>;
+  findMany(input: IGrpcFindManyInput<T>): Promise<Connection<T>>;
   deleteOne(input: any): Promise<StatusMsg>;
   updateOne(input: any): Promise<StatusMsg>;
   createOne(input: any): Promise<T>;
