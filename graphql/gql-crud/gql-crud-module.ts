@@ -1,7 +1,7 @@
 import { Global, Module, Type } from '@nestjs/common';
 import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/gql-crud.interface';
 
-import { getGenericGrpcWrapper } from '@bits/grpc/generic-grpc-wrapper.service';
+import { getDefaultGrpcServiceWrapper } from '@bits/grpc/generic-grpc-wrapper.service';
 import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
@@ -42,7 +42,7 @@ export class GqlCrudModule<T> {
 
   makeReadableCrud(): any {
     const GenericService =
-      this.Service || getGenericGrpcWrapper('CORE_PACKAGE', this.grpcServiceName, this.Model);
+      this.Service || getDefaultGrpcServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
     const GenericResolver =
       this.Resolver ||
       ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName);

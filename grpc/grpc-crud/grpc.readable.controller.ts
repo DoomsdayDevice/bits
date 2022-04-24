@@ -1,5 +1,9 @@
 import { Controller, Inject, Type } from '@nestjs/common';
-import { FindManyInput, FindManyResponse, IGrpcReadController } from './grpc-controller.interface';
+import {
+  IGrpcFindManyInput,
+  IGrpcFindManyResponse,
+  IGrpcReadController,
+} from './grpc-controller.interface';
 import { GrpcMethodDef } from '../decorators/method.decorator';
 import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMessageDef } from '../decorators/message.decorator';
@@ -47,7 +51,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       requestType: () => FindMany,
       responseType: () => FindManyResp,
     })
-    async findMany(input: FindManyInput<M>): Promise<FindManyResponse<M>> {
+    async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = this.convertExternalFilterToLocal(input.filter);
       const resp = {
         totalCount: await this.svc.count(filter),

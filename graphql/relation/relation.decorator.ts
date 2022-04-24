@@ -74,52 +74,12 @@ export function getRelationNames<DTO>(DTOCls: Type<DTO>): (keyof DTO)[] {
   return rels as any;
 }
 
-/*
-export function Rel<DTO, Relation>(
-  name: string,
-  relationTypeFunc: RelationTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
-): RelationClassDecorator<DTO> {
-  return <Cls extends Type<DTO>>(DTOClass: Cls): Cls | void => {
-    const isMany = Array.isArray(relationTypeFunc());
-    const relationOpts = isMany ? { pagingStrategy: 'offset', ...options } : options;
-    reflector.append(DTOClass, { name, isMany, relationOpts, relationTypeFunc });
-    return DTOClass;
-  };
-}
-
- */
-
-export function GqlRelation<DTO extends Object, Relation>(
-  relationTypeFunc: RelationTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
-) {
-  return <Cls extends Type<DTO>>(dto: DTO, name: string): void => {
-    const DTOClass = dto.constructor;
-    const isMany = Array.isArray(relationTypeFunc());
-    const relationOpts = isMany ? { pagingStrategy: 'offset', ...options } : options;
-    // Field(relationTypeFunc)(dto, name);
-    reflector.append(DTOClass as Type<DTO>, { name, isMany, relationOpts, relationTypeFunc });
-  };
-}
-
 export function FilterableGqlRelation<DTO extends Type<unknown>, Relation>(
   relationTypeFunc: RelationTypeFunc<Relation>,
   options?: RelationDecoratorOpts<Relation>,
 ) {
   return GqlRelation<DTO, Relation>(relationTypeFunc, { ...options, allowFiltering: true });
 }
-
-/*
-export function FilterableRelation<DTO, Relation>(
-  name: string,
-  relationTypeFunc: RelationTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
-): RelationClassDecorator<DTO> {
-  return Rel<DTO, Relation>(name, relationTypeFunc, { ...options, allowFiltering: true });
-}
-
- */
 
 export function Connection<DTO, Relation>(
   name: string,
@@ -138,4 +98,32 @@ export function FilterableConnection<DTO, Relation>(
   options?: RelationDecoratorOpts<Relation>,
 ): RelationClassDecorator<DTO> {
   return Connection<DTO, Relation>(name, relationTypeFunc, { ...options, allowFiltering: true });
+}
+
+export function GqlRelation<DTO extends Object, Relation>(
+  relationTypeFunc: RelationTypeFunc<Relation>,
+  options?: RelationDecoratorOpts<Relation>,
+) {
+  return <Cls extends Type<DTO>>(dto: DTO, name: string): void => {
+    const DTOClass = dto.constructor;
+    const isMany = Array.isArray(relationTypeFunc());
+    const relationOpts = isMany ? { pagingStrategy: 'offset', ...options } : options;
+    // Field(relationTypeFunc)(dto, name);
+    reflector.append(DTOClass as Type<DTO>, { name, isMany, relationOpts, relationTypeFunc });
+  };
+}
+
+/** populate relation by array on self */
+export function GqlOwnArrayRelation() {
+  //
+}
+
+/** for MANY-TO-MANY join with join table */
+export function GqlManyRel() {
+  //
+}
+
+/** for MANY-TO-MANY: join with join table and leave out the join table itself */
+export function GqlSimpleManyRel() {
+  //
 }

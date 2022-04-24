@@ -1,10 +1,10 @@
 import { Type } from '@nestjs/common';
-import { Filter } from '../grpc-controller.interface';
-import { fieldReflector, grpcEnums } from '../../decorators/decorators';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 import * as _ from 'lodash';
 import { upperFirst } from 'lodash';
+import { Filter } from '../grpc-controller.interface';
+import { grpcEnums } from '../../decorators/decorators';
+import { GrpcFieldDef } from '../../decorators/field.decorator';
+import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 
 export type IListValue<T> = {
   values: T[];
@@ -25,6 +25,7 @@ const StringListValue = ListValue(String);
 
 @GrpcMessageDef({ oneOf: true })
 export class StringFieldComparison {
+<<<<<<< HEAD
   @GrpcFieldDef(() => StringListValue)
   in: IListValue<string>;
 
@@ -56,10 +57,10 @@ export function getEnumComparisonType<E>(Enum: E, enumName: string): any {
   @GrpcMessageDef({ name: msgName, oneOf: true })
   class EnumComparison {
     @GrpcFieldDef(() => EnumInArr)
-    in: E[];
+    in!: E[];
 
     @GrpcFieldDef(() => enumName)
-    eq: E;
+    eq!: E;
   }
 
   return EnumComparison;

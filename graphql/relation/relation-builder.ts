@@ -53,15 +53,15 @@ export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
 
         let connection;
 
-        if (opts.joinByOwnArray) {
-          const refArray = parent[opts.fieldName!];
-          const refField = opts.referencedFieldName!;
+        if (opts.manyToManyByArr) {
+          const refArray = parent[opts.manyToManyByArr.arrayName!];
+          const refField = opts.manyToManyByArr.referencedFieldName!;
           connection = await svc.findMany({
             filter: { [refField]: { in: { list: refArray } } },
           });
-        } else {
-          const refField = opts.ownFieldThatIsReferenced!;
-          const ownIdField = opts?.ownIdField || 'id';
+        } else if (opts.manyToManyByRefs) {
+          const refField = opts.manyToManyByRefs.ownFieldThatIsReferenced!;
+          const ownIdField = opts.manyToManyByRefs.ownIdField || 'id';
           connection = await svc.findMany({
             filter: { [refField]: { eq: parent[ownIdField] } },
           });

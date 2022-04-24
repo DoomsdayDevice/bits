@@ -1,7 +1,7 @@
 /**
  * Field comparisons with a type of `boolean`.
  */
-import { Filter } from './filter.interface';
+import { IFilter } from './filter.interface';
 
 export interface BooleanFieldComparisons {
   /**
@@ -212,10 +212,10 @@ type FilterFieldComparisonType<FieldType, IsKeys extends true | false> = FieldTy
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
   ? CommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
-  ? CommonFieldComparisonType<U> | Filter<U> // eslint-disable-next-line @typescript-eslint/ban-types
+  ? CommonFieldComparisonType<U> | IFilter<U> // eslint-disable-next-line @typescript-eslint/ban-types
   : IsKeys extends true
-  ? CommonFieldComparisonType<FieldType> & StringFieldComparisons & Filter<FieldType>
-  : CommonFieldComparisonType<FieldType> | Filter<FieldType>;
+  ? CommonFieldComparisonType<FieldType> & StringFieldComparisons & IFilter<FieldType>
+  : CommonFieldComparisonType<FieldType> | IFilter<FieldType>;
 
 /**
  * Type for field comparisons.

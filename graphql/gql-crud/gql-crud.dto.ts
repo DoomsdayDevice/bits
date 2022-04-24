@@ -1,7 +1,23 @@
-import { Field, InputType, Int, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import {
+  ArgsType,
+  Field,
+  InputType,
+  Int,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
 import { GraphQLUUID } from 'graphql-scalars';
 import { Type } from '@nestjs/common';
-import { IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
+import { IFindManyArgs, IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
+import { IFilter } from '@bits/graphql/filter/filter.interface';
+import {
+  createFilterComparisonType,
+  getFilterableFields,
+} from '@bits/graphql/filter/filter-comparison.factory';
+import * as _ from 'lodash';
+import { ValidateNested } from 'class-validator';
+import { Type as TransformerType } from 'class-transformer';
 
 @InputType({ isAbstract: true })
 export class DeleteByIDInput {
@@ -61,4 +77,40 @@ export function getDefaultModelConnection<T>(Model: Type<T>, modelName: string):
     nodes!: T[];
   }
   return DtoConnectionCls;
+}
+
+// TODO add getOrCreate with memoize for nested filters
+export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IFilter<T>> {
+  @InputType(`${modelName}Filter`)
+  class GraphQLFilter {}
+  const filterableFields = getFilterableFields(Model);
+  filterableFields.forEach(({ propertyName, target, advancedOptions, returnTypeFunc }) => {
+    const FC = createFilterComparisonType({
+      FieldType: target,
+      fieldName: `${modelName}${_.capitalize(propertyName)}`,
+      allowedComparisons: advancedOptions?.allowedComparisons,
+      returnTypeFunc,
+    });
+    const nullable = advancedOptions?.filterRequired !== true;
+    ValidateNested()(GraphQLFilter.prototype, propertyName);
+    Field(() => FC, { nullable })(GraphQLFilter.prototype, propertyName);
+    TransformerType(() => FC)(GraphQLFilter.prototype, propertyName);
+  });
+
+  return GraphQLFilter as any;
+}
+
+export function getDefaultFindManyArgs<T>(
+  Model: Type<T>,
+  modelName: string,
+): Type<IFindManyArgs<T>> {
+  const Filter = getDefaultFilter(Model, modelName);
+
+  @ArgsType()
+  class FindManyArgs {
+    @Field(() => Filter, { nullable: true })
+    filter!: IFilter<T>;
+  }
+
+  return FindManyArgs;
 }

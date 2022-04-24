@@ -1,5 +1,6 @@
-import { DeepPartial, FindConditions } from 'typeorm';
+import { FindConditions } from 'typeorm';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
+import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 import { FindOneInput, OffsetPagination } from '../grpc.dto';
 
 export interface IGrpcWriteController<M> {
@@ -10,21 +11,19 @@ export interface IGrpcWriteController<M> {
 
 export interface IGrpcReadController<M> {
   findOne(input: FindOneInput): Promise<M>;
-  findMany(input: FindManyInput<M>): Promise<FindManyResponse<M>>;
+  findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
 }
 
-export interface FindManyResponse<M> {
+export interface IGrpcFindManyResponse<M> {
   totalCount: number;
   nodes: M[];
 }
 
-export interface FindManyInput<M> {
-  paging: OffsetPagination;
+export interface IGrpcFindManyInput<M> {
+  paging?: OffsetPagination;
 
-  filter: Filter<M>;
+  filter?: IGrpcFilter<M>;
 }
-
-export type Filter<M> = DeepPartial<M>;
 
 export interface DeleteOneResponse {
   success: boolean;

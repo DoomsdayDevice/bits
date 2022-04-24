@@ -2,40 +2,49 @@ import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
 import { renameFunc } from '@bits/bits.utils';
-import { transformAndValidate } from '@bits/dto.utils';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
+import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
+import { transformAndValidate } from '@bits/dto.utils';
 
-export function getGenericGrpcWrapper<Service extends IGrpcService, T>(
-  packageToken: string,
-  serviceName: string,
-  Model: Type<T>,
-): Type<Service> {
+type Transformed<Svc, To> = Omit<Svc, 'findMany'> & IGrpcService<To>;
+
+type Func<T> = (args: T | T[]) => unknown;
+
+/**
+ * создает и оборачивает gRPC сервис
+ */
+export function getDefaultGrpcServiceWrapper<
+  Service extends IGrpcService<T>,
+  T extends object,
+  DTO extends object = T,
+>(packageToken: string, serviceName: string, DTOCls?: Type<DTO>): Type<Transformed<Service, DTO>> {
   @Injectable()
   class GenericGrpcService implements OnModuleInit {
-    private svc!: Service;
+    private grpcSvc!: Service;
 
     constructor(
       @Inject(packageToken) private client: ClientGrpc, // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
     ) {}
 
     onModuleInit(): any {
-      this.svc = promisify(this.client.getService<Service>(serviceName));
-      Object.assign(this, this.svc);
-
-      (this as any).findMany = async function (input: any) {
-        const many = await this.svc.findMany(input);
-        const trans = transformAndValidate(Model, many.nodes);
-        return { nodes: trans };
-      };
+      this.grpcSvc = promisify(this.client.getService<Service>(serviceName));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { findMany, ...rest } = this.grpcSvc;
+      Object.assign(this, rest);
     }
 
     // findOne(input: FindOneInput) {
     //   return this.svc.findOne(input);
     // }
-    //
-    findMany(input: any) {
-      const many = this.svc.findMany(input);
-      return many;
+
+    async findMany(input: IGrpcFindManyInput<T>): Promise<Connection<DTO>> {
+      const many = await this.grpcSvc.findMany(input as any);
+      if (DTOCls) {
+        const trans = transformAndValidate(DTOCls, many.nodes as any);
+        return { ...many, nodes: trans };
+      }
+      return many as any;
     }
     //
     // createOne(input: CreateUserInput): Promise<User> {

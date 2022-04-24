@@ -1,6 +1,6 @@
 import { CanActivate, ExceptionFilter, NestInterceptor, PipeTransform, Type } from '@nestjs/common';
 import { GraphQLCompositeType, GraphQLField } from 'graphql';
-import { Filter } from '../filter/filter.interface';
+import { IFilter } from '../filter/filter.interface';
 
 export declare type ComplexityEstimatorArgs = {
   type: GraphQLCompositeType;
@@ -75,17 +75,16 @@ export type ResolverRelation<Relation> = {
    */
   DTO: Type<Relation>;
 
-  simpleArray?: boolean;
+  manyToManyByArr?: {
+    arrayName: string;
+    referencedFieldName: string;
+  };
 
-  joinByOwnArray?: boolean;
-
-  referencedFieldName?: string;
-
-  ownFieldThatIsReferenced?: string;
-
-  ownIdField?: string;
-
-  fieldName?: string;
+  manyToManyByRefs?: {
+    ownFieldThatIsReferenced: string;
+    ownIdField: string;
+    simplify?: boolean;
+  };
 
   /**
    * The name of the relation to use when fetching from the QueryService
@@ -130,7 +129,7 @@ export type ResolverRelation<Relation> = {
 
 export interface AuthorizerOptions<DTO> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  authorize: (context: any) => Filter<DTO> | Promise<Filter<DTO>>;
+  authorize: (context: any) => IFilter<DTO> | Promise<IFilter<DTO>>;
 }
 
 export type RelationsOpts = {
