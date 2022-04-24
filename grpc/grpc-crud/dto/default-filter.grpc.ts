@@ -1,41 +1,58 @@
 import { Type } from '@nestjs/common';
 import { Filter } from '../grpc-controller.interface';
 import { fieldReflector, grpcEnums } from '../../decorators/decorators';
-import { GFieldInput } from '../../grpc.interface';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 import * as _ from 'lodash';
 import { upperFirst } from 'lodash';
 
-export type IInArray<T> = {
-  list: T[];
+export type IListValue<T> = {
+  values: T[];
 };
 
-export function InArray<T>(Cls: Type<T> | string): Type<IInArray<T>> {
+export function ListValue<T>(Cls: Type<T> | string): Type<IListValue<T>> {
   const name = upperFirst((Cls as any).name || Cls);
-  @GrpcMessageDef({ name: `${name}InArray` })
+  @GrpcMessageDef({ name: `${name}ListValue` })
   class InArray {
     @GrpcFieldDef(() => [Cls] as any)
-    list: T[];
+    values: T[];
   }
 
   return InArray as any;
 }
 
-const StringInArray = InArray(String);
+const StringListValue = ListValue(String);
 
 @GrpcMessageDef({ oneOf: true })
 export class StringFieldComparison {
-  @GrpcFieldDef(() => StringInArray)
-  in: IInArray<string>;
+  @GrpcFieldDef(() => StringListValue)
+  in: IListValue<string>;
 
-  @GrpcFieldDef(() => String)
+  @GrpcFieldDef()
   eq: string;
+
+  @GrpcFieldDef()
+  like: string;
+
+  @GrpcFieldDef()
+  iLike: string;
+}
+
+@GrpcMessageDef({ oneOf: true })
+export class BooleanFieldComparison {
+  @GrpcFieldDef()
+  eq: boolean;
+}
+
+@GrpcMessageDef({ oneOf: true })
+export class DateFieldComparison {
+  @GrpcFieldDef()
+  eq: Date;
 }
 
 export function getEnumComparisonType<E>(Enum: E, enumName: string): any {
   const msgName = `${_.upperFirst(enumName)}FieldComparison`;
-  const EnumInArr = InArray(enumName);
+  const EnumInArr = ListValue(enumName);
   @GrpcMessageDef({ name: msgName, oneOf: true })
   class EnumComparison {
     @GrpcFieldDef(() => EnumInArr)
@@ -60,6 +77,10 @@ export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
     let filterTypeFn;
     if (f.typeFn() === String) {
       filterTypeFn = () => StringFieldComparison;
+    } else if (f.typeFn() === Date) {
+      filterTypeFn = () => DateFieldComparison;
+    } else if (f.typeFn() === Boolean) {
+      filterTypeFn = () => BooleanFieldComparison;
     } else {
       const enumName = f.typeFn();
       const enumComp = getEnumComparisonType(

@@ -7,7 +7,7 @@ import { GrpcFieldDef } from '../decorators/field.decorator';
 import { FindOneInput } from '../grpc.dto';
 import { getDefaultFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
-import { In } from 'typeorm';
+import { ILike, In, Like } from 'typeorm';
 import { UInt32 } from '@bits/grpc/grpc.scalars';
 
 function getDefaultFindManyResponse<M>(ModelCls: Type<M>): any {
@@ -53,11 +53,11 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
         totalCount: await this.svc.count(filter),
         nodes: await this.svc.findMany(filter),
       };
-      resp.nodes.forEach(n => {
-        for (const key of Object.keys(n)) {
-          if (n[key] instanceof Date) n[key] = n[key].toISOString();
-        }
-      });
+      // resp.nodes.forEach(n => {
+      //   for (const key of Object.keys(n)) {
+      //     if (n[key] instanceof Date) n[key] = n[key].toISOString();
+      //   }
+      // });
       return resp;
     }
 
@@ -66,7 +66,9 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       for (const key of Object.keys(filter)) {
         const comparisonField = filter[key];
         if (comparisonField.eq !== undefined) newFilter[key] = comparisonField.eq;
-        else if (comparisonField.in) newFilter[key] = In(comparisonField.in.list);
+        else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
+        else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
+        else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
       }
       return newFilter;
     }
