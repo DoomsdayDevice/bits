@@ -35,7 +35,6 @@ export function getGenericGrpcWrapper<Service extends IGrpcService, T>(
     //
     findMany(input: any) {
       const many = this.svc.findMany(input);
-      console.log({ many });
       return many;
     }
     //

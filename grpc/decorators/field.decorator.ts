@@ -47,11 +47,12 @@ export function GrpcFieldDef(
 
 /** wrapped for nullables and such */
 export function getFieldType(type: any, wrapped = false): string {
-  console.log({ type });
   switch (type) {
     case String:
-    case Date:
+      if (wrapped) return 'google.protobuf.StringValue';
       return 'string';
+    case Date:
+      return 'google.protobuf.Timestamp';
     case 'uint32':
     case UInt32:
       return 'uint32';
