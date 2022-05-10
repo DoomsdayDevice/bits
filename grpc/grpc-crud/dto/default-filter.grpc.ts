@@ -1,16 +1,16 @@
 import { Type } from '@nestjs/common';
 import * as _ from 'lodash';
-import { upperFirst } from 'lodash';
-import { Filter } from '../grpc-controller.interface';
+import { memoize, upperFirst } from 'lodash';
 import { grpcEnums } from '../../decorators/decorators';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
+import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 
 export type IListValue<T> = {
   values: T[];
 };
 
-export function ListValue<T>(Cls: Type<T> | string): Type<IListValue<T>> {
+export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
   const name = upperFirst((Cls as any).name || Cls);
   @GrpcMessageDef({ name: `${name}ListValue` })
   class InArray {
@@ -18,14 +18,13 @@ export function ListValue<T>(Cls: Type<T> | string): Type<IListValue<T>> {
     values: T[];
   }
 
-  return InArray as any;
-}
+  return InArray;
+});
 
-const StringListValue = ListValue(String);
+const StringListValue = getListValueOfCls(String);
 
 @GrpcMessageDef({ oneOf: true })
 export class StringFieldComparison {
-<<<<<<< HEAD
   @GrpcFieldDef(() => StringListValue)
   in: IListValue<string>;
 
@@ -51,9 +50,9 @@ export class DateFieldComparison {
   eq: Date;
 }
 
-export function getEnumComparisonType<E>(Enum: E, enumName: string): any {
+export const getEnumComparisonType = memoize(function <E>(Enum: E, enumName: string): any {
   const msgName = `${_.upperFirst(enumName)}FieldComparison`;
-  const EnumInArr = ListValue(enumName);
+  const EnumInArr = getListValueOfCls(enumName);
   @GrpcMessageDef({ name: msgName, oneOf: true })
   class EnumComparison {
     @GrpcFieldDef(() => EnumInArr)
@@ -64,9 +63,9 @@ export function getEnumComparisonType<E>(Enum: E, enumName: string): any {
   }
 
   return EnumComparison;
-}
+});
 
-export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
+export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGrpcFilter<M>> => {
   // get filterable fields TODO make a separate function to get fields and filterable fields
   const foundFields = getFieldDataForClass(ModelCls);
   const filterable = foundFields.filter(f => f.filterable);
@@ -98,4 +97,4 @@ export function getDefaultFilter<M>(ModelCls: Type<M>): Type<Filter<M>> {
 
   GrpcMessageDef({ name: `${ModelCls.name}Filter` })(GenericFilter);
   return GenericFilter as any;
-}
+});

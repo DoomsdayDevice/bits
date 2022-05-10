@@ -73,6 +73,9 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
         else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
         else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
         else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
+        else {
+          newFilter[key] = this.convertExternalFilterToLocal(comparisonField);
+        }
       }
       return newFilter;
     }
