@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { common, wrappers } from 'protobufjs';
 import IStringValue = common.IStringValue;
 
