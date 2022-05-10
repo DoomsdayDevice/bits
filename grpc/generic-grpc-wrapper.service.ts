@@ -7,9 +7,12 @@ import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { transformAndValidate } from '@bits/dto.utils';
 
-type Transformed<Svc, To> = Omit<Svc, 'findMany'> & IGrpcService<To>;
-
-type Func<T> = (args: T | T[]) => unknown;
+export type WrappedGrpcService<Svc, From, To> = Omit<Svc, 'findMany' | 'createOne'> &
+  IGrpcService<To> & {
+    grpcSvc: Svc;
+    validate(input: From): To;
+    validate(input: From[]): To[];
+  };
 
 /**
  * создает и оборачивает gRPC сервис
@@ -18,10 +21,15 @@ export function getDefaultGrpcServiceWrapper<
   Service extends IGrpcService<T>,
   T extends object,
   DTO extends object = T,
->(packageToken: string, serviceName: string, DTOCls?: Type<DTO>): Type<Transformed<Service, DTO>> {
+  Excluded extends keyof Service = never,
+>(
+  packageToken: string,
+  serviceName: string,
+  DTOCls?: Type<DTO>,
+): Type<Omit<WrappedGrpcService<Service, T, DTO>, Excluded>> {
   @Injectable()
   class GenericGrpcService implements OnModuleInit {
-    private grpcSvc!: Service;
+    public grpcSvc!: Service;
 
     constructor(
       @Inject(packageToken) private client: ClientGrpc, // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
@@ -34,22 +42,29 @@ export function getDefaultGrpcServiceWrapper<
       Object.assign(this, rest);
     }
 
+    validate(input: T): DTO;
+    validate(input: T[]): DTO[];
+    validate(input: T | T[]): DTO | DTO[] {
+      if (DTOCls) return transformAndValidate(DTOCls, input as any);
+      else return input as DTO;
+    }
+
     // findOne(input: FindOneInput) {
     //   return this.svc.findOne(input);
     // }
 
     async findMany(input: IGrpcFindManyInput<T>): Promise<Connection<DTO>> {
       const many = await this.grpcSvc.findMany(input as any);
-      if (DTOCls) {
-        const trans = transformAndValidate(DTOCls, many.nodes as any);
-        return { ...many, nodes: trans };
-      }
-      return many as any;
+      const valid = this.validate(many.nodes);
+      return { ...many, nodes: valid };
     }
-    //
-    // createOne(input: CreateUserInput): Promise<User> {
-    //   return this.svc.createOne(input);
-    // }
+
+    async createOne(input: any): Promise<DTO> {
+      if (DTOCls) {
+        return transformAndValidate(DTOCls, (await this.grpcSvc.createOne(input)) as any);
+      }
+      return (await this.grpcSvc.createOne(input)) as DTO;
+    }
   }
   renameFunc(GenericGrpcService, serviceName);
 

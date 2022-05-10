@@ -1,9 +1,8 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { buildRelations } from '@bits/graphql/relation/relation-builder';
 import { transformAndValidate } from '@bits/dto.utils';
-import { IBaseServiceRead } from '@ext-types/types';
-import { getPlural, getSingular } from '@bits/bits.utils';
+import { IBaseServiceRead } from '@i/ext/types';
+import { getPlural, getSingular, renameFunc } from '@bits/bits.utils';
 import {
   FindOneInput,
   getDefaultFindManyArgs,
@@ -16,8 +15,9 @@ export function ReadResolverMixin<T, N extends string>(
   Model: Type<T>,
   Service: Type,
   pagination: boolean,
-  modelName: N,
+  myModelName?: N,
 ): Type<IBaseServiceRead<T, N>> {
+  const modelName = myModelName || Model.name;
   const plural = getPlural(modelName);
   const singular = getSingular(modelName);
 
@@ -48,8 +48,7 @@ export function ReadResolverMixin<T, N extends string>(
       };
     }
   }
-
-  buildRelations(Model, GenericResolver);
+  renameFunc(GenericResolver, `${modelName}Resolver`);
 
   return GenericResolver as any;
 }
