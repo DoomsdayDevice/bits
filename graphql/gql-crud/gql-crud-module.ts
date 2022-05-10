@@ -6,6 +6,8 @@ import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
+import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.resolver';
+import { buildRelations } from '@bits/graphql/relation/relation-builder';
 
 export class GqlCrudModule<T> {
   private modelName: string;
@@ -50,11 +52,43 @@ export class GqlCrudModule<T> {
     // assign service to Entity
     crudServiceReflector.set(this.Model, GenericService);
 
+    buildRelations(this.Model, GenericResolver);
     @Global()
     @Module({
       providers: [GenericService, GenericResolver],
       imports: [CoreClientModule, ...this.imports],
       exports: [GenericService],
+    })
+    class GenericModule {}
+
+    return GenericModule;
+  }
+
+  makeWritableCrud(): any {
+    const GenericService =
+      this.Service || getDefaultGrpcServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
+    const GenericResolver =
+      this.Resolver ||
+      WriteResolverMixin(
+        this.Model,
+        GenericService,
+        this.modelName,
+      )(ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName));
+
+    // assign service to Entity
+    crudServiceReflector.set(this.Model, GenericService);
+
+    buildRelations(this.Model, GenericResolver);
+
+    @Global()
+    @Module({
+      providers: [
+        { provide: GenericService.name, useClass: GenericService },
+        GenericService,
+        GenericResolver,
+      ],
+      imports: [CoreClientModule, ...this.imports],
+      exports: [GenericService, { provide: GenericService.name, useClass: GenericService }],
     })
     class GenericModule {}
 
