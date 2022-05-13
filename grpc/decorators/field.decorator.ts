@@ -68,7 +68,7 @@ export function getFieldType(type: any, wrapped = false): string {
       return 'float';
     case 'bool':
     case Boolean:
-      if (wrapped) return 'BoolValue';
+      if (wrapped) return 'google.protobuf.BoolValue';
       return 'bool';
     default: {
       if (typeof type === 'string') return type;

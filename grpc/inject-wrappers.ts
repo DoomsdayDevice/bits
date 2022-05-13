@@ -1,5 +1,6 @@
 import { common, wrappers } from 'protobufjs';
 import IStringValue = common.IStringValue;
+import IBoolValue = common.IBoolValue;
 
 export function injectWrappers() {
   //
@@ -24,5 +25,16 @@ export function injectWrappers() {
     toObject: function (message: IStringValue, options: any) {
       return message.value;
     },
-  } as any; // <- dirty workaround :D
+  } as any;
+
+  wrappers['.google.protobuf.BoolValue'] = {
+    fromObject: function (value: boolean) {
+      return {
+        value,
+      };
+    },
+    toObject: function (message: IBoolValue, options: any) {
+      return message.value;
+    },
+  } as any;
 }
