@@ -11,7 +11,7 @@ type BuiltInTypes =
   | never;
 
 export interface CommonFieldComparisonType<T> {
-  eq?: T;
+  eq: T;
 }
 
 export interface StringListValue {
@@ -30,14 +30,21 @@ export type GWrapperStringFieldComparison =
 /**
  * for raw grpc services
  */
-export type GStringFieldComparison = {
-  in: StringListValue | undefined;
-  eq: string | undefined;
-  like: string | undefined;
-  iLike: string | undefined;
-};
+export type GStringFieldComparison =
+  | {
+      in: StringListValue;
+    }
+  | {
+      eq: string;
+    }
+  | {
+      like: string;
+    }
+  | {
+      iLike: string;
+    };
 
-export type BooleanFieldComparisons = { is: boolean };
+export type BooleanFieldComparisons = { eq: boolean };
 
 type FilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends
   | string
@@ -46,7 +53,7 @@ type FilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType e
   : FieldType extends boolean | Boolean
   ? BooleanFieldComparisons
   : FieldType extends null | undefined | never
-  ? BooleanFieldComparisons // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ? never // eslint-disable-next-line @typescript-eslint/no-explicit-any
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
   ? CommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
@@ -59,4 +66,4 @@ export type FilterComparisons<T> = {
   [K in keyof T]?: FilterFieldComparison<T[K], false>;
 };
 
-export type IGrpcFilter<M> = any;
+export type IGrpcFilter<M> = FilterComparisons<M>;

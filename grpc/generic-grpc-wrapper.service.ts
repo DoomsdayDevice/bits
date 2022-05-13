@@ -38,8 +38,11 @@ export function getDefaultGrpcServiceWrapper<
     onModuleInit(): any {
       this.grpcSvc = promisify(this.client.getService<Service>(serviceName));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { findMany, ...rest } = this.grpcSvc;
-      Object.assign(this, rest);
+      // const { findMany, ...rest } = this.grpcSvc;
+      for (const methName of Object.keys(this.grpcSvc)) {
+        if (!(GenericGrpcService as any).prototype[methName])
+          (GenericGrpcService as any).prototype[methName] = (this.grpcSvc as any)[methName];
+      }
     }
 
     validate(input: T): DTO;
