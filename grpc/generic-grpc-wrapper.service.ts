@@ -64,7 +64,9 @@ export function getDefaultGrpcServiceWrapper<
 
     async createOne(input: any): Promise<DTO> {
       if (DTOCls) {
-        return transformAndValidate(DTOCls, (await this.grpcSvc.createOne(input)) as any);
+        // TODO add validation with CreateOneDTO
+        const newOne = transformAndValidate(DTOCls, input as any);
+        return transformAndValidate(DTOCls, (await this.grpcSvc.createOne(newOne)) as any);
       }
       return (await this.grpcSvc.createOne(input)) as DTO;
     }
