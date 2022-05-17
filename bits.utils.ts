@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 import * as _ from 'lodash';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -21,3 +22,5 @@ export function getPlural(modelName: string) {
 export function getSingular(modelName: string) {
   return `${_.camelCase(modelName)}`;
 }
+
+export const RemoveTrailingSpace = () => Transform(({ value }: TransformFnParams) => value?.trim());
