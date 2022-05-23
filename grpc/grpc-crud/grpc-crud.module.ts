@@ -52,12 +52,16 @@ export class GRPCCrudModule {
         ReadableGrpcController(Model, FinalService, false),
       );
 
+    const exports = [];
+    if (!Repo) exports.push(FinalRepo);
+    if (!Service) exports.push(FinalService);
+
     return {
       module: GRPCCrudModule,
       providers: [FinalRepo, FinalController, FinalService],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
-      exports: [FinalRepo, FinalService],
+      exports,
     };
   }
 
