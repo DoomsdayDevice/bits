@@ -8,6 +8,8 @@ import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
 import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.resolver';
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
+import { Resolver } from '@nestjs/graphql';
+import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
 
 export class GqlCrudModule<T> {
   private modelName: string;
@@ -93,5 +95,20 @@ export class GqlCrudModule<T> {
     class GenericModule {}
 
     return GenericModule;
+  }
+
+  onlyRelations(): DynamicModule {
+    @Resolver(() => this.Model)
+    class GenericResolver {}
+
+    buildRelations(this.Model, GenericResolver);
+
+    @Module({
+      providers: [GenericResolver],
+      // imports: [CoreClientModule],
+    })
+    class GenericModule {}
+
+    return GenericModule as any;
   }
 }

@@ -7,6 +7,7 @@ import {
   getDefaultUpdateOneInput,
 } from '@bits/graphql/gql-crud/gql-crud.dto';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { GraphQLUUID } from 'graphql-scalars';
 
 export const WriteResolverMixin =
   <T, N extends string>(Model: Type<T>, Service: Type, modelName?: N, Create?: Type) =>
@@ -20,7 +21,9 @@ export const WriteResolverMixin =
       @Inject(Service) private svc!: IGrpcService;
 
       @Mutation(() => Boolean)
-      async [`deleteOne${name}`](@Args('id') id: string): Promise<boolean> {
+      async [`deleteOne${name}`](
+        @Args('id', { type: () => GraphQLUUID }) id: string,
+      ): Promise<boolean> {
         const res = await this.svc.deleteOne({ id });
         return res.success;
       }

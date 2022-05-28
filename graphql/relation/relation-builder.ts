@@ -37,8 +37,11 @@ export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
       CrudResolver.prototype[relName] = async function findOne(par: any) {
         // get the corresponding service and run
         const svc = this[svcName(relName)];
-        const id = par[`${relName}Id`];
-        return svc.findOne({ id });
+        const opts = one[relName];
+
+        const ownForeignKey = opts.customForeignKey?.ownForeignKey || `${relName}Id`;
+        const value = par[ownForeignKey];
+        return svc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
       };
       buildRel(true, relName, CrudResolver, one[relName].DTO, svcName(relName));
     }
