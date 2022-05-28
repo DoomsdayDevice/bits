@@ -1,7 +1,7 @@
 import { FindConditions } from 'typeorm';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
-import { FindOneInput, OffsetPagination } from '../grpc.dto';
+import { FindByIdInput, OffsetPagination } from '../grpc.dto';
 
 export interface IGrpcWriteController<M> {
   createOne(newUser: CreateInput<M>): Promise<M>;
@@ -10,7 +10,7 @@ export interface IGrpcWriteController<M> {
 }
 
 export interface IGrpcReadController<M> {
-  findOne(input: FindOneInput): Promise<M>;
+  findOne(input: FindByIdInput): Promise<M>;
   findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
 }
 

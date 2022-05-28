@@ -8,7 +8,7 @@ import { GrpcMethodDef } from '../decorators/method.decorator';
 import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMessageDef } from '../decorators/message.decorator';
 import { GrpcFieldDef } from '../decorators/field.decorator';
-import { FindOneInput } from '../grpc.dto';
+import { FindByIdInput } from '../grpc.dto';
 import { getDefaultFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { ILike, In, Like } from 'typeorm';
@@ -34,17 +34,19 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
   ServiceCls: Type<IReadableCrudService<M>>,
   defineService = true,
   Base: B = class {} as any,
+  FindOneInputDTO?: Type,
 ): Type<IGrpcReadController<M> & InstanceType<B>> {
   const FindMany = getDefaultFindManyInput(ModelCls);
   const FindManyResp = getDefaultFindManyResponse(ModelCls);
+  const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 
   @Controller()
   class ModelController extends Base implements IGrpcReadController<M> {
     @Inject(ServiceCls) private svc: IReadableCrudService<M>;
 
-    @GrpcMethodDef({ requestType: () => FindOneInput, responseType: () => ModelCls })
-    async findOne(input: FindOneInput): Promise<M> {
-      return this.svc.findOne(input.id);
+    @GrpcMethodDef({ requestType: () => FinalFindOneInput, responseType: () => ModelCls })
+    async findOne(input: FindByIdInput): Promise<M> {
+      return this.svc.findOne(input as any);
     }
 
     @GrpcMethodDef({

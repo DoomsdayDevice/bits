@@ -24,6 +24,7 @@ export interface GrpcReadableCrudConfig<M> {
   Model: Type<M>;
   Repo?: Type<IReadableRepo<M>>;
   Controller?: Type<IGrpcWriteController<M>>;
+  FindOneDTO?: Type;
   Service?: Type;
   imports?: any[];
 }
@@ -69,12 +70,14 @@ export class GRPCCrudModule {
     Model,
     Repo,
     Service,
+    FindOneDTO,
     Controller,
     imports = [],
   }: GrpcReadableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || ReadableRepoMixin(Model)();
     const FinalService = Service || ReadableCrudService(Model, FinalRepo);
-    const FinalController = Controller || ReadableGrpcController(Model, FinalService);
+    const FinalController =
+      Controller || ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO);
 
     return {
       module: GRPCCrudModule,
