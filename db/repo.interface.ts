@@ -47,7 +47,7 @@ export interface IReadableRepo<Entity> {
 }
 
 export interface IWritableRepo<Entity> {
-  repository: Repository<Entity>;
+  writeRepo: Repository<Entity>;
 
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
   update(
