@@ -29,7 +29,7 @@ export interface IReadableRepo<Entity> {
   findOne(
     id: string | FindOneOptions<Entity> | FindConditions<Entity>,
     options?: FindOneOptions<Entity>,
-  ): Promise<Entity>;
+  ): Promise<Entity> | undefined;
   findNested({
     relations,
     where,
@@ -67,4 +67,4 @@ export interface IWritableRepo<Entity> {
   ): Promise<DeleteResult>;
 }
 
-export type IWRRepo<T> = IWritableRepo<T> & IReadableRepo<T>;
+export type IRepo<T> = IWritableRepo<T> & IReadableRepo<T>;

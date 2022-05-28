@@ -179,6 +179,7 @@ export class NestedQuery<T> {
     if (take) this.query.take(take);
     if (skip) this.query.skip(skip);
 
+    const query = this.query.getQuery();
     const items = await this.query.getMany();
 
     const totalCount = await this.query.getCount();
