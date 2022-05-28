@@ -75,6 +75,11 @@ export type ResolverRelation<Relation> = {
    */
   DTO: Type<Relation>;
 
+  customForeignKey?: {
+    ownForeignKey: string;
+    referencedKey: string;
+  };
+
   manyToManyByArr?: {
     arrayName: string;
     referencedFieldName: string;
