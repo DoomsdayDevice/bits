@@ -36,9 +36,9 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         options?: FindOneOptions<Entity>,
       ): Promise<Entity> {
         const record = await this.readRepo.findOne(id as any, options);
-        if (!record) {
-          throw new NotFoundException('the requested record was not found');
-        }
+        // if (!record) {
+        //   throw new NotFoundException('the requested record was not found');
+        // }
         return record;
       }
 

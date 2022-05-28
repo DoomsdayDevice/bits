@@ -8,6 +8,8 @@ import { WritableCrudService } from '@bits/services/writable-crud.service';
 import { WritableGrpcController } from '@bits/grpc/grpc-crud/grpc.writable.controller';
 import { ReadableGrpcController } from '@bits/grpc/grpc-crud/grpc.readable.controller';
 import { ReadableCrudService } from '@bits/services/readable-crud.service';
+import { getRepositoryToken } from '@bits/db/inject-repo.decorator';
+import { renameFunc } from '@bits/bits.utils';
 
 type IWRRepo<M> = IWritableRepo<M> & IReadableRepo<M>;
 
@@ -85,6 +87,24 @@ export class GRPCCrudModule {
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports: [FinalRepo, FinalService],
+    };
+  }
+
+  static makeAndProvideRepo(Model: Type, write: boolean = true): DynamicModule {
+    const Repo = write
+      ? WritableRepoMixin(Model)(ReadableRepoMixin(Model)())
+      : ReadableRepoMixin(Model)();
+
+    renameFunc(Repo, `${Model.name}Repo`);
+
+    const token = getRepositoryToken(Model);
+
+    return {
+      global: true,
+      module: GRPCCrudModule,
+      imports: [TypeOrmModule.forFeature([Model])],
+      providers: [{ provide: token, useClass: Repo }],
+      exports: [token],
     };
   }
 }
