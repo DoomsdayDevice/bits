@@ -1,6 +1,6 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { IBaseServiceWrite } from '@i/ext/types';
+import { IBaseServiceWrite } from '@api-types/types';
 import { IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
 import {
   getDefaultCreateOneInput,
