@@ -1,7 +1,7 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { transformAndValidate } from '@bits/dto.utils';
-import { IBaseServiceRead } from '@i/ext/types';
+import { IBaseServiceRead } from '@api-types/types';
 import { getPlural, getSingular, renameFunc } from '@bits/bits.utils';
 import {
   FindOneInput,
