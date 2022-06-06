@@ -18,6 +18,8 @@ import {
 import * as _ from 'lodash';
 import { ValidateNested } from 'class-validator';
 import { Type as TransformerType } from 'class-transformer';
+import { IConnection } from '@bits/bits.types';
+import { memoize } from 'lodash';
 
 @InputType({ isAbstract: true })
 export class DeleteByIDInput {
@@ -67,17 +69,19 @@ export function getDefaultCreateOneInput<T>(
   // return CreateOneInput;
 }
 
-export function getDefaultModelConnection<T>(Model: Type<T>, modelName: string): any {
-  @ObjectType(`${modelName}Connection`)
-  class DtoConnectionCls {
-    @Field(() => Int)
-    totalCount = 0;
+export const getDefaultModelConnection = memoize(
+  <T>(Model: Type<T>, modelName?: string): Type<IConnection<T>> => {
+    @ObjectType(`${modelName || Model.name}Connection`)
+    class DtoConnectionCls {
+      @Field(() => Int)
+      totalCount = 0;
 
-    @Field(() => [Model])
-    nodes!: T[];
-  }
-  return DtoConnectionCls;
-}
+      @Field(() => [Model])
+      nodes!: T[];
+    }
+    return DtoConnectionCls;
+  },
+);
 
 // TODO add getOrCreate with memoize for nested filters
 export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IFilter<T>> {

@@ -3,9 +3,9 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
 import { renameFunc } from '@bits/bits.utils';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
-import { Connection } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { transformAndValidate } from '@bits/dto.utils';
+import { IConnection } from '@bits/bits.types';
 
 export type WrappedGrpcService<Svc, From, To> = Omit<Svc, 'findMany' | 'createOne'> &
   IGrpcService<To> & {
@@ -56,7 +56,7 @@ export function getDefaultGrpcCrudServiceWrapper<
     //   return this.svc.findOne(input);
     // }
 
-    async findMany(input: IGrpcFindManyInput<T>): Promise<Connection<DTO>> {
+    async findMany(input: IGrpcFindManyInput<T>): Promise<IConnection<DTO>> {
       const many = await this.grpcSvc.findMany(input as any);
       const valid = this.validate(many.nodes);
       return { ...many, nodes: valid };

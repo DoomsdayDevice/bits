@@ -14,3 +14,8 @@ export type Promisify<T> = {
 export type Maybe<T> = T | null;
 
 export type ModuleImportElem = Type | DynamicModule | Promise<DynamicModule> | ForwardReference;
+
+export interface IConnection<T> {
+  totalCount: number;
+  nodes: T[];
+}

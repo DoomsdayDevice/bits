@@ -12,11 +12,6 @@ export interface GqlWritableCrudConfig<M> {
   Service?: Type<any>;
 }
 
-export interface Connection<T> {
-  totalCount: number;
-  nodes: T[];
-}
-
 export interface IUpdateOneInput<T> {
   id: string;
   update: Partial<T>;
