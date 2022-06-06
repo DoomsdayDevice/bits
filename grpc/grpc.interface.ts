@@ -33,10 +33,10 @@ export type GEnumInput = {
 };
 
 /** for clients */
-export interface IGrpcService<T = any> {
-  findOne(opts: { id: string }): Promise<T>;
-  findMany(input: IGrpcFindManyInput<T>): Promise<IGrpcFindManyResponse<T>>;
+export interface IGrpcService<WriteModel = any, ReadModel = WriteModel> {
+  findOne(opts: { id: string }): Promise<WriteModel>;
+  findMany(input: IGrpcFindManyInput<WriteModel>): Promise<IGrpcFindManyResponse<WriteModel>>;
   deleteOne(input: any): Promise<StatusMsg>;
   updateOne(input: any): Promise<StatusMsg>;
-  createOne(input: any): Promise<T>;
+  createOne(input: any): Promise<WriteModel>;
 }

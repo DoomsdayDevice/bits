@@ -2,9 +2,11 @@ import { FindConditions } from 'typeorm';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 import { FindByIdInput, OffsetPagination } from '../grpc.dto';
+import { Type } from '@nestjs/common';
+import { IWritableCrudService } from '@bits/services/interface.service';
 
-export interface IGrpcWriteController<M> {
-  createOne(newUser: CreateInput<M>): Promise<M>;
+export interface IGrpcWriteController<M, RM = M> {
+  createOne(newUser: CreateInput<M>): Promise<RM>;
   updateOne(user: UpdateInput<M>): Promise<StatusMsg>;
   deleteOne(user: FindConditions<M>): Promise<DeleteOneResponse>;
 }
@@ -12,6 +14,17 @@ export interface IGrpcWriteController<M> {
 export interface IGrpcReadController<M> {
   findOne(input: FindByIdInput): Promise<M>;
   findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
+}
+
+export interface IWritableGrpcControllerOpts<M, B extends Type, RM = M> {
+  WriteModelCls: Type<M>;
+  ServiceCls: Type<IWritableCrudService<M>>;
+  CreateDTO?: Type;
+  DeleteDTO?: Type;
+  ReadModelCls?: Type<RM>;
+  defineService: boolean;
+  Base: B;
+  separateRead?: boolean;
 }
 
 export interface IGrpcFindManyResponse<M> {

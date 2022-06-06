@@ -46,14 +46,14 @@ export class GRPCCrudModule {
       Service || WritableCrudService(Model, FinalRepo, ReadableCrudService(Model, FinalRepo));
     const FinalController =
       Controller ||
-      WritableGrpcController(
-        Model,
-        FinalService,
+      WritableGrpcController({
+        WriteModelCls: Model,
+        ServiceCls: FinalService,
         CreateDTO,
         DeleteDTO,
-        true,
-        ReadableGrpcController(Model, FinalService, false),
-      );
+        defineService: true,
+        Base: ReadableGrpcController(Model, FinalService, false),
+      });
 
     const exports = [];
     if (!Repo) exports.push(FinalRepo);
