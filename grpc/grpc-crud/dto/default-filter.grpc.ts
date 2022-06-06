@@ -4,7 +4,12 @@ import { memoize, upperFirst } from 'lodash';
 import { grpcEnums } from '../../decorators/decorators';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
-import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
+import {
+  BooleanFieldComparisons,
+  GStringFieldComparison,
+  IGrpcFilter,
+} from '@bits/grpc/grpc-filter.interface';
+import { Merge } from 'ts-toolbelt/out/Union/Merge';
 
 export type IListValue<T> = {
   values: T[];
@@ -23,8 +28,23 @@ export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
 
 const StringListValue = getListValueOfCls(String);
 
+// @GrpcMessageDef({ oneOf: true })
+// export class CommonFieldComparison {}
+
 @GrpcMessageDef({ oneOf: true })
-export class StringFieldComparison {
+export class BooleanFieldComparison implements Merge<BooleanFieldComparisons> {
+  @GrpcFieldDef()
+  is: boolean;
+
+  @GrpcFieldDef()
+  isNot: boolean;
+}
+
+@GrpcMessageDef({ oneOf: true })
+export class StringFieldComparison
+  extends BooleanFieldComparison
+  implements Merge<GStringFieldComparison>
+{
   @GrpcFieldDef(() => StringListValue)
   in: IListValue<string>;
 
@@ -32,22 +52,40 @@ export class StringFieldComparison {
   eq: string;
 
   @GrpcFieldDef()
+  neq: string;
+
+  @GrpcFieldDef()
   like: string;
 
   @GrpcFieldDef()
-  iLike: string;
-}
+  gt: string;
 
-@GrpcMessageDef({ oneOf: true })
-export class BooleanFieldComparison {
   @GrpcFieldDef()
-  eq: boolean;
+  gte: string;
+
+  @GrpcFieldDef()
+  lt: string;
+
+  @GrpcFieldDef()
+  lte: string;
+
+  @GrpcFieldDef()
+  iLike: string;
+
+  @GrpcFieldDef()
+  notLike: string;
+
+  @GrpcFieldDef()
+  notILike: string;
 }
 
 @GrpcMessageDef({ oneOf: true })
-export class DateFieldComparison {
+export class DateFieldComparison extends BooleanFieldComparison {
   @GrpcFieldDef()
   eq: Date;
+
+  @GrpcFieldDef()
+  neq: Date;
 }
 
 export const getEnumComparisonType = memoize(function <E>(Enum: E, enumName: string): any {

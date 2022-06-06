@@ -1,3 +1,5 @@
+import exp from 'constants';
+
 type BuiltInTypes =
   | boolean
   | string
@@ -27,24 +29,46 @@ export type GWrapperStringFieldComparison =
     }
   | { eq: string };
 
+export type CompareComps<T> =
+  | {
+      lt: T;
+    }
+  | {
+      lte: T;
+    }
+  | {
+      gt: T;
+    }
+  | {
+      gte: T;
+    };
+
 /**
  * for raw grpc services
  */
-export type GStringFieldComparison =
-  | {
-      in: StringListValue;
-    }
-  | {
-      eq: string;
-    }
-  | {
-      like: string;
-    }
-  | {
-      iLike: string;
-    };
+export type GStringFieldComparison = CompareComps<string> &
+  (
+    | {
+        in: StringListValue;
+      }
+    | {
+        eq: string;
+      }
+    | {
+        like: string;
+      }
+    | {
+        iLike: string;
+      }
+    | {
+        notLike: string;
+      }
+    | {
+        notILike: string;
+      }
+  );
 
-export type BooleanFieldComparisons = { eq: boolean };
+export type BooleanFieldComparisons = { is: boolean; isNot: boolean };
 
 type FilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends
   | string

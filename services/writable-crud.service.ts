@@ -12,20 +12,20 @@ export function WritableCrudService<Entity, B extends Type>(
 ): Type<IWritableCrudService<Entity> & InstanceType<B>> {
   @Injectable()
   class WritableCrudService extends Base implements IWritableCrudService<Entity> {
-    @Inject(Repo) private repo: IWritableRepo<Entity>;
+    @Inject(Repo) writeRepo: IWritableRepo<Entity>;
 
     createOne(newEntity: DeepPartial<Entity>): Promise<Entity> {
-      return this.repo.create(newEntity);
+      return this.writeRepo.create(newEntity);
     }
     deleteOne(id: string | FindConditions<Entity>): Promise<boolean> {
-      return this.repo.deleteOne(id);
+      return this.writeRepo.deleteOne(id);
     }
     updateOne(
       idOrConditions: string | FindConditions<Entity>,
       partialEntity: QueryDeepPartialEntity<Entity>,
     ): // ...options: any[]
     Promise<UpdateResult | Entity> {
-      return this.repo.update(idOrConditions, partialEntity);
+      return this.writeRepo.update(idOrConditions, partialEntity);
     }
   }
   return WritableCrudService as any;
