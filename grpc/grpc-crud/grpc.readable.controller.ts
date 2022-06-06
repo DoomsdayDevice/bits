@@ -6,27 +6,11 @@ import {
 } from './grpc-controller.interface';
 import { GrpcMethodDef } from '../decorators/method.decorator';
 import { GrpcServiceDef } from '../decorators/service.decorator';
-import { GrpcMessageDef } from '../decorators/message.decorator';
-import { GrpcFieldDef } from '../decorators/field.decorator';
 import { FindByIdInput } from '../grpc.dto';
-import { getDefaultFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
+import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { ILike, In, Like } from 'typeorm';
-import { UInt32 } from '@bits/grpc/grpc.scalars';
-import { IConnection } from '../../bits.types';
-
-function getDefaultConnection<M>(ModelCls: Type<M>): Type<IConnection<M>> {
-  @GrpcMessageDef({ name: `${ModelCls.name}Connection` })
-  class GenericFindManyResponse {
-    @GrpcFieldDef(() => UInt32)
-    totalCount: number;
-
-    @GrpcFieldDef(() => [ModelCls])
-    nodes: M[];
-  }
-
-  return GenericFindManyResponse;
-}
+import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -37,17 +21,17 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
   Base: B = class {} as any,
   FindOneInputDTO?: Type,
 ): Type<IGrpcReadController<M> & InstanceType<B>> {
-  const FindMany = getDefaultFindManyInput(ModelCls);
-  const FindManyResp = getDefaultConnection(ModelCls);
+  const FindMany = getOrCreateFindManyInput(ModelCls);
+  const FindManyResp = getOrCreateConnection(ModelCls);
   const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 
   @Controller()
   class ModelController extends Base implements IGrpcReadController<M> {
-    @Inject(ServiceCls) private svc: IReadableCrudService<M>;
+    @Inject(ServiceCls) private readSvc: IReadableCrudService<M>;
 
     @GrpcMethodDef({ requestType: () => FinalFindOneInput, responseType: () => ModelCls })
     async findOne(input: FindByIdInput): Promise<M> {
-      return this.svc.findOne(input as any);
+      return this.readSvc.findOne(input as any);
     }
 
     @GrpcMethodDef({
@@ -57,8 +41,8 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = this.convertExternalFilterToLocal(input.filter);
       const resp = {
-        totalCount: await this.svc.count(filter),
-        nodes: await this.svc.findMany(filter),
+        totalCount: await this.readSvc.count(filter),
+        nodes: await this.readSvc.findMany(filter),
       };
       // resp.nodes.forEach(n => {
       //   for (const key of Object.keys(n)) {
