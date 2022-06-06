@@ -9,23 +9,23 @@ export const ReadableCrudService = <M>(
 ): Type<IReadableCrudService<M>> => {
   @Injectable()
   class ReadableCrudService implements IReadableCrudService<M> {
-    @Inject(Repo) private repo!: IReadableRepo<M>;
+    @Inject(Repo) readRepo!: IReadableRepo<M>;
 
     count(filter?: FindManyOptions<M>): Promise<number> {
-      return this.repo.count(filter);
+      return this.readRepo.count(filter);
     }
 
     createOne(newEntity: DeepPartial<M>): Promise<M> {
-      return this.repo.create(newEntity);
+      return this.readRepo.create(newEntity);
     }
     findMany(filter?: FindManyOptions<M>): Promise<M[]> {
-      return this.repo.findAll(filter);
+      return this.readRepo.findAll(filter);
     }
     findOne(
       id: string | FindOneOptions<M> | FindConditions<M>,
       options?: FindOneOptions<M>,
     ): Promise<M> {
-      return this.repo.findOne(id, options);
+      return this.readRepo.findOne(id, options);
     }
   }
 
