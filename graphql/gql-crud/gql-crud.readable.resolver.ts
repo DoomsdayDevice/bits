@@ -9,7 +9,8 @@ import {
   getDefaultModelConnection,
 } from '@bits/graphql/gql-crud/gql-crud.dto';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
-import { Connection, IFindManyArgs } from './gql-crud.interface';
+import { IConnection } from '@bits/bits.types';
+import { IFindManyArgs } from './gql-crud.interface';
 
 export function ReadResolverMixin<T, N extends string>(
   Model: Type<T>,
@@ -38,7 +39,7 @@ export function ReadResolverMixin<T, N extends string>(
     @Query(() => FindManyType)
     async [plural](
       @Args({ type: () => FindManyInput }) { filter }: IFindManyArgs<T>,
-    ): Promise<Connection<T> | T[]> {
+    ): Promise<IConnection<T> | T[]> {
       const { nodes, totalCount } = await this.svc.findMany({ filter });
       // const newNodes = transformAndValidate(Model, nodes);
       if (!pagination) return nodes;

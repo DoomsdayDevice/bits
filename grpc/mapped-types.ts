@@ -1,7 +1,6 @@
 import { fieldReflector } from './decorators/decorators';
 import { Type } from '@nestjs/common';
 import { getFieldDataForClass } from '@bits/grpc/decorators/message.decorator';
-import { GrpcFieldDef } from '@bits/grpc/decorators/field.decorator';
 
 export function PartialType<T extends Type>(MsgClass: T): Type<Partial<InstanceType<T>>> {
   // take all field metadatas for class

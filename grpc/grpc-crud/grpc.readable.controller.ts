@@ -13,9 +13,10 @@ import { getDefaultFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-m
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { ILike, In, Like } from 'typeorm';
 import { UInt32 } from '@bits/grpc/grpc.scalars';
+import { IConnection } from '../../bits.types';
 
-function getDefaultFindManyResponse<M>(ModelCls: Type<M>): any {
-  @GrpcMessageDef({ name: `FindMany${ModelCls.name}Response` })
+function getDefaultConnection<M>(ModelCls: Type<M>): Type<IConnection<M>> {
+  @GrpcMessageDef({ name: `${ModelCls.name}Connection` })
   class GenericFindManyResponse {
     @GrpcFieldDef(() => UInt32)
     totalCount: number;
@@ -37,7 +38,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
   FindOneInputDTO?: Type,
 ): Type<IGrpcReadController<M> & InstanceType<B>> {
   const FindMany = getDefaultFindManyInput(ModelCls);
-  const FindManyResp = getDefaultFindManyResponse(ModelCls);
+  const FindManyResp = getDefaultConnection(ModelCls);
   const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 
   @Controller()
