@@ -24,3 +24,15 @@ export function getSingular(modelName: string) {
 }
 
 export const RemoveTrailingSpace = () => Transform(({ value }: TransformFnParams) => value?.trim());
+
+/*
+ тэг для подсвечивания sql кода в IDE
+ ничего не делает
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function sql(t: any, ...a: any[]) {
+  const o = [t[0]];
+  // eslint-disable-next-line prefer-rest-params
+  for (let i = 1, l = arguments.length; i < l; i++) o.push(arguments[i], t[i]);
+  return o.join('');
+}
