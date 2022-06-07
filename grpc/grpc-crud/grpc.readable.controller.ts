@@ -11,6 +11,7 @@ import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { ILike, In, Like } from 'typeorm';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
+import { convertGrpcFilterToTypeorm, convertGrpcOrderByToTypeorm } from '@bits/grpc/grpc.utils';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -39,10 +40,11 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       responseType: () => FindManyResp,
     })
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
-      const filter = this.convertExternalFilterToLocal(input.filter);
+      const filter = convertGrpcFilterToTypeorm(input.filter);
+      const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
       const resp = {
         totalCount: await this.readSvc.count(filter),
-        nodes: await this.readSvc.findMany(filter),
+        nodes: await this.readSvc.findMany({ where: filter, order }),
       };
       // resp.nodes.forEach(n => {
       //   for (const key of Object.keys(n)) {
@@ -50,21 +52,6 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       //   }
       // });
       return resp;
-    }
-
-    convertExternalFilterToLocal(filter: any = {}): any {
-      const newFilter = {};
-      for (const key of Object.keys(filter)) {
-        const comparisonField = filter[key];
-        if (comparisonField.eq !== undefined) newFilter[key] = comparisonField.eq;
-        else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
-        else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
-        else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
-        else {
-          newFilter[key] = this.convertExternalFilterToLocal(comparisonField);
-        }
-      }
-      return newFilter;
     }
   }
 

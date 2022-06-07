@@ -3,8 +3,7 @@ import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 import { Type } from '@nestjs/common';
 import { IWritableCrudService } from '@bits/services/interface.service';
-import { Sort } from '@apis/core';
-import { FindByIdInput, OffsetPagination } from '../grpc.dto';
+import { FindByIdInput, OffsetPagination, Sort } from '../grpc.dto';
 
 export interface IGrpcWriteController<M, RM = M> {
   createOne(newUser: CreateInput<M>): Promise<RM>;
@@ -15,7 +14,6 @@ export interface IGrpcWriteController<M, RM = M> {
 export interface IGrpcReadController<M> {
   findOne(input: FindByIdInput): Promise<M>;
   findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
-  convertExternalFilterToLocal(filter: any): any;
 }
 
 export interface IWritableGrpcControllerOpts<M, B extends Type, RM = M> {
@@ -52,7 +50,11 @@ export interface DeleteOneInput {
 
 export type CreateInput<M> = Omit<M, 'createdAt' | 'id'>;
 
-export type UpdateInput<M> = Partial<M>;
+export type FieldMask = {
+  paths: string[];
+};
+
+export type UpdateInput<M> = { update: Partial<M>; updateMask: FieldMask };
 
 export type IListValue<T> = {
   values: T[];

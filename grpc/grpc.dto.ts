@@ -21,3 +21,17 @@ export class OffsetPagination {
   @GrpcFieldDef(() => 'uint32', { nullable: true })
   offset!: number;
 }
+
+export enum SortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+@GrpcMessageDef()
+export class Sort {
+  @GrpcFieldDef()
+  field!: string;
+
+  @GrpcFieldDef(() => 'SortDirection')
+  direction!: SortDirection;
+}
