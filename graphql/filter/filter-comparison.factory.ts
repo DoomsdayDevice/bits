@@ -186,7 +186,7 @@ export function createFilterComparisonType<T>(
     return generator() as Type<FilterFieldComparison<T>>;
   }
 
-  const isNotAllowed = isNotAllowedChecker(options as FilterComparisonOptions<unknown>);
+  const isNotAllowed = isNotAllowedChecker(options as FilterComparisonOptions<unknown>) as any;
   @InputType(inputName)
   class Fc {
     @SkipIf(isNotAllowed('is'), Field(() => Boolean, { nullable: true }))
