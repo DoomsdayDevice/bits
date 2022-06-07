@@ -11,7 +11,6 @@ import {
   ReturnTypeFuncValue,
   TypeMetadataStorage,
 } from '@nestjs/graphql';
-import * as _ from 'lodash';
 import { EnumMetadata } from '@nestjs/graphql/dist/schema-builder/metadata';
 import { LazyMetadataStorage } from '@nestjs/graphql/dist/schema-builder/storages/lazy-metadata.storage';
 import { IsBoolean, IsOptional } from 'class-validator';
@@ -19,15 +18,18 @@ import { SkipIf } from '@bits/graphql/filter/skip-if.decorator';
 import { IsUndefined } from '@bits/graphql/filter/is-undefined.validator';
 import { Type as TransformerType } from 'class-transformer';
 import { GraphQLUUID } from 'graphql-scalars';
+import { getOrCreateUUIDFieldComparison } from '@bits/graphql/filter/uuid-field-comparison.type';
+import { capitalizeFirstLetter } from '@core/utils';
+import {
+  FilterableFieldDescriptor,
+  FilterableFieldOptions,
+} from '@bits/graphql/filter/filterable-field.interface';
 import { ArrayReflector, getPrototypeChain, MapReflector } from '../../grpc/reflector';
-import { FilterableFieldDescriptor, FilterableFieldOptions } from './filter.interface';
 import {
   FilterComparisonOperators,
   FilterFieldComparison,
 } from './filter-field-comparison.interface';
 import { getOrCreateStringFieldComparison } from './string-field-comparison.type';
-import { getOrCreateUUIDFieldComparison } from '@bits/graphql/filter/uuid-field-comparison.type';
-import { capitalizeFirstLetter } from '@core/utils';
 
 const filterComparisonMap = new Map<string, () => Type<FilterFieldComparison<unknown>>>();
 filterComparisonMap.set('StringFilterComparison', getOrCreateStringFieldComparison);
