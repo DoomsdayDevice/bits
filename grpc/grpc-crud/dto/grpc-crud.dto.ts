@@ -5,19 +5,29 @@ import {
   DeleteOneResponse,
   UpdateInput,
 } from '../grpc-controller.interface';
+import { memoize } from 'lodash';
 import { GrpcMessageDef } from '../../decorators/message.decorator';
 import { OmitType, PartialType } from '../../mapped-types';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
+import { FieldMask } from '@bits/grpc/grpc-crud/dto/field-mask.grpc';
 
-export function getDefaultUpdateInput<M>(
-  ModelCls: Type<M>,
-  modelName?: string,
-): Type<UpdateInput<M>> {
-  @GrpcMessageDef({ name: `Update${modelName || ModelCls.name}Input` })
-  class GenericUpdateInput extends PartialType(ModelCls as Type) {}
+export const getDefaultUpdateInput = memoize(
+  <M>(ModelCls: Type<M>, modelName?: string): Type<UpdateInput<M>> => {
+    @GrpcMessageDef({ name: `${modelName || ModelCls.name}Update` })
+    class UpdType extends PartialType(ModelCls as Type) {}
 
-  return GenericUpdateInput as any;
-}
+    @GrpcMessageDef({ name: `Update${modelName || ModelCls.name}Input` })
+    class GenericUpdateInput {
+      @GrpcFieldDef(() => UpdType)
+      update!: Partial<M>;
+
+      @GrpcFieldDef(() => FieldMask)
+      updateMask!: FieldMask;
+    }
+
+    return GenericUpdateInput as any;
+  },
+);
 
 export function getDefaultDeleteInput<M>(
   ModelCls: Type<M>,

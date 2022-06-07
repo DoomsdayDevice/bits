@@ -50,10 +50,10 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
     }
 
     @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => StatusMsg })
-    async updateOne(entity: UpdateInput<WriteModel>): Promise<StatusMsg> {
+    async updateOne(input: UpdateInput<WriteModel>): Promise<StatusMsg> {
       const res = (await this.writeSvc.updateOne(
-        (entity as any).id,
-        entity as any,
+        (input.update as any).id,
+        input.update as any,
       )) as unknown as Promise<WriteModel>;
       return { success: true };
     }
