@@ -14,6 +14,7 @@ export interface IGrpcWriteController<M, RM = M> {
 export interface IGrpcReadController<M> {
   findOne(input: FindByIdInput): Promise<M>;
   findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
+  convertExternalFilterToLocal(filter: any): any;
 }
 
 export interface IWritableGrpcControllerOpts<M, B extends Type, RM = M> {
