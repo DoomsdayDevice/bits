@@ -1,9 +1,10 @@
 import { FindConditions } from 'typeorm';
 import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
-import { FindByIdInput, OffsetPagination } from '../grpc.dto';
 import { Type } from '@nestjs/common';
 import { IWritableCrudService } from '@bits/services/interface.service';
+import { Sort } from '@apis/core';
+import { FindByIdInput, OffsetPagination } from '../grpc.dto';
 
 export interface IGrpcWriteController<M, RM = M> {
   createOne(newUser: CreateInput<M>): Promise<RM>;
@@ -37,6 +38,8 @@ export interface IGrpcFindManyInput<M> {
   paging?: OffsetPagination;
 
   filter?: IGrpcFilter<M>;
+
+  sorting?: IListValue<Sort>;
 }
 
 export interface DeleteOneResponse {
@@ -50,3 +53,7 @@ export interface DeleteOneInput {
 export type CreateInput<M> = Omit<M, 'createdAt' | 'id'>;
 
 export type UpdateInput<M> = Partial<M>;
+
+export type IListValue<T> = {
+  values: T[];
+};

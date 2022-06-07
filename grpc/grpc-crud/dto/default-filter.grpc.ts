@@ -1,19 +1,16 @@
 import { Type } from '@nestjs/common';
 import * as _ from 'lodash';
 import { memoize, upperFirst } from 'lodash';
-import { grpcEnums } from '../../decorators/decorators';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 import {
   GrpcBooleanFieldComparisons,
   GrpcStringFieldComparison,
   IGrpcFilter,
 } from '@bits/grpc/grpc-filter.interface';
 import { Merge } from 'ts-toolbelt/out/Union/Merge';
-
-export type IListValue<T> = {
-  values: T[];
-};
+import { grpcEnums } from '../../decorators/decorators';
+import { GrpcFieldDef } from '../../decorators/field.decorator';
+import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
+import { IListValue } from '../grpc-controller.interface';
 
 export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
   const name = upperFirst((Cls as any).name || Cls);
