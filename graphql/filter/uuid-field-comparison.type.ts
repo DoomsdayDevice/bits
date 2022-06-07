@@ -15,7 +15,7 @@ export function getOrCreateUUIDFieldComparison(): Type<FilterFieldComparison<str
   }
 
   @InputType()
-  class UUIDFieldComparison implements FilterFieldComparison<string> {
+  class UUIDFieldComparison {
     @Field(() => Boolean, { nullable: true })
     @IsBoolean()
     @IsOptional()
@@ -47,6 +47,6 @@ export function getOrCreateUUIDFieldComparison(): Type<FilterFieldComparison<str
     notIn?: string[];
   }
 
-  uuidFieldComparison = UUIDFieldComparison;
+  uuidFieldComparison = UUIDFieldComparison as Type<FilterFieldComparison<string>>;
   return uuidFieldComparison;
 }

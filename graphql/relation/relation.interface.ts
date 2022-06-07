@@ -1,6 +1,6 @@
 import { CanActivate, ExceptionFilter, NestInterceptor, PipeTransform, Type } from '@nestjs/common';
 import { GraphQLCompositeType, GraphQLField } from 'graphql';
-import { IFilter } from '../filter/filter.interface';
+import { IGqlFilter } from '../filter/filter.interface';
 
 export declare type ComplexityEstimatorArgs = {
   type: GraphQLCompositeType;
@@ -134,7 +134,7 @@ export type ResolverRelation<Relation> = {
 
 export interface AuthorizerOptions<DTO> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  authorize: (context: any) => IFilter<DTO> | Promise<IFilter<DTO>>;
+  authorize: (context: any) => IGqlFilter<DTO> | Promise<IGqlFilter<DTO>>;
 }
 
 export type RelationsOpts = {

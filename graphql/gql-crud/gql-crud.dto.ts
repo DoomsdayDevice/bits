@@ -10,7 +10,7 @@ import {
 import { GraphQLUUID } from 'graphql-scalars';
 import { Type } from '@nestjs/common';
 import { IFindManyArgs, IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
-import { IFilter } from '@bits/graphql/filter/filter.interface';
+import { IGqlFilter } from '@bits/graphql/filter/filter.interface';
 import {
   createFilterComparisonType,
   getFilterableFields,
@@ -84,7 +84,7 @@ export const getDefaultModelConnection = memoize(
 );
 
 // TODO add getOrCreate with memoize for nested filters
-export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IFilter<T>> {
+export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IGqlFilter<T>> {
   @InputType(`${modelName}Filter`)
   class GraphQLFilter {}
   const filterableFields = getFilterableFields(Model);
@@ -104,17 +104,16 @@ export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IFi
   return GraphQLFilter as any;
 }
 
-export function getDefaultFindManyArgs<T>(
-  Model: Type<T>,
-  modelName: string,
-): Type<IFindManyArgs<T>> {
-  const Filter = getDefaultFilter(Model, modelName);
+export const getDefaultFindManyArgs = memoize(
+  <T>(Model: Type<T>, modelName: string): Type<IFindManyArgs<T>> => {
+    const Filter = getDefaultFilter(Model, modelName);
 
-  @ArgsType()
-  class FindManyArgs {
-    @Field(() => Filter, { nullable: true })
-    filter!: IFilter<T>;
-  }
+    @ArgsType()
+    class FindManyArgs {
+      @Field(() => Filter, { nullable: true })
+      filter?: IGqlFilter<T>;
+    }
 
-  return FindManyArgs;
-}
+    return FindManyArgs;
+  },
+);

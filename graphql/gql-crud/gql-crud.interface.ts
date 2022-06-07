@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { ModuleImportElem } from '@bits/bits.types';
-import { IFilter } from '@bits/graphql/filter/filter.interface';
+import { IGqlFilter } from '@bits/graphql/filter/filter.interface';
 
 export interface GqlWritableCrudConfig<M> {
   imports?: ModuleImportElem[];
@@ -18,5 +18,5 @@ export interface IUpdateOneInput<T> {
 }
 
 export interface IFindManyArgs<T> {
-  filter?: IFilter<T>;
+  filter?: IGqlFilter<T>;
 }

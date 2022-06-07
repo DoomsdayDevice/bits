@@ -13,7 +13,7 @@ export function getOrCreateStringFieldComparison(): Type<FilterFieldComparison<s
     return stringFieldComparison;
   }
   @InputType()
-  class StringFieldComparison implements FilterFieldComparison<string> {
+  class StringFieldComparison {
     @Field({ nullable: true })
     @IsString()
     eq?: string;
@@ -43,6 +43,6 @@ export function getOrCreateStringFieldComparison(): Type<FilterFieldComparison<s
     @IsUndefined()
     notILike?: string;
   }
-  stringFieldComparison = StringFieldComparison;
+  stringFieldComparison = StringFieldComparison as Type<FilterFieldComparison<string>>;
   return stringFieldComparison;
 }

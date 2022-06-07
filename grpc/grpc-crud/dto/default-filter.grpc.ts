@@ -5,8 +5,8 @@ import { grpcEnums } from '../../decorators/decorators';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 import {
-  BooleanFieldComparisons,
-  GStringFieldComparison,
+  GrpcBooleanFieldComparisons,
+  GrpcStringFieldComparison,
   IGrpcFilter,
 } from '@bits/grpc/grpc-filter.interface';
 import { Merge } from 'ts-toolbelt/out/Union/Merge';
@@ -32,7 +32,7 @@ const StringListValue = getListValueOfCls(String);
 // export class CommonFieldComparison {}
 
 @GrpcMessageDef({ oneOf: true })
-export class BooleanFieldComparison implements Merge<BooleanFieldComparisons> {
+export class BooleanFieldComparison implements Merge<GrpcBooleanFieldComparisons> {
   @GrpcFieldDef()
   is: boolean;
 
@@ -43,7 +43,7 @@ export class BooleanFieldComparison implements Merge<BooleanFieldComparisons> {
 @GrpcMessageDef({ oneOf: true })
 export class StringFieldComparison
   extends BooleanFieldComparison
-  implements Merge<GStringFieldComparison>
+  implements Merge<GrpcStringFieldComparison>
 {
   @GrpcFieldDef(() => StringListValue)
   in: IListValue<string>;

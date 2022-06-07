@@ -62,11 +62,11 @@ type FilterGrouping<T> = {
   /**
    * Group an array of filters with an AND operation.
    */
-  and?: IFilter<T>[];
+  and?: IGqlFilter<T>[];
   /**
    * Group an array of filters with an OR operation.
    */
-  or?: IFilter<T>[];
+  or?: IGqlFilter<T>[];
 };
 
 /**
@@ -117,7 +117,7 @@ type FilterGrouping<T> = {
  *
  * @typeparam T - the type of object to filter on.
  */
-export type IFilter<T> = FilterGrouping<T> & FilterComparisons<T>;
+export type IGqlFilter<T> = FilterGrouping<T> & FilterComparisons<T>;
 
 export type FilterableFieldOptions = {
   allowedComparisons?: FilterComparisonOperators<unknown>[];

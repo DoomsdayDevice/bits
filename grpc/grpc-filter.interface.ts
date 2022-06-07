@@ -12,7 +12,7 @@ type BuiltInTypes =
   | undefined
   | never;
 
-export interface CommonFieldComparisonType<T> {
+export interface GrpcCommonFieldComparisonType<T> {
   eq: T;
 }
 
@@ -29,7 +29,7 @@ export type GWrapperStringFieldComparison =
     }
   | { eq: string };
 
-export type CompareComps<T> =
+export type GrpcCompareComps<T> =
   | {
       lt: T;
     }
@@ -46,48 +46,47 @@ export type CompareComps<T> =
 /**
  * for raw grpc services
  */
-export type GStringFieldComparison = CompareComps<string> &
-  (
-    | {
-        in: StringListValue;
-      }
-    | {
-        eq: string;
-      }
-    | {
-        like: string;
-      }
-    | {
-        iLike: string;
-      }
-    | {
-        notLike: string;
-      }
-    | {
-        notILike: string;
-      }
-  );
+export type GrpcStringFieldComparison =
+  | GrpcCompareComps<string>
+  | {
+      in: StringListValue;
+    }
+  | {
+      eq: string;
+    }
+  | {
+      like: string;
+    }
+  | {
+      iLike: string;
+    }
+  | {
+      notLike: string;
+    }
+  | {
+      notILike: string;
+    };
 
-export type BooleanFieldComparisons = { is: boolean; isNot: boolean };
+export type GrpcBooleanFieldComparisons = { is: boolean; isNot: boolean };
 
-type FilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends
+type GrpcFilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends
   | string
   | String
-  ? GStringFieldComparison // eslint-disable-next-line @typescript-eslint/ban-types
+  ? GrpcStringFieldComparison // eslint-disable-next-line @typescript-eslint/ban-types
   : FieldType extends boolean | Boolean
-  ? BooleanFieldComparisons
+  ? GrpcBooleanFieldComparisons
   : FieldType extends null | undefined | never
   ? never // eslint-disable-next-line @typescript-eslint/no-explicit-any
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
-  ? CommonFieldComparisonType<FieldType>
+  ? GrpcCommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
-  ? CommonFieldComparisonType<U> | IGrpcFilter<U> // eslint-disable-next-line @typescript-eslint/ban-types
+  ? GrpcCommonFieldComparisonType<U> | IGrpcFilter<U> // eslint-disable-next-line @typescript-eslint/ban-types
   : IsKeys extends true
-  ? CommonFieldComparisonType<FieldType> & GStringFieldComparison & IGrpcFilter<FieldType>
-  : CommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType>;
+  ? GrpcCommonFieldComparisonType<FieldType> & GrpcStringFieldComparison & IGrpcFilter<FieldType>
+  : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType>;
 
-export type FilterComparisons<T> = {
-  [K in keyof T]?: FilterFieldComparison<T[K], false>;
+export type GrpcFilterComparisons<T> = {
+  [K in keyof T]?: GrpcFilterFieldComparison<T[K], false>;
 };
 
-export type IGrpcFilter<M> = FilterComparisons<M>;
+export type IGrpcFilter<M> = GrpcFilterComparisons<M>;
