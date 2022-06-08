@@ -9,6 +9,8 @@ import {
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { GraphQLUUID } from 'graphql-scalars';
 
+const { generateFieldMask } = require('protobuf-fieldmask');
+
 export const WriteResolverMixin =
   <T, N extends string>(Model: Type<T>, Service: Type, modelName?: N, Create?: Type) =>
   <B extends Type>(Base: B): Type<IBaseServiceWrite<T, N> & InstanceType<B>> => {
@@ -18,7 +20,7 @@ export const WriteResolverMixin =
 
     @Resolver(() => Model)
     class GenericResolver extends Base {
-      @Inject(Service) private svc!: IGrpcService;
+      @Inject(Service) private svc!: IGrpcService<T>;
 
       @Mutation(() => Boolean)
       async [`deleteOne${name}`](
@@ -32,7 +34,12 @@ export const WriteResolverMixin =
       async [`updateOne${name}`](
         @Args('input', { type: () => UpdateOne }) input: IUpdateOneInput<T>,
       ): Promise<boolean> {
-        const res = await this.svc.updateOne({ ...input.update, id: input.id });
+        const update = { ...input.update, id: input.id };
+        const updateMask = { paths: generateFieldMask(update) };
+        const res = await this.svc.updateOne({
+          update,
+          updateMask,
+        });
         return res.success;
       }
 

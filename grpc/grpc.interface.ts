@@ -3,6 +3,7 @@ import { Type } from '@nestjs/common';
 import {
   IGrpcFindManyInput,
   IGrpcFindManyResponse,
+  UpdateInput,
 } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 
 export type GMethodInput = {
@@ -37,6 +38,6 @@ export interface IGrpcService<WriteModel = any, ReadModel = WriteModel> {
   findOne(opts: { id: string }): Promise<WriteModel>;
   findMany(input: IGrpcFindManyInput<WriteModel>): Promise<IGrpcFindManyResponse<WriteModel>>;
   deleteOne(input: any): Promise<StatusMsg>;
-  updateOne(input: any): Promise<StatusMsg>;
+  updateOne(input: UpdateInput<WriteModel>): Promise<StatusMsg>;
   createOne(input: any): Promise<WriteModel>;
 }
