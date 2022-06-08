@@ -3,8 +3,6 @@ import { GrpcServiceDef } from '../decorators/service.decorator';
 import { GrpcMethodDef } from '../decorators/method.decorator';
 import {
   CreateInput,
-  DeleteOneInput,
-  DeleteOneResponse,
   IGrpcWriteController,
   IWritableGrpcControllerOpts,
   UpdateInput,
@@ -18,6 +16,7 @@ import {
   StatusMsg,
 } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { FindConditions } from 'typeorm';
+import { applyFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 
 export function WritableGrpcController<WriteModel, B extends Type, ReadModel = WriteModel>({
   WriteModelCls,
@@ -51,9 +50,10 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
 
     @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => StatusMsg })
     async updateOne(input: UpdateInput<WriteModel>): Promise<StatusMsg> {
+      const update = applyFieldMask(input.update, input.updateMask.paths);
       const res = (await this.writeSvc.updateOne(
-        (input.update as any).id,
-        input.update as any,
+        (update as any).id,
+        update as any,
       )) as unknown as Promise<WriteModel>;
       return { success: true };
     }
