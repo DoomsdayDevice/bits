@@ -4,5 +4,5 @@ import { GrpcFieldDef } from '../../decorators/field.decorator';
 @GrpcMessageDef()
 export class FieldMask {
   @GrpcFieldDef(() => [String])
-  paths: string[];
+  paths!: string[];
 }

@@ -18,7 +18,7 @@ export const promisify = <T extends object>(service: T, except: string[] = []) =
   });
 
 export function convertGrpcFilterToTypeorm(filter: any = {}): any {
-  const newFilter = {};
+  const newFilter: any = {};
   for (const key of Object.keys(filter)) {
     const comparisonField = filter[key];
     if (comparisonField.eq !== undefined) newFilter[key] = comparisonField.eq;
@@ -37,9 +37,9 @@ type TypeORMOrderBy<Entity> = {
 };
 
 export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): TypeORMOrderBy<T> {
-  const obj = {};
+  const obj: TypeORMOrderBy<T> = {};
   for (const o of orderBy) {
-    obj[o.field] = o.direction;
+    obj[o.field as keyof TypeORMOrderBy<T>] = o.direction;
   }
   return obj;
 }
