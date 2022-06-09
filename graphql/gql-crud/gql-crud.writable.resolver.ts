@@ -8,8 +8,7 @@ import {
 } from '@bits/graphql/gql-crud/gql-crud.dto';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { GraphQLUUID } from 'graphql-scalars';
-
-const { generateFieldMask } = require('protobuf-fieldmask');
+import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 
 export const WriteResolverMixin =
   <T, N extends string>(Model: Type<T>, Service: Type, modelName?: N, Create?: Type) =>
