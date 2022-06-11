@@ -17,7 +17,7 @@ export function WritableCrudService<Entity, B extends Type>(
     createOne(newEntity: DeepPartial<Entity>): Promise<Entity> {
       return this.writeRepo.create(newEntity);
     }
-    deleteOne(id: string | FindConditions<Entity>): Promise<boolean> {
+    deleteOne(id: string): Promise<boolean> {
       return this.writeRepo.deleteOne(id);
     }
     updateOne(

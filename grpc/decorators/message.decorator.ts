@@ -14,15 +14,18 @@ export function GrpcMessageDef(opts?: GrpcMessageOpts): ClassDecorator {
   return target => {
     const messageName = opts?.name || target.name;
 
-    messageReflector.set(target as any, {
-      name: messageName,
-      oneOf: opts?.oneOf,
-    });
+    if (!opts?.isAbstract) {
+      for (const field of getFieldDataForClass(target as any)) {
+        grpcFields.push({ ...(field as any), messageName });
+      }
 
-    for (const field of getFieldDataForClass(target as any)) {
-      grpcFields.push({ ...(field as any), messageName });
+      grpcMessages.push({ name: messageName, oneOf: opts?.oneOf });
+
+      messageReflector.set(target as any, {
+        name: messageName,
+        oneOf: opts?.oneOf,
+      });
     }
-    if (!opts?.isAbstract) grpcMessages.push({ name: messageName, oneOf: opts?.oneOf });
   };
 }
 

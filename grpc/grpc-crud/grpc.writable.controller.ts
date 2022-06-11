@@ -63,7 +63,8 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
       responseType: () => StatusMsg,
     })
     async deleteOne(input: FindConditions<WriteModel>): Promise<StatusMsg> {
-      return { success: Boolean(await this.writeSvc.deleteOne(input)) };
+      const i = input as any;
+      return { success: Boolean(await this.writeSvc.deleteOne(i.id || i.name)) };
     }
   }
   if (defineService) GrpcServiceDef(`${WriteModelCls.name}Service`)(WriteModelController);

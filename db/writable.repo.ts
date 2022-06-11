@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
 import { IWritableRepo } from '@bits/db/repo.interface';
+import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 
 export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
   return <B extends {}>(BaseCls: Type<B> = class {} as any): Type<IWritableRepo<Entity> & B> => {
@@ -40,11 +41,14 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         }
       }
 
-      public async deleteOne(id: string | FindConditions<Entity>): Promise<boolean> {
-        const result = await this.hardDelete(id);
+      public async deleteOne(id: string | FindOneOptions<Entity>): Promise<boolean> {
+        const e = await this.writeRepo.findOne(id as any);
+        const result = await this.writeRepo.remove(e);
+        // const result = await this.hardDelete(id);
         // const result = await this.writeRepo.softDelete(id);
-        if (!result.affected) throw new Error('The record was not found');
-        return Boolean(result.affected);
+        // if (!result.affected) throw new Error('The record was not found');
+        return true;
+        // return Boolean(result.affected);
       }
 
       public async restoreOne(id: string): Promise<boolean> {
@@ -53,6 +57,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         return Boolean(result.affected);
       }
 
+      // fast query
       public async hardDelete(
         criteria: string | number | FindConditions<Entity>,
         /* ...options: any[] */
