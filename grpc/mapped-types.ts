@@ -35,7 +35,7 @@ export function OmitType<T extends Type, K extends readonly (keyof InstanceType<
 export function PickType<T extends Type, K extends readonly (keyof InstanceType<T>)[]>(
   MsgClass: T,
   keys: K,
-): Type<Omit<InstanceType<T>, K[number]>> {
+): Type<Pick<InstanceType<T>, K[number]>> {
   const fieldMeta = getFieldDataForClass(MsgClass);
 
   class PartialCls {}

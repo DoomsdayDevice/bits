@@ -1,9 +1,8 @@
 import { IWritableRepo } from '../db/repo.interface';
 import { IWritableCrudService } from './interface.service';
-import { DeepPartial, FindConditions, UpdateResult } from 'typeorm';
+import { DeepPartial, FindConditions } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Inject, Injectable, Type } from '@nestjs/common';
-import { ReadableCrudService } from '@bits/services/readable-crud.service';
 
 export function WritableCrudService<Entity, B extends Type>(
   ModelCls: Type<Entity>,
@@ -24,7 +23,7 @@ export function WritableCrudService<Entity, B extends Type>(
       idOrConditions: string | FindConditions<Entity>,
       partialEntity: QueryDeepPartialEntity<Entity>,
     ): // ...options: any[]
-    Promise<UpdateResult | Entity> {
+    Promise<boolean> {
       return this.writeRepo.update(idOrConditions, partialEntity);
     }
   }

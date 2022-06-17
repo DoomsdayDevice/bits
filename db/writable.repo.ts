@@ -22,9 +22,11 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
         idOrConditions: string | FindConditions<Entity>,
         partialEntity: QueryDeepPartialEntity<Entity>,
         // ...options: any[]
-      ): Promise<UpdateResult | Entity> {
+      ): Promise<boolean> {
         try {
-          return await this.writeRepo.update(idOrConditions, partialEntity);
+          const result = await this.writeRepo.update(idOrConditions, partialEntity);
+          if (result.affected) return true;
+          else throw Error('not updated');
         } catch (err) {
           throw new BadRequestException(err);
         }

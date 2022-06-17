@@ -27,5 +27,5 @@ export interface IWritableCrudService<Entity> {
     idOrConditions: string | FindConditions<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
-  ): Promise<UpdateResult | Entity>;
+  ): Promise<boolean>;
 }

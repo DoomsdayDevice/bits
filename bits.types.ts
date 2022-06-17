@@ -19,3 +19,5 @@ export interface IConnection<T> {
   totalCount: number;
   nodes: T[];
 }
+
+export type Defined<T> = T extends null | undefined ? never : T;
