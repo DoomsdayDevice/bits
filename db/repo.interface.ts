@@ -54,7 +54,7 @@ export interface IWritableRepo<Entity> {
     idOrConditions: string | FindConditions<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
-  ): Promise<UpdateResult | Entity>;
+  ): Promise<boolean>;
   save<T extends DeepPartial<Entity>>(
     entityOrEntities: T | T[],
     options?: SaveOptions,

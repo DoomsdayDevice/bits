@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 import * as _ from 'lodash';
 import { Transform, TransformFnParams } from 'class-transformer';
+import { Defined } from '@bits/bits.types';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -35,4 +36,8 @@ export function sql(t: any, ...a: any[]) {
   // eslint-disable-next-line prefer-rest-params
   for (let i = 1, l = arguments.length; i < l; i++) o.push(arguments[i], t[i]);
   return o.join('');
+}
+
+function isDefined<T extends any>(value: T): value is Defined<T> {
+  return (value !== null && value !== undefined) as any;
 }
