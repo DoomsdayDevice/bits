@@ -3,9 +3,10 @@ import { IGrpcFindManyInput, IListValue } from '../grpc-controller.interface';
 import { GrpcMessageDef } from '../../decorators/message.decorator';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { OffsetPagination, Sort } from '../../grpc.dto';
-import { getListValueOfCls, getOrCreateDefaultFilter } from './default-filter.grpc';
+import { getOrCreateDefaultFilter } from './default-filter.grpc';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 import { memoize } from 'lodash';
+import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
 
 export const getOrCreateFindManyInput = memoize(
   <M>(ModelCls: Type<M>): Type<IGrpcFindManyInput<M>> => {

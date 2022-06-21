@@ -11,7 +11,12 @@ import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { ILike, In, Like } from 'typeorm';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import { convertGrpcFilterToTypeorm, convertGrpcOrderByToTypeorm } from '@bits/grpc/grpc.utils';
+import {
+  convertGrpcFilterToTypeorm,
+  convertGrpcFilterToUcast,
+  convertGrpcOrderByToTypeorm,
+} from '@bits/grpc/grpc.utils';
+import { interpret } from '@ucast/sql/typeorm';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -41,6 +46,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
     })
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = convertGrpcFilterToTypeorm(input.filter);
+      console.log(convertGrpcFilterToUcast(input.filter));
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
       const resp = {
         totalCount: await this.readSvc.count(filter),

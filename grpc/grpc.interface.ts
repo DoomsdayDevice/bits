@@ -26,6 +26,7 @@ export type GFieldInput = {
   rule?: string;
   filterable?: boolean;
   nullable?: boolean;
+  listValue?: any;
 };
 
 export type GEnumInput = {

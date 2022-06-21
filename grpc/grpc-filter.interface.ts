@@ -1,9 +1,7 @@
-import exp from 'constants';
-import { DeepPartial } from 'typeorm';
-import { RoleDto } from '@domain/role/role.dto';
 import { MotivationName } from '@api-types/motivation/motivation-name.enum';
 import { RoleName } from '@api-types/role/role-name.enum';
 import { DeviceOS } from '@api-types/notification/device-os.enum';
+import { Role } from '@domain/role/role.entity';
 
 type Enums = MotivationName | RoleName | DeviceOS;
 
@@ -103,5 +101,3 @@ export type GrpcFilterComparisons<T> = {
 };
 
 export type IGrpcFilter<M> = GrpcFilterComparisons<M>;
-
-type OH = IGrpcFilter<RoleDto>;

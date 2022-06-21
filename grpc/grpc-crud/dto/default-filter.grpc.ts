@@ -11,17 +11,7 @@ import { grpcEnums } from '../../decorators/decorators';
 import { GrpcFieldDef } from '../../decorators/field.decorator';
 import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
 import { IListValue } from '../grpc-controller.interface';
-
-export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
-  const name = upperFirst((Cls as any).name || Cls);
-  @GrpcMessageDef({ name: `${name}ListValue` })
-  class InArray {
-    @GrpcFieldDef(() => [Cls] as any)
-    values: T[];
-  }
-
-  return InArray;
-});
+import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
 
 const StringListValue = getListValueOfCls(String);
 
@@ -100,6 +90,18 @@ export const getEnumComparisonType = memoize(function <E>(Enum: E, enumName: str
   return EnumComparison;
 });
 
+export const getArrayComparisonType = function <E>(Cls: Type<E>) {
+  const msgName = `${_.upperFirst(Cls.name)}ArrayComparison`;
+
+  @GrpcMessageDef({ name: msgName })
+  class ArrayComparison {
+    @GrpcFieldDef(() => getOrCreateDefaultFilter(Cls))
+    elemMatch!: E;
+  }
+
+  return ArrayComparison;
+};
+
 export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGrpcFilter<M>> => {
   // get filterable fields TODO make a separate function to get fields and filterable fields
   const foundFields = getFieldDataForClass(ModelCls);
@@ -118,11 +120,22 @@ export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGr
       filterTypeFn = () => BooleanFieldComparison;
     } else {
       const enumName = f.typeFn();
-      const enumComp = getEnumComparisonType(
-        grpcEnums.find(e => e.name === enumName),
-        enumName,
-      );
-      filterTypeFn = () => enumComp;
+      const foundEnum = grpcEnums.find(e => e.name === enumName);
+      if (foundEnum) {
+        const enumComp = getEnumComparisonType(foundEnum, enumName);
+        filterTypeFn = () => enumComp;
+      } else {
+        let t: any;
+        const type = f.typeFn();
+        console.log({ typeFn: f.typeFn() });
+        if (f.rule === 'repeated') {
+          t = getOrCreateDefaultFilter(type);
+        }
+        if (f.listValue) {
+          t = getArrayComparisonType(f.typeFn());
+        }
+        filterTypeFn = () => t;
+      }
     }
     GrpcFieldDef(filterTypeFn, { name: f.name, filterable: f.filterable, nullable: true })(
       GenericFilter.prototype,

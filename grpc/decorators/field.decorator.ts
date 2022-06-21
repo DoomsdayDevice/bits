@@ -2,6 +2,7 @@ import { GFieldInput, GMessageInput } from '@bits/grpc/grpc.interface';
 import { Type } from '@nestjs/common';
 import { Float, Int64, UInt32 } from '@bits/grpc/grpc.scalars';
 import { fieldReflector, messageReflector } from './decorators';
+import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
 
 export type GrpcFieldOpts = {
   name?: string;
@@ -40,7 +41,11 @@ export function GrpcFieldDef(
       nullable: opts?.nullable,
       filterable: opts?.filterable,
     };
-    if (isArr) field.rule = 'repeated';
+    if (isArr) {
+      if (field.nullable) {
+        field.listValue = getListValueOfCls(field.typeFn());
+      } else field.rule = 'repeated';
+    }
     fieldReflector.append(target.constructor, field);
   };
 }
