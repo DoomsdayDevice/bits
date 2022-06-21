@@ -10,7 +10,10 @@ import {
 } from '@bits/graphql/gql-crud/gql-crud.dto';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { IConnection } from '@bits/bits.types';
+import { IGrpcUser } from '@api-types/user/user.grpc.type';
 import { IFindManyArgs } from './gql-crud.interface';
+import { CurrentUser } from '../../../../src/auth/decorators/user.decorator';
+import { AuthService } from '../../../../src/auth/auth.service';
 
 export function ReadResolverMixin<T, N extends string>(
   Model: Type<T>,
@@ -31,6 +34,8 @@ export function ReadResolverMixin<T, N extends string>(
   class GenericResolver {
     @Inject(Service) private svc!: IGrpcService;
 
+    @Inject(AuthService) private authSvc!: AuthService;
+
     @Query(() => Model)
     async [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
       return transformAndValidate(Model, await this.svc.findOne(input));
@@ -39,8 +44,10 @@ export function ReadResolverMixin<T, N extends string>(
     @Query(() => FindManyType)
     async [plural](
       @Args({ type: () => FindManyInput }) { filter }: IFindManyArgs<T>,
+      @CurrentUser() user: IGrpcUser,
     ): Promise<IConnection<T> | T[]> {
-      const { nodes, totalCount } = await this.svc.findMany({ filter });
+      const userFilter = this.authSvc.getFilterForResource(Model, user, filter);
+      const { nodes, totalCount } = await this.svc.findMany({ filter: userFilter as any });
       // const newNodes = transformAndValidate(Model, nodes);
       if (!pagination) return nodes;
       return {
