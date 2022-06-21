@@ -1,6 +1,10 @@
-import { ILike, In, Like } from 'typeorm';
+import { getConnection, ILike, In, Like } from 'typeorm';
 import { EntityFieldsNames } from 'typeorm/common/EntityFieldsNames';
 import { Sort } from '@bits/grpc/grpc.dto';
+import { Activity } from '@domain/activity/activity.entity';
+import { renameKeyNames } from '@bits/bits.utils';
+import { allInterpreters, createSqlInterpreter } from '@ucast/sql';
+import { interpret } from '@ucast/sql/typeorm';
 
 /**
  * promisify all methods on service except specified
@@ -42,4 +46,12 @@ export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): TypeORMOr
     obj[o.field as keyof TypeORMOrderBy<T>] = o.direction;
   }
   return obj;
+}
+
+export function convertGrpcFilterToUcast(filter: any): string {
+  const con = renameKeyNames(filter, { elemMatch: '$elemMatch', eq: '$eq' });
+  const myInterpret = createSqlInterpreter(allInterpreters);
+
+  const qb = interpret(con, getConnection().createQueryBuilder(Activity, 'a'));
+  return '';
 }
