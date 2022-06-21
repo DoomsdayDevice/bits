@@ -42,17 +42,21 @@ export function sql(t: any, ...a: any[]) {
 function isDefined<T extends any>(value: T): value is Defined<T> {
   return (value !== null && value !== undefined) as any;
 }
+
+/** deep rename fields in object */
 export function renameKeyNames(obj: any, nameMap: any) {
   const clonedObj = clone(obj);
   const oldNames = Object.keys(nameMap);
 
   for (const key of Object.keys(clonedObj)) {
-    const keyVal = clonedObj[key];
-    if (oldNames.includes(key)) {
-      clonedObj[nameMap[key]] = keyVal;
-      delete clonedObj[key];
-    } else if (isObject(clonedObj[key])) {
+    if (isObject(clonedObj[key])) {
       clonedObj[key] = renameKeyNames(clonedObj[key], nameMap);
+    }
+    if (oldNames.includes(key)) {
+      const val = clonedObj[key];
+      const newName = nameMap[key];
+      clonedObj[newName] = val;
+      delete clonedObj[key];
     }
   }
 
