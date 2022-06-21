@@ -1,4 +1,4 @@
-import { Global, Module, Type } from '@nestjs/common';
+import { forwardRef, Global, Module, Type } from '@nestjs/common';
 import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/gql-crud.interface';
 
 import { getDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
@@ -10,6 +10,7 @@ import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.res
 import { buildRelations } from '@bits/graphql/relation/relation-builder';
 import { Resolver } from '@nestjs/graphql';
 import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
+import { AuthModule } from '../../../../src/auth/auth.module';
 
 export class GqlCrudModule<T> {
   private modelName: string;

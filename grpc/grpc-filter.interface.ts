@@ -1,4 +1,11 @@
 import exp from 'constants';
+import { DeepPartial } from 'typeorm';
+import { RoleDto } from '@domain/role/role.dto';
+import { MotivationName } from '@api-types/motivation/motivation-name.enum';
+import { RoleName } from '@api-types/role/role-name.enum';
+import { DeviceOS } from '@api-types/notification/device-os.enum';
+
+type Enums = MotivationName | RoleName | DeviceOS;
 
 type BuiltInTypes =
   | boolean
@@ -67,20 +74,26 @@ export type GrpcStringFieldComparison =
       notILike: string;
     };
 
+export type ArrayComparisonType<T> = {
+  elemMatch: GrpcFilterComparisons<T>;
+};
+
 export type GrpcBooleanFieldComparisons = { is: boolean; isNot: boolean };
 
-type GrpcFilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends
-  | string
-  | String
-  ? GrpcStringFieldComparison // eslint-disable-next-line @typescript-eslint/ban-types
-  : FieldType extends boolean | Boolean
+type GrpcFilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends Enums
+  ? GrpcCommonFieldComparisonType<FieldType>
+  : FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
+  ? GrpcStringFieldComparison
+  : FieldType extends boolean | Boolean // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcBooleanFieldComparisons
   : FieldType extends null | undefined | never
   ? never // eslint-disable-next-line @typescript-eslint/no-explicit-any
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
   ? GrpcCommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
-  ? GrpcCommonFieldComparisonType<U> | IGrpcFilter<U> // eslint-disable-next-line @typescript-eslint/ban-types
+  ? ArrayComparisonType<U> // eslint-disable-next-line @typescript-eslint/ban-types
+  : FieldType extends { values: Array<infer U> }
+  ? ArrayComparisonType<U>
   : IsKeys extends true
   ? GrpcCommonFieldComparisonType<FieldType> & GrpcStringFieldComparison & IGrpcFilter<FieldType>
   : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType>;
@@ -90,3 +103,5 @@ export type GrpcFilterComparisons<T> = {
 };
 
 export type IGrpcFilter<M> = GrpcFilterComparisons<M>;
+
+type OH = IGrpcFilter<RoleDto>;
