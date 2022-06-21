@@ -21,15 +21,6 @@ const mergeArrays = <T>(arr1?: T[], arr2?: T[]): T[] | undefined => {
 
 export const reflector = new ArrayReflector(RELATION_KEY);
 
-function getRelationsDescriptors<DTO>(DTOClass: Type<DTO>): RelationDescriptor<unknown>[] {
-  return getPrototypeChain(DTOClass).reduce((relations, cls) => {
-    const relationNames = relations.map(t => t.name);
-    const metaRelations = reflector.get<unknown, RelationDescriptor<unknown>>(cls) ?? [];
-    const inheritedRelations = metaRelations.filter(t => !relationNames.includes(t.name));
-    return [...inheritedRelations, ...relations];
-  }, [] as RelationDescriptor<unknown>[]);
-}
-
 export const mergeBaseResolverOpts = <Into extends BaseResolverOptions>(
   into: Into,
   from: BaseResolverOptions,
@@ -41,6 +32,11 @@ export const mergeBaseResolverOpts = <Into extends BaseResolverOptions>(
   const decorators = mergeArrays(from.decorators, into.decorators);
   return { ...into, guards, interceptors, pipes, filters, decorators };
 };
+
+export function getRelations<DTO>(DTOClass: Type<DTO>, opts?: any): RelationsOpts {
+  const relationDescriptors = getRelationsDescriptors(DTOClass);
+  return convertRelationsToOpts(relationDescriptors, opts);
+}
 
 function convertRelationsToOpts(
   relations: RelationDescriptor<unknown>[],
@@ -61,17 +57,21 @@ function convertRelationsToOpts(
   return relationOpts;
 }
 
-export function getRelations<DTO>(DTOClass: Type<DTO>, opts?: any): RelationsOpts {
-  const relationDescriptors = getRelationsDescriptors(DTOClass);
-  return convertRelationsToOpts(relationDescriptors, opts);
-}
-
 export function getRelationNames<DTO>(DTOCls: Type<DTO>): (keyof DTO)[] {
   const opts = getRelations(DTOCls);
   const { one, many } = opts;
 
   const rels = Object.keys({ ...one, ...many });
   return rels as any;
+}
+
+function getRelationsDescriptors<DTO>(DTOClass: Type<DTO>): RelationDescriptor<unknown>[] {
+  return getPrototypeChain(DTOClass).reduce((relations, cls) => {
+    const relationNames = relations.map(t => t.name);
+    const metaRelations = reflector.get<unknown, RelationDescriptor<unknown>>(cls) ?? [];
+    const inheritedRelations = metaRelations.filter(t => !relationNames.includes(t.name));
+    return [...inheritedRelations, ...relations];
+  }, [] as RelationDescriptor<unknown>[]);
 }
 
 export function FilterableGqlRelation<DTO extends Type<unknown>, Relation>(

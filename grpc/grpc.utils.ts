@@ -5,6 +5,7 @@ import { Activity } from '@domain/activity/activity.entity';
 import { renameKeyNames } from '@bits/bits.utils';
 import { allInterpreters, createSqlInterpreter } from '@ucast/sql';
 import { interpret } from '@ucast/sql/typeorm';
+import { allParsingInstructions, MongoQueryParser } from '@ucast/mongo';
 
 /**
  * promisify all methods on service except specified
@@ -29,29 +30,11 @@ export function convertGrpcFilterToTypeorm(filter: any = {}): any {
     else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
     else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
     else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
+    else if (comparisonField.elemMatch)
+      newFilter[key] = convertGrpcFilterToTypeorm(comparisonField.elemMatch);
     else {
       newFilter[key] = convertGrpcFilterToTypeorm(comparisonField);
     }
   }
   return newFilter;
-}
-
-type TypeORMOrderBy<Entity> = {
-  [P in EntityFieldsNames<Entity>]?: 'ASC' | 'DESC' | 1 | -1;
-};
-
-export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): TypeORMOrderBy<T> {
-  const obj: TypeORMOrderBy<T> = {};
-  for (const o of orderBy) {
-    obj[o.field as keyof TypeORMOrderBy<T>] = o.direction;
-  }
-  return obj;
-}
-
-export function convertGrpcFilterToUcast(filter: any): string {
-  const con = renameKeyNames(filter, { elemMatch: '$elemMatch', eq: '$eq' });
-  const myInterpret = createSqlInterpreter(allInterpreters);
-
-  const qb = interpret(con, getConnection().createQueryBuilder(Activity, 'a'));
-  return '';
 }

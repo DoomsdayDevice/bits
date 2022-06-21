@@ -3,6 +3,7 @@ import { Repository, DeepPartial, FindOneOptions, FindConditions, FindManyOption
 import { InjectRepository } from '@nestjs/typeorm';
 import { NestedQuery } from './nested-query';
 import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
+import { IConnection } from '@bits/bits.types';
 
 export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
@@ -50,19 +51,20 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         skip,
         orderBy,
       }: NestedFindManyOpts<Entity>): Promise<Entity[]> {
-        const complexQuery = new NestedQuery<Entity>(
+        const complexQuery = new NestedQuery(
+          EntityCls,
           this.readRepo.metadata.discriminatorValue as any,
           this.readRepo,
         );
 
-        const { items } = await complexQuery.execute({
+        const { nodes } = await complexQuery.execute({
           relations,
           where,
           take,
           skip,
           orderBy,
         });
-        return items;
+        return nodes;
       }
 
       public async findNestedAndCount({
@@ -70,21 +72,23 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         where,
         take,
         skip,
-        orderBy,
-      }: NestedFindManyOpts<Entity>): Promise<any> {
-        const complexQuery = new NestedQuery<Entity>(
+        order,
+      }: // orderBy,
+      NestedFindManyOpts<Entity>): Promise<IConnection<Entity>> {
+        const complexQuery = new NestedQuery(
+          EntityCls,
           this.readRepo.metadata.discriminatorValue as any,
           this.readRepo,
         );
 
-        const { totalCount, items } = await complexQuery.execute({
+        const { totalCount, nodes } = await complexQuery.execute({
           relations,
           where,
           take,
           skip,
-          orderBy,
+          order,
         });
-        return { totalCount, items };
+        return { totalCount, nodes };
       }
     }
     return ReadableRepo as any;

@@ -2,6 +2,7 @@ import { IReadableRepo } from '../db/repo.interface';
 import { DeepPartial, FindConditions, FindManyOptions, FindOneOptions } from 'typeorm';
 import { IReadableCrudService } from './interface.service';
 import { Inject, Injectable, Type } from '@nestjs/common';
+import { IConnection } from '@bits/bits.types';
 
 export const ReadableCrudService = <M>(
   Model: Type<M>,
@@ -19,7 +20,10 @@ export const ReadableCrudService = <M>(
       return this.readRepo.create(newEntity);
     }
     findMany(filter?: FindManyOptions<M>): Promise<M[]> {
-      return this.readRepo.findAll(filter);
+      return this.readRepo.findNested(filter);
+    }
+    findManyAndCount(filter?: FindManyOptions<M>): Promise<IConnection<M>> {
+      return this.readRepo.findNestedAndCount(filter);
     }
     findOne(
       id: string | FindOneOptions<M> | FindConditions<M>,

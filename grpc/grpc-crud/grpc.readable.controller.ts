@@ -9,14 +9,9 @@ import { GrpcServiceDef } from '../decorators/service.decorator';
 import { FindByIdInput } from '../grpc.dto';
 import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
-import { ILike, In, Like } from 'typeorm';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import {
-  convertGrpcFilterToTypeorm,
-  convertGrpcFilterToUcast,
-  convertGrpcOrderByToTypeorm,
-} from '@bits/grpc/grpc.utils';
-import { interpret } from '@ucast/sql/typeorm';
+import { convertGrpcFilterToTypeorm } from '@bits/grpc/grpc.utils';
+import { convertGrpcOrderByToTypeorm } from '@bits/db/db.utils';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -46,18 +41,13 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
     })
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = convertGrpcFilterToTypeorm(input.filter);
-      console.log(convertGrpcFilterToUcast(input.filter));
+      // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
-      const resp = {
-        totalCount: await this.readSvc.count(filter),
-        nodes: await this.readSvc.findMany({ where: filter, order }),
-      };
-      // resp.nodes.forEach(n => {
-      //   for (const key of Object.keys(n)) {
-      //     if (n[key] instanceof Date) n[key] = n[key].toISOString();
-      //   }
-      // });
-      return resp;
+
+      return this.readSvc.findManyAndCount({
+        where: filter,
+        orderBy: order as any,
+      });
     }
   }
 

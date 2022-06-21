@@ -10,13 +10,13 @@ import {
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
 
-export interface OrderByInput {
-  direction: 'ASC' | 'DESC';
-  fieldPath: string;
-}
+export type OrderByInput = {
+  [P in string]: 'ASC' | 'DESC';
+};
 
 export interface NestedFindManyOpts<T> extends FindManyOptions<T> {
   orderBy?: OrderByInput;
+  onlyTopLevel?: boolean;
 }
 
 export interface IReadableRepo<Entity> {
