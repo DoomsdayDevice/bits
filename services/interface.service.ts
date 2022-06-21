@@ -7,12 +7,14 @@ import {
   UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { IReadableRepo, IWritableRepo } from '@bits/db/repo.interface';
+import { IReadableRepo, IWritableRepo, NestedFindManyOpts } from '@bits/db/repo.interface';
+import { IConnection } from '@bits/bits.types';
 
 export interface IReadableCrudService<Entity> {
   readRepo: IReadableRepo<Entity>;
   count(filter?: FindManyOptions<Entity>): Promise<number>;
   findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
+  findManyAndCount(filter?: NestedFindManyOpts<Entity>): Promise<IConnection<Entity>>;
   findOne(
     id: string | FindOneOptions<Entity> | FindConditions<Entity>,
     options?: FindOneOptions<Entity>,

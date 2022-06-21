@@ -7,12 +7,17 @@ import {
   // WhereExpression,
   FindOperator,
   Repository,
+  FindConditions,
 } from 'typeorm';
 import * as _ from 'lodash';
 // import { Class } from '@nestjs-query/core';
 
 import { BossOperator } from './find-operators';
 import { NestedFindManyOpts } from './repo.interface';
+import { union } from 'lodash';
+import { Type } from '@nestjs/common';
+import { getRelations } from '@bits/db/get-relations';
+import { IConnection } from '@bits/bits.types';
 // type CustomOperator<T> = FindOperator<T> | BossOperator;
 
 export class NestedQuery<T> {
@@ -20,7 +25,7 @@ export class NestedQuery<T> {
 
   query: SelectQueryBuilder<T>;
 
-  constructor(private baseAlias: string, repository: Repository<T>) {
+  constructor(private Entity: Type<T>, private baseAlias: string, repository: Repository<T>) {
     this.baseAlias = _.camelCase(baseAlias);
     this.query = repository.createQueryBuilder(this.baseAlias);
   }
@@ -50,8 +55,14 @@ export class NestedQuery<T> {
     throw new Error('alias mapping problem during query building');
   }
 
-  private applyJoins(relations: string[], query: SelectQueryBuilder<T>, aliasMap: any) {
-    relations.forEach((rel, index) => {
+  private applyJoins(
+    relations: string[],
+    filterRels: string[],
+    query: SelectQueryBuilder<T>,
+    aliasMap: any,
+  ) {
+    const allRels = union(relations, filterRels);
+    allRels.forEach((rel, index) => {
       const parentAlias = this.getParentAlias(rel, index, relations);
 
       const splitRel = rel.split('.');
@@ -60,7 +71,8 @@ export class NestedQuery<T> {
       const alias = NestedQuery.getChildAlias(parentAlias, childName);
       const aliasHash = String.fromCharCode(65 + aliasMap.size);
       aliasMap.add({ name: alias, hash: aliasHash });
-      query.leftJoinAndSelect(path, aliasHash);
+      if (relations.includes(rel)) query.leftJoinAndSelect(path, aliasHash);
+      else query.leftJoin(path, aliasHash);
     });
   }
 
@@ -167,22 +179,48 @@ export class NestedQuery<T> {
     }
   }
 
-  public async execute({ relations, where, take, skip, orderBy }: NestedFindManyOpts<T>) {
+  private getRelsFromFilter(filter: any): string[] {
+    const { oneToManyRelations, manyToOneRelations, manyToManyRelations } = getRelations(
+      this.Entity,
+    );
+    const rels = [...oneToManyRelations, ...manyToOneRelations, ...manyToManyRelations];
+    const relNames = rels.map(r => r.propertyName);
+    const relsInFilter = [];
+    for (const key of Object.keys(filter)) {
+      const val = filter[key];
+      // has fields that are themselves objects
+      if (relNames.includes(key)) relsInFilter.push(key);
+    }
+    return relsInFilter;
+  }
+
+  public async execute({
+    relations,
+    where,
+    take,
+    skip,
+    orderBy,
+  }: NestedFindManyOpts<T>): Promise<IConnection<T>> {
     const aliasMap = new Set([]);
 
-    if (relations) this.applyJoins(relations, this.query, aliasMap);
+    // get relations from filter
+    const filterRels = this.getRelsFromFilter(where);
+    // const relUnion = union(, relations || []);
+    this.applyJoins(relations || [], filterRels, this.query, aliasMap);
     if (where) this.applyFilter(this.baseAlias, where, this.query, aliasMap);
     if (orderBy) {
-      this.query.orderBy(this.getOrderBy(orderBy.fieldPath, aliasMap), orderBy.direction);
+      for (const o of Object.keys(orderBy)) {
+        this.query.addOrderBy(this.getOrderBy(o, aliasMap), orderBy[o]);
+      }
     }
 
     if (take) this.query.take(take);
     if (skip) this.query.skip(skip);
 
     const query = this.query.getQuery();
-    const items = await this.query.getMany();
+    const nodes = await this.query.getMany();
 
     const totalCount = await this.query.getCount();
-    return { totalCount, items };
+    return { totalCount, nodes };
   }
 }
