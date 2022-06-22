@@ -1,4 +1,4 @@
-import { DynamicModule, Type } from '@nestjs/common';
+import { DynamicModule, Module, Type } from '@nestjs/common';
 import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
 import { WritableRepoMixin } from '../../db/writable.repo';
 import { ReadableRepoMixin } from '../../db/readable.repo';
@@ -59,13 +59,15 @@ export class GRPCCrudModule {
     if (!Repo) exports.push(FinalRepo);
     if (!Service) exports.push(FinalService);
 
-    return {
-      module: GRPCCrudModule,
+    @Module({
       providers: [FinalRepo, FinalController, FinalService],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports,
-    };
+    })
+    class WritableModule {}
+
+    return WritableModule as any;
   }
 
   static makeReadableCrud<M extends Object>({
@@ -81,13 +83,15 @@ export class GRPCCrudModule {
     const FinalController =
       Controller || ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO);
 
-    return {
-      module: GRPCCrudModule,
+    @Module({
       providers: [FinalRepo, FinalService],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports: [FinalRepo, FinalService],
-    };
+    })
+    class ReadableModule {}
+
+    return ReadableModule as any;
   }
 
   static makeAndProvideRepo(Model: Type, write: boolean = true): DynamicModule {

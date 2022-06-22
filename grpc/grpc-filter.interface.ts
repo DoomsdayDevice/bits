@@ -1,7 +1,6 @@
 import { MotivationName } from '@api-types/motivation/motivation-name.enum';
 import { RoleName } from '@api-types/role/role-name.enum';
 import { DeviceOS } from '@api-types/notification/device-os.enum';
-import { Role } from '@domain/role/role.entity';
 
 type Enums = MotivationName | RoleName | DeviceOS;
 

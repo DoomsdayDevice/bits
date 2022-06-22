@@ -4,13 +4,13 @@ import { IReadableCrudService } from './interface.service';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import { IConnection } from '@bits/bits.types';
 
-export const ReadableCrudService = <M>(
+export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
   Model: Type<M>,
-  Repo: Type<IReadableRepo<M>>,
-): Type<IReadableCrudService<M>> => {
+  Repo: Type<R>,
+): Type<IReadableCrudService<M> & { readRepo: R }> => {
   @Injectable()
   class ReadableCrudService implements IReadableCrudService<M> {
-    @Inject(Repo) readRepo!: IReadableRepo<M>;
+    @Inject(Repo) readRepo!: R;
 
     count(filter?: FindManyOptions<M>): Promise<number> {
       return this.readRepo.count(filter);

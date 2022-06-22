@@ -12,6 +12,7 @@ import { IReadableCrudService } from '@bits/services/interface.service';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
 import { convertGrpcFilterToTypeorm } from '@bits/grpc/grpc.utils';
 import { convertGrpcOrderByToTypeorm } from '@bits/db/db.utils';
+import { Logger } from '../../../../src/infrastructure/logger/logger';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -29,6 +30,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
   @Controller()
   class ModelController extends Base implements IGrpcReadController<M> {
     @Inject(ServiceCls) private readSvc: IReadableCrudService<M>;
+    @Inject(Logger) private logger: Logger;
 
     @GrpcMethodDef({ requestType: () => FinalFindOneInput, responseType: () => ModelCls })
     async findOne(input: FindByIdInput): Promise<M> {
@@ -43,8 +45,9 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       const filter = convertGrpcFilterToTypeorm(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
+      console.log({ in: input.filter, filter });
 
-      return this.readSvc.findManyAndCount({
+      return await this.readSvc.findManyAndCount({
         where: filter,
         orderBy: order as any,
       });

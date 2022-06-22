@@ -83,8 +83,10 @@ export class NestedQuery<T> {
     path: string,
   ) {
     const opType = operator._type;
+    // if (opType === 'in' && operator.value.length) {
     if (opType === 'in') {
-      query.andWhere(`${path} IN (:...${valueName})`, { [valueName]: operator.value });
+      if (!operator.value.length) query.andWhere('FALSE');
+      else query.andWhere(`${path} IN (:...${valueName})`, { [valueName]: operator.value });
     } else if (opType === 'isNull') {
       query.andWhere(`${path} IS NULL`);
     } else if (opType === 'not') {

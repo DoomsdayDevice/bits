@@ -1,11 +1,4 @@
-import { getConnection, ILike, In, Like } from 'typeorm';
-import { EntityFieldsNames } from 'typeorm/common/EntityFieldsNames';
-import { Sort } from '@bits/grpc/grpc.dto';
-import { Activity } from '@domain/activity/activity.entity';
-import { renameKeyNames } from '@bits/bits.utils';
-import { allInterpreters, createSqlInterpreter } from '@ucast/sql';
-import { interpret } from '@ucast/sql/typeorm';
-import { allParsingInstructions, MongoQueryParser } from '@ucast/mongo';
+import { ILike, In, Like } from 'typeorm';
 
 /**
  * promisify all methods on service except specified
