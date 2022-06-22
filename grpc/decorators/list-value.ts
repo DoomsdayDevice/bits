@@ -8,7 +8,7 @@ export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
   @GrpcMessageDef({ name: `${name}ListValue` })
   class InArray {
     @GrpcFieldDef(() => [Cls] as any)
-    values: T[];
+    values!: T[];
   }
 
   return InArray;
