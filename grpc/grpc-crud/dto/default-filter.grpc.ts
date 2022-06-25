@@ -127,7 +127,6 @@ export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGr
       } else {
         let t: any;
         const type = f.typeFn();
-        console.log({ typeFn: f.typeFn() });
         if (f.rule === 'repeated') {
           t = getOrCreateDefaultFilter(type);
         }

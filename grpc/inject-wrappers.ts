@@ -5,9 +5,9 @@ import IBoolValue = common.IBoolValue;
 export function injectWrappers() {
   //
   wrappers['.google.protobuf.Timestamp'] = {
-    fromObject: function (value: any) {
+    fromObject: function (value: Date) {
       return {
-        seconds: value.getTime() / 1000,
+        seconds: Math.trunc(value.getTime() / 1000),
         nanos: (value.getTime() % 1000) * 1e6,
       };
     },
