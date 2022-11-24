@@ -18,8 +18,9 @@ export type WrappedGrpcService<Svc, From, To> = Omit<Svc, 'findMany' | 'createOn
  * создает и оборачивает gRPC сервис
  */
 export function getDefaultGrpcCrudServiceWrapper<
-  Service extends IGrpcService<T>,
+  Service extends IGrpcService<Enums, T>,
   T extends object,
+  Enums,
   DTO extends object = T,
   Excluded extends keyof Service = never,
 >(
@@ -56,7 +57,7 @@ export function getDefaultGrpcCrudServiceWrapper<
     //   return this.svc.findOne(input);
     // }
 
-    async findMany(input: IGrpcFindManyInput<T>): Promise<IConnection<DTO>> {
+    async findMany(input: IGrpcFindManyInput<T, Enums>): Promise<IConnection<DTO>> {
       const many = await this.grpcSvc.findMany(input as any);
       const valid = this.validate(many.nodes);
       return { ...many, nodes: valid };

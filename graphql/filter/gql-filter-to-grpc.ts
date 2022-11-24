@@ -2,9 +2,9 @@ import { IGqlFilter } from './filter.interface';
 import { IGrpcFilter } from '../../grpc/grpc-filter.interface';
 
 // TODO do for nested and other operators
-export function gqlFilterToGrpc<T, F extends IGqlFilter<T>>(
+export function gqlFilterToGrpc<T, Enums, F extends IGqlFilter<T>>(
   filter?: F,
-): IGrpcFilter<T> | undefined {
+): IGrpcFilter<T, Enums> | undefined {
   if (!filter) return undefined;
   const compFieldNames = ['in', 'eq', 'lt', 'lte'];
   const keys = Object.keys(filter) as unknown as (keyof F)[];

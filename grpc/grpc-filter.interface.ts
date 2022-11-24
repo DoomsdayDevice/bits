@@ -1,9 +1,3 @@
-import { MotivationName } from '@api-types/motivation/motivation-name.enum';
-import { RoleName } from '@api-types/role/role-name.enum';
-import { DeviceOS } from '@api-types/notification/device-os.enum';
-
-type Enums = MotivationName | RoleName | DeviceOS;
-
 type BuiltInTypes =
   | boolean
   | string
@@ -71,13 +65,17 @@ export type GrpcStringFieldComparison =
       notILike: string;
     };
 
-export type ArrayComparisonType<T> = {
-  elemMatch: GrpcFilterComparisons<T>;
+export type ArrayComparisonType<T, Enums> = {
+  elemMatch: GrpcFilterComparisons<T, Enums>;
 };
 
 export type GrpcBooleanFieldComparisons = { is: boolean; isNot: boolean };
 
-type GrpcFilterFieldComparison<FieldType, IsKeys extends true | false> = FieldType extends Enums
+type GrpcFilterFieldComparison<
+  FieldType,
+  Enums,
+  IsKeys extends true | false,
+> = FieldType extends Enums
   ? GrpcCommonFieldComparisonType<FieldType>
   : FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcStringFieldComparison
@@ -88,15 +86,17 @@ type GrpcFilterFieldComparison<FieldType, IsKeys extends true | false> = FieldTy
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
   ? GrpcCommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
-  ? ArrayComparisonType<U> // eslint-disable-next-line @typescript-eslint/ban-types
+  ? ArrayComparisonType<U, Enums> // eslint-disable-next-line @typescript-eslint/ban-types
   : FieldType extends { values: Array<infer U> }
-  ? ArrayComparisonType<U>
+  ? ArrayComparisonType<U, Enums>
   : IsKeys extends true
-  ? GrpcCommonFieldComparisonType<FieldType> & GrpcStringFieldComparison & IGrpcFilter<FieldType>
-  : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType>;
+  ? GrpcCommonFieldComparisonType<FieldType> &
+      GrpcStringFieldComparison &
+      IGrpcFilter<FieldType, Enums>
+  : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType, Enums>;
 
-export type GrpcFilterComparisons<T> = {
-  [K in keyof T]?: GrpcFilterFieldComparison<T[K], false>;
+export type GrpcFilterComparisons<T, Enums> = {
+  [K in keyof T]?: GrpcFilterFieldComparison<T[K], Enums, false>;
 };
 
-export type IGrpcFilter<M> = GrpcFilterComparisons<M>;
+export type IGrpcFilter<M, Enums> = GrpcFilterComparisons<M, Enums>;
