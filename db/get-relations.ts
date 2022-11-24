@@ -1,5 +1,4 @@
 import { Type } from '@nestjs/common';
-import { getPrototypeChain } from '@bits/grpc/reflector';
 import { getConnection } from 'typeorm';
 
 // TODO FINISH GRPC RELS
