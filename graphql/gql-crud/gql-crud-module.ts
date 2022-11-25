@@ -2,7 +2,6 @@ import { Global, Module, Type } from '@nestjs/common';
 import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/gql-crud.interface';
 
 import { getDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
-import { CoreClientModule } from '@core/grpc/clients';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
@@ -58,7 +57,7 @@ export class GqlCrudModule<T> {
     @Global()
     @Module({
       providers: [GenericService, GenericResolver],
-      imports: [CoreClientModule, ...this.imports],
+      imports: [...this.imports],
       exports: [GenericService],
     })
     class GenericModule {}
@@ -89,7 +88,7 @@ export class GqlCrudModule<T> {
         GenericService,
         GenericResolver,
       ],
-      imports: [CoreClientModule, ...this.imports],
+      imports: [...this.imports],
       exports: [GenericService, { provide: GenericService.name, useClass: GenericService }],
     })
     class GenericModule {}
