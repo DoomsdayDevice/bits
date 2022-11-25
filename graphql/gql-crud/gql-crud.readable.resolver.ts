@@ -1,7 +1,6 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { transformAndValidate } from '@bits/dto.utils';
-import { IBaseServiceRead } from '@api-types/types';
 import { getPlural, getSingular, renameFunc } from '@bits/bits.utils';
 import {
   FindOneInput,
@@ -11,7 +10,7 @@ import {
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { IConnection } from '@bits/bits.types';
 import { IGrpcUser } from '@api-types/user/user.grpc.type';
-import { IFindManyArgs } from './gql-crud.interface';
+import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
 import { CurrentUser } from '../../../../src/auth/decorators/user.decorator';
 import { AuthService } from '../../../../src/auth/auth.service';
 
