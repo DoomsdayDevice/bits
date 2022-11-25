@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { Transform, TransformFnParams } from 'class-transformer';
 import { Defined } from '@bits/bits.types';
 import { clone, cloneDeep, isObject } from 'lodash';
+import { Inject } from '@nestjs/common';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -62,3 +63,8 @@ export function renameKeyNames(obj: any, nameMap: any) {
 
   return clonedObj;
 }
+
+export const OptionalInject = (token: any) => {
+  if (token) return Inject(token);
+  return () => {};
+};
