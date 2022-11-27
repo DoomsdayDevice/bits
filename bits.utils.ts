@@ -4,6 +4,7 @@ import { Transform, TransformFnParams } from 'class-transformer';
 import { Defined } from '@bits/bits.types';
 import { clone, cloneDeep, isObject } from 'lodash';
 import { Inject } from '@nestjs/common';
+import { FindOptionsWhere, ILike, In, Like } from 'typeorm';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -68,3 +69,39 @@ export const OptionalInject = (token: any) => {
   if (token) return Inject(token);
   return () => {};
 };
+
+/** to typeorm/service layer filter */
+export function convertGrpcFilterToService<T>(filter: any = {}): FindOptionsWhere<T> {
+  const newFilter: any = {};
+  for (const key of Object.keys(filter)) {
+    const comparisonField = filter[key];
+    if (comparisonField.eq !== undefined) newFilter[key] = comparisonField.eq;
+    else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
+    else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
+    else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
+    else if (comparisonField.elemMatch)
+      newFilter[key] = convertGrpcFilterToService(comparisonField.elemMatch);
+    else {
+      newFilter[key] = convertGrpcFilterToService(comparisonField);
+    }
+  }
+  return newFilter;
+}
+
+export function convertGraphqlFilterToService<T>(filter: any) {
+  return convertGrpcFilterToService<T>(filter);
+}
+
+export function convertServiceFilterToGrpc<T>(filter: any) {
+  const newFilter: any = {};
+  for (const key of Object.keys(filter)) {
+    const comparisonField = filter[key];
+    if (comparisonField._type) {
+      if (comparisonField._type === 'in') newFilter[key] = { in: comparisonField._value };
+    } else {
+      newFilter[key] = convertServiceFilterToGrpc(comparisonField);
+    }
+  }
+
+  return filter;
+}

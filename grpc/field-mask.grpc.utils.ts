@@ -5,7 +5,7 @@ function escape(propertyName: string) {
 }
 
 function unescapeAndSplit(originalPath: string) {
-  const properties = [];
+  const properties: string[] = [];
   let path = originalPath;
   let i = path.indexOf('.');
   while (i >= 0) {

@@ -1,11 +1,11 @@
 import {
   DeepPartial,
   DeleteResult,
-  FindConditions,
   FindManyOptions,
   FindOneOptions,
+  FindOptionsWhere,
+  ObjectLiteral,
   Repository,
-  UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
@@ -19,7 +19,7 @@ export interface NestedFindManyOpts<T> extends FindManyOptions<T> {
   onlyTopLevel?: boolean;
 }
 
-export interface IReadableRepo<Entity> {
+export interface IReadableRepo<Entity extends ObjectLiteral> {
   readRepo: Repository<Entity>;
 
   count(filter?: FindManyOptions<Entity>): Promise<number>;
@@ -27,7 +27,7 @@ export interface IReadableRepo<Entity> {
   findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
   findAllWithDeleted(filter: FindManyOptions<Entity>): Promise<Entity[]>;
   findOne(
-    id: string | FindOneOptions<Entity> | FindConditions<Entity>,
+    id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity> | undefined;
   findNested({
@@ -46,12 +46,12 @@ export interface IReadableRepo<Entity> {
   }: NestedFindManyOpts<Entity>): Promise<any>;
 }
 
-export interface IWritableRepo<Entity> {
+export interface IWritableRepo<Entity extends ObjectLiteral> {
   writeRepo: Repository<Entity>;
 
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
   update(
-    idOrConditions: string | FindConditions<Entity>,
+    idOrConditions: string | FindOptionsWhere<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
   ): Promise<boolean>;
@@ -59,12 +59,12 @@ export interface IWritableRepo<Entity> {
     entityOrEntities: T | T[],
     options?: SaveOptions,
   ): Promise<T | T[]>;
-  deleteOne(id: string | FindConditions<Entity>): Promise<boolean>;
+  deleteOne(id: string | FindOptionsWhere<Entity>): Promise<boolean>;
   restoreOne(id: string): Promise<boolean>;
   hardDelete(
-    criteria: string | number | FindConditions<Entity>,
+    criteria: string | number | FindOptionsWhere<Entity>,
     /* ...options: any[] */
   ): Promise<DeleteResult>;
 }
 
-export type IRepo<T> = IWritableRepo<T> & IReadableRepo<T>;
+export type IRepo<T extends ObjectLiteral> = IWritableRepo<T> & IReadableRepo<T>;

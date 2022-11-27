@@ -1,14 +1,21 @@
 import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
-import { renameFunc } from '@bits/bits.utils';
+import { convertServiceFilterToGrpc, renameFunc } from '@bits/bits.utils';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
-import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IConnection } from '@bits/bits.types';
+import { ICrudService } from '@bits/services/interface.service';
+import { FindManyOptions, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { NestedFindManyOpts } from '@bits/db/repo.interface';
+import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 
-export type WrappedGrpcService<Svc, From, To> = Omit<Svc, 'findMany' | 'createOne'> &
-  IGrpcService<To> & {
+export type WrappedGrpcService<Svc, From extends ObjectLiteral, To> = Omit<
+  Svc,
+  'findMany' | 'createOne' | 'findOne' | 'updateOne' | 'deleteOne'
+> &
+  ICrudService<From> & {
     grpcSvc: Svc;
     validate(input: From): To;
     validate(input: From[]): To[];
@@ -23,13 +30,10 @@ export function getDefaultGrpcCrudServiceWrapper<
   Enums,
   DTO extends object = T,
   Excluded extends keyof Service = never,
->(
-  packageToken: string,
-  serviceName: string,
-  DTOCls?: Type<DTO>,
-): Type<Omit<WrappedGrpcService<Service, T, DTO>, Excluded>> {
+>(packageToken: string, serviceName: string, DTOCls?: Type<DTO>): any {
+  // ): Type<Omit<WrappedGrpcService<Service, T, DTO>, Excluded>> {
   @Injectable()
-  class GenericGrpcService implements OnModuleInit {
+  class GenericGrpcService implements OnModuleInit, ICrudService<T> {
     public grpcSvc!: Service;
 
     constructor(
@@ -46,30 +50,69 @@ export function getDefaultGrpcCrudServiceWrapper<
       }
     }
 
-    validate(input: T): DTO;
-    validate(input: T[]): DTO[];
-    validate(input: T | T[]): DTO | DTO[] {
+    validate(input: T): T;
+    validate(input: T[]): T[];
+    validate(input: T | T[]): T | T[] {
       if (DTOCls) return transformAndValidate(DTOCls, input as any);
-      else return input as DTO;
+      return input as T;
     }
 
     // findOne(input: FindOneInput) {
     //   return this.svc.findOne(input);
     // }
 
-    async findMany(input: IGrpcFindManyInput<T, Enums>): Promise<IConnection<DTO>> {
-      const many = await this.grpcSvc.findMany(input as any);
+    async findMany(input: FindManyOptions<T>): Promise<T[]> {
+      const many = await this.grpcSvc.findMany(convertServiceFilterToGrpc(input));
       const valid = this.validate(many.nodes);
+      return valid;
+    }
+
+    async findManyAndCount(filter?: NestedFindManyOpts<T>): Promise<IConnection<T>> {
+      const many = await this.grpcSvc.findMany(filter as any);
+      const valid = this.validate(many.nodes);
+
       return { ...many, nodes: valid };
     }
 
-    async createOne(input: any): Promise<DTO> {
+    async createOne(input: any): Promise<T> {
       if (DTOCls) {
         // TODO add validation with CreateOneDTO
         const newOne = transformAndValidate(DTOCls, input as any);
         return transformAndValidate(DTOCls, (await this.grpcSvc.createOne(newOne)) as any);
       }
-      return (await this.grpcSvc.createOne(input)) as DTO;
+      return (await this.grpcSvc.createOne(input)) as T;
+    }
+
+    async deleteOne(id: string | FindOptionsWhere<T>): Promise<boolean> {
+      await this.grpcSvc.deleteOne(id);
+      return true;
+    }
+
+    async updateOne(
+      idOrConditions: string | FindOptionsWhere<T>,
+      partialEntity: QueryDeepPartialEntity<T>,
+      // ...options: any[]
+    ): Promise<boolean> {
+      const update: any = { ...partialEntity, id: idOrConditions };
+      const updateMask = { paths: generateFieldMask(update) };
+
+      await this.grpcSvc.updateOne({
+        update,
+        updateMask,
+      });
+      return true;
+    }
+
+    async findOne(
+      id: string | FindOneOptions<T> | FindOptionsWhere<T>,
+      options?: FindOneOptions<T>,
+    ): Promise<T> {
+      return this.grpcSvc.findOne({ id } as any);
+    }
+
+    async count(filter?: FindManyOptions<T>): Promise<number> {
+      const { totalCount } = await this.grpcSvc.findMany(filter as any);
+      return totalCount;
     }
   }
   renameFunc(GenericGrpcService, serviceName);

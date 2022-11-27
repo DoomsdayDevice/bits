@@ -6,24 +6,30 @@ import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.reso
 import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
 import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.resolver';
-import { buildRelations } from '@bits/graphql/relation/relation-builder';
+import { buildRelationsForModelResolver } from '@bits/graphql/relation/relation-builder';
 import { Resolver } from '@nestjs/graphql';
 import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
+import { getGenericCrudService } from '@bits/db/generic-crud.service';
+import { ObjectLiteral } from 'typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ICrudService } from '@bits/services/interface.service';
 
-export class GqlCrudModule<T> {
+export class GqlCrudModule<T extends ObjectLiteral> {
   private modelName: string;
 
   private Model: Type<T>;
 
-  private Resolver?: Type;
+  private Resolver: Type;
 
-  private Service?: Type;
+  private Service: Type<ICrudService<T>>;
 
   private pagination: boolean;
 
   private grpcServiceName: string;
 
   private imports: ModuleImportElem[];
+
+  private type: 'grpc' | 'typeorm';
 
   constructor({
     Model,
@@ -33,74 +39,75 @@ export class GqlCrudModule<T> {
     ModelResolver,
     Service,
     imports,
+    type = 'typeorm',
+    readOnly = false,
   }: GqlWritableCrudConfig<T>) {
     this.Model = Model;
     this.modelName = modelName || Model.name;
     this.pagination = pagination;
+    this.type = type;
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
-    this.Resolver = ModelResolver;
-    this.Service = Service;
     this.imports = imports || [];
+
+    if (!Service) {
+      if (type === 'grpc') this.Service = this.buildGrpcService();
+      else this.Service = this.buildTypeormService();
+    } else this.Service = Service;
+
+    if (!ModelResolver) {
+      if (readOnly) this.Resolver = this.buildReadResolver();
+      else this.Resolver = this.buildWriteResolver();
+    } else this.Resolver = ModelResolver;
   }
 
-  makeReadableCrud(): any {
-    const GenericService =
-      this.Service || getDefaultGrpcCrudServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
-    const GenericResolver =
-      this.Resolver ||
-      ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName);
-
-    // assign service to Entity
-    crudServiceReflector.set(this.Model, GenericService);
-
-    buildRelations(this.Model, GenericResolver);
-    @Global()
-    @Module({
-      providers: [GenericService, GenericResolver],
-      imports: [...this.imports],
-      exports: [GenericService],
-    })
-    class GenericModule {}
-
-    return GenericModule;
+  buildGrpcService(): Type<ICrudService<T>> {
+    return getDefaultGrpcCrudServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
   }
 
-  makeWritableCrud(): any {
-    const GenericService =
-      this.Service || getDefaultGrpcCrudServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
-    const GenericResolver =
-      this.Resolver ||
-      WriteResolverMixin(
-        this.Model,
-        GenericService,
-        this.modelName,
-      )(ReadResolverMixin(this.Model, GenericService, this.pagination, this.modelName));
+  buildTypeormService(): Type<ICrudService<T>> {
+    this.imports.push(TypeOrmModule.forFeature([this.Model]));
 
+    return getGenericCrudService(this.Model);
+  }
+
+  buildWriteResolver(): any {
+    return WriteResolverMixin(
+      this.Model,
+      this.Service,
+      this.modelName,
+    )(ReadResolverMixin(this.Model, this.Service, this.pagination, this.modelName));
+  }
+
+  buildReadResolver(): any {
+    return ReadResolverMixin(this.Model, this.Service, this.pagination, this.modelName);
+  }
+
+  makeCrud(): DynamicModule {
     // assign service to Entity
-    crudServiceReflector.set(this.Model, GenericService);
+    crudServiceReflector.set(this.Model, this.Service);
 
-    buildRelations(this.Model, GenericResolver);
+    buildRelationsForModelResolver(this.Model, this.Resolver);
 
     @Global()
     @Module({
       providers: [
-        { provide: GenericService.name, useClass: GenericService },
-        GenericService,
-        GenericResolver,
+        { provide: this.Service.name, useClass: this.Service },
+        this.Service,
+        this.Resolver,
       ],
       imports: [...this.imports],
-      exports: [GenericService, { provide: GenericService.name, useClass: GenericService }],
+      exports: [this.Service, { provide: this.Service.name, useClass: this.Service }],
     })
     class GenericModule {}
 
-    return GenericModule;
+    return GenericModule as any;
   }
 
   onlyRelations(): DynamicModule {
     @Resolver(() => this.Model)
     class GenericResolver {}
 
-    buildRelations(this.Model, GenericResolver);
+    buildRelationsForModelResolver(this.Model, GenericResolver);
 
     @Module({
       providers: [GenericResolver],

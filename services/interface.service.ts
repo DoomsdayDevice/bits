@@ -1,33 +1,35 @@
 import {
   DeepPartial,
-  FindConditions,
   FindManyOptions,
   FindOneOptions,
-  Repository,
-  UpdateResult,
+  FindOptionsWhere,
+  ObjectLiteral,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { IReadableRepo, IWritableRepo, NestedFindManyOpts } from '@bits/db/repo.interface';
+import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { IConnection } from '@bits/bits.types';
 
-export interface IReadableCrudService<Entity> {
-  readRepo: IReadableRepo<Entity>;
+export interface IReadableCrudService<Entity extends ObjectLiteral> {
+  // readRepo: IReadableRepo<Entity>;
   count(filter?: FindManyOptions<Entity>): Promise<number>;
   findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
   findManyAndCount(filter?: NestedFindManyOpts<Entity>): Promise<IConnection<Entity>>;
   findOne(
-    id: string | FindOneOptions<Entity> | FindConditions<Entity>,
+    id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
 }
 
-export interface IWritableCrudService<Entity> {
-  writeRepo: IWritableRepo<Entity>;
+export interface IWritableCrudService<Entity extends ObjectLiteral> {
+  // writeRepo: IWritableRepo<Entity>;
   createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  deleteOne(id: string | FindConditions<Entity>): Promise<boolean>;
+  deleteOne(id: string | FindOptionsWhere<Entity>): Promise<boolean>;
   updateOne(
-    idOrConditions: string | FindConditions<Entity>,
+    idOrConditions: string | FindOptionsWhere<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
   ): Promise<boolean>;
 }
+
+export type ICrudService<Entity extends ObjectLiteral> = IWritableCrudService<Entity> &
+  IReadableCrudService<Entity>;

@@ -10,6 +10,9 @@ export interface GqlWritableCrudConfig<M> {
   grpcServiceName?: string;
   ModelResolver?: any;
   Service?: Type<any>;
+  /** using grpc or simply typeorm */
+  type?: 'grpc' | 'typeorm';
+  readOnly?: boolean;
 }
 
 export interface IUpdateOneInput<T> {

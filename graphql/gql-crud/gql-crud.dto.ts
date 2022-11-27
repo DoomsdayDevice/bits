@@ -55,8 +55,8 @@ export function getDefaultUpdateOneInput<T>(
 export function getDefaultCreateOneInput<T>(
   ModelCls: Type<T>,
   modelName?: string,
-): Type<Omit<T, 'createdAt' | 'id'>> {
-  return OmitType(ModelCls, ['createdAt' as keyof T, 'id' as keyof T] as const, () =>
+): Type<Omit<T, 'createdAt' | 'id' | 'updatedAt'>> {
+  return OmitType(ModelCls, ['createdAt', 'id', 'updatedAt'] as any, () =>
     InputType(`CreateOne${modelName || ModelCls.name}Input`),
   ) as any;
 

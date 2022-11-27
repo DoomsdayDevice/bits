@@ -2,6 +2,7 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { transformAndValidate } from '@bits/dto.utils';
 import {
+  convertGraphqlFilterToService,
   getPlural,
   getSingular,
   OptionalInject,
@@ -13,20 +14,21 @@ import {
   getDefaultFindManyArgs,
   getDefaultModelConnection,
 } from '@bits/graphql/gql-crud/gql-crud.dto';
-import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { IConnection } from '@bits/bits.types';
 import { AnyAbility, MongoQuery } from '@casl/ability';
 import { CurrentUser } from '@bits/auth/current-user.decorator';
 import { merge } from 'lodash';
+import { ICrudService } from '@bits/services/interface.service';
+import { ObjectLiteral } from 'typeorm';
 import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
 
 interface ICaslAbilityFactory<IUser> {
   createForUser(u: IUser): AnyAbility;
 }
 
-export function ReadResolverMixin<T, N extends string, IUser>(
+export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUser>(
   Model: Type<T>,
-  Service: Type,
+  Service: Type<ICrudService<T>>,
   pagination: boolean,
   // CurrentUser: () => ParameterDecorator,
   myModelName?: N,
@@ -44,13 +46,13 @@ export function ReadResolverMixin<T, N extends string, IUser>(
 
   @Resolver(() => Model)
   class GenericResolver {
-    @Inject(Service) private svc!: IGrpcService;
+    @Inject(Service) private svc!: ICrudService<T>;
 
     @OptionalInject(CaslAbilityFactory) private abilityFactory?: ICaslAbilityFactory<IUser>;
 
     @Query(() => Model)
     async [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
-      return transformAndValidate(Model, await this.svc.findOne(input));
+      return transformAndValidate(Model, await this.svc.findOne(input as any));
     }
 
     @Query(() => FindManyType)
@@ -58,18 +60,18 @@ export function ReadResolverMixin<T, N extends string, IUser>(
       @Args({ type: () => FindManyInput }) { filter }: IFindManyArgs<T>,
       @CurrentUser() user: IUser,
     ): Promise<IConnection<T> | T[]> {
-      const userFilter = this.getFilterForResource(Model, user, filter);
-      const { nodes, totalCount } = await this.svc.findMany({ filter: userFilter as any });
-      // const newNodes = transformAndValidate(Model, nodes);
-      if (!pagination) return nodes;
-      return {
-        totalCount,
-        nodes,
-      };
+      const finalFilter = this.getFilterForResource(Model, user, filter);
+
+      if (pagination)
+        return this.svc.findManyAndCount({
+          where: convertGraphqlFilterToService(finalFilter),
+        });
+      return this.svc.findMany({ where: convertGraphqlFilterToService(finalFilter) });
     }
 
     /** filter that only leaves owned rows */
-    getFilterForResource(resource: any, user: IUser, origFilter?: any): MongoQuery | null {
+    getFilterForResource(resource: any, user: IUser, origFilter: any = {}): MongoQuery | null {
+      if (!user) return origFilter;
       if (resources?.includes(resource)) {
         let filter = null;
         if (this.abilityFactory) {

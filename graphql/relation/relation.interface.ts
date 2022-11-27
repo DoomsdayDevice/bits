@@ -90,6 +90,10 @@ export type ResolverRelation<Relation> = {
     ownIdField: string;
     simplify?: boolean;
   };
+  oneToMany?: {
+    referencedFieldName: string;
+    ownIdField?: string;
+  };
 
   /**
    * The name of the relation to use when fetching from the QueryService

@@ -5,12 +5,18 @@ import {
   getDefaultCreateOneInput,
   getDefaultUpdateOneInput,
 } from '@bits/graphql/gql-crud/gql-crud.dto';
-import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { GraphQLUUID } from 'graphql-scalars';
-import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
+import { ICrudService } from '@bits/services/interface.service';
+import { ObjectLiteral } from 'typeorm';
+import { renameFunc } from '@bits/bits.utils';
 
 export const WriteResolverMixin =
-  <T, N extends string>(Model: Type<T>, Service: Type, modelName?: N, Create?: Type) =>
+  <T extends ObjectLiteral, N extends string>(
+    Model: Type<T>,
+    Service: Type<ICrudService<T>>,
+    modelName?: N,
+    Create?: Type,
+  ) =>
   <B extends Type>(Base: B): Type<IBaseServiceWrite<T, N> & InstanceType<B>> => {
     const name = modelName || Model.name;
     const UpdateOne = getDefaultUpdateOneInput(Model, name);
@@ -18,27 +24,22 @@ export const WriteResolverMixin =
 
     @Resolver(() => Model)
     class GenericResolver extends Base {
-      @Inject(Service) private svc!: IGrpcService<T>;
+      @Inject(Service) private svc!: ICrudService<T>;
 
       @Mutation(() => Boolean)
       async [`deleteOne${name}`](
         @Args('id', { type: () => GraphQLUUID }) id: string,
       ): Promise<boolean> {
-        const res = await this.svc.deleteOne({ id });
-        return res.success;
+        const res = await this.svc.deleteOne(id);
+        return res;
       }
 
       @Mutation(() => Boolean)
       async [`updateOne${name}`](
         @Args('input', { type: () => UpdateOne }) input: IUpdateOneInput<T>,
       ): Promise<boolean> {
-        const update = { ...input.update, id: input.id };
-        const updateMask = { paths: generateFieldMask(update) };
-        const res = await this.svc.updateOne({
-          update,
-          updateMask,
-        });
-        return res.success;
+        const res = await this.svc.updateOne(input.id, input.update);
+        return res;
       }
 
       @Mutation(() => Model)
@@ -46,6 +47,7 @@ export const WriteResolverMixin =
         return this.svc.createOne(input);
       }
     }
+    renameFunc(GenericResolver, `${modelName}Resolver`);
 
     return GenericResolver as any;
   };

@@ -1,16 +1,20 @@
 import { Inject, Type } from '@nestjs/common';
-import { Parent, ResolveField } from '@nestjs/graphql';
+import { Info, Parent, ResolveField } from '@nestjs/graphql';
+import { ICrudService } from '@bits/services/interface.service';
+import { GraphQLResolveInfo } from 'graphql/type';
 import { getRelations } from './relation.decorator';
 import { crudServiceReflector } from '../../services/crud.constants';
+import { lowercaseFirstLetter } from '@core/utils';
+import { In } from 'typeorm';
 
-const toInject: { dto: any; resolver: any; svcName: string }[] = [];
+const servicesToInjectIntoResolvers: { dto: any; resolver: any; svcName: string }[] = [];
 
 /**
  * launched from main.ts after all classes and decorators load
  * TODO use ModuleRef instead of injecting all these services, also remove @Global from generic modules
  */
 export function injectServices() {
-  for (const { dto, resolver, svcName } of toInject) {
+  for (const { dto, resolver, svcName } of servicesToInjectIntoResolvers) {
     const cls = crudServiceReflector.get(dto);
     Inject(cls)(resolver.prototype, svcName);
   }
@@ -18,29 +22,35 @@ export function injectServices() {
 
 function buildRel<T>(one: boolean, relName: string, Resolver: Type, relDTO: Type, svcName: string) {
   // send to inject service
-  toInject.push({ dto: relDTO, resolver: Resolver, svcName });
+  servicesToInjectIntoResolvers.push({ dto: relDTO, resolver: Resolver, svcName });
 
   Parent()(Resolver.prototype, relName, 0);
+  Info()(Resolver.prototype, relName, 1);
 
   ResolveField(relName, () => (one ? relDTO : [relDTO]))(Resolver.prototype, relName, {
     value: Resolver.prototype[relName],
   });
 }
 
-export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
+/** injects services for relations to join */
+export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver: Type) {
   const { one, many } = getRelations(DTOCls);
 
   const svcName = (r: string) => `${r}Service`;
 
   if (one)
+    // TODO apply filters like getFilterForResource
     for (const relName of Object.keys(one)) {
-      CrudResolver.prototype[relName] = async function findOne(par: any) {
+      CrudResolver.prototype[relName] = async function resolveOne(
+        parent: T,
+        info: GraphQLResolveInfo,
+      ) {
         // get the corresponding service and run
         const svc = this[svcName(relName)];
         const opts = one[relName];
 
         const ownForeignKey = opts.customForeignKey?.ownForeignKey || `${relName}Id`;
-        const value = par[ownForeignKey];
+        const value = parent[ownForeignKey];
         return svc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
       };
       buildRel(true, relName, CrudResolver, one[relName].DTO, svcName(relName));
@@ -48,30 +58,40 @@ export function buildRelations<T>(DTOCls: Type<T>, CrudResolver: Type) {
 
   if (many)
     for (const relName of Object.keys(many)) {
-      CrudResolver.prototype[relName] = async function findMany(parent: any) {
+      CrudResolver.prototype[relName] = async function resolveMany(parent: T) {
         // get the corresponding service and run
-        const svc = this[svcName(relName)];
+        const svc: ICrudService<any> = this[svcName(relName)];
         const opts = many[relName];
         // IF simpleArray - join with the other table
 
-        let connection;
+        let nodes;
 
         if (opts.manyToManyByArr) {
           const refArray = parent[opts.manyToManyByArr.arrayName!];
           const refField = opts.manyToManyByArr.referencedFieldName!;
-          connection = await svc.findMany({
-            filter: { [refField]: { in: { list: refArray } } },
+          nodes = await svc.findMany({
+            where: { [refField]: In(refArray) },
           });
         } else if (opts.manyToManyByRefs) {
           const refField = opts.manyToManyByRefs.ownFieldThatIsReferenced!;
           const ownIdField = opts.manyToManyByRefs.ownIdField || 'id';
-          connection = await svc.findMany({
-            filter: { [refField]: { eq: parent[ownIdField] } },
+          nodes = await svc.findMany({
+            where: { [refField]: parent[ownIdField] },
+          });
+        } else {
+          // simple one to many
+          // TODO
+          const defaultIdField = `${lowercaseFirstLetter(DTOCls.name)}Id`;
+          nodes = await svc.findMany({
+            where: {
+              [opts.oneToMany?.referencedFieldName || defaultIdField]:
+                parent[opts.oneToMany?.ownIdField || 'id'],
+            },
           });
         }
         // ELSE only return the joinEntity
 
-        return connection.nodes;
+        return nodes;
       };
       buildRel<T>(false, relName, CrudResolver, many[relName].DTO, svcName(relName));
     }
