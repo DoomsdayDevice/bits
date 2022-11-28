@@ -11,7 +11,7 @@ export interface GqlWritableCrudConfig<M> {
   ModelResolver?: any;
   Service?: Type<any>;
   /** using grpc or simply typeorm */
-  type?: 'grpc' | 'typeorm';
+  type: 'grpc' | 'typeorm';
   readOnly?: boolean;
 }
 

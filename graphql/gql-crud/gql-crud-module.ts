@@ -51,7 +51,7 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     this.imports = imports || [];
 
     if (!Service) {
-      if (type === 'grpc') this.Service = this.buildGrpcService();
+      if (type === 'grpc' || grpcServiceName) this.Service = this.buildGrpcService();
       else this.Service = this.buildTypeormService();
     } else this.Service = Service;
 

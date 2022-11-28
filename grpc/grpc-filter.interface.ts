@@ -74,8 +74,9 @@ export type GrpcBooleanFieldComparisons = { is: boolean; isNot: boolean };
 type GrpcFilterFieldComparison<
   FieldType,
   IsKeys extends true | false,
-> /* FieldType extends ProjectEnums
-  ? GrpcCommonFieldComparisonType<FieldType> */ = FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
+> = FieldType extends ProjectEnums // expected to be a global type
+  ? GrpcCommonFieldComparisonType<FieldType>
+  : FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcStringFieldComparison
   : FieldType extends boolean | Boolean // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcBooleanFieldComparisons

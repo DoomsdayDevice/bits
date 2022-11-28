@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException, Type } from '@nestjs/common';
-import { Repository, DeepPartial, FindOneOptions, FindConditions, FindManyOptions } from 'typeorm';
+import { Injectable, Type } from '@nestjs/common';
+import {
+  Repository,
+  DeepPartial,
+  FindOneOptions,
+  FindManyOptions,
+  FindOptionsWhere,
+} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IConnection } from '@bits/bits.types';
 import { NestedQuery } from './nested-query';
 import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
-import { IConnection } from '@bits/bits.types';
 
 export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
@@ -33,7 +39,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
       }
 
       public async findOne(
-        id: string | FindOneOptions<Entity> | FindConditions<Entity>,
+        id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
         options?: FindOneOptions<Entity>,
       ): Promise<Entity> {
         const record = await this.readRepo.findOne(id as any, options);

@@ -109,10 +109,10 @@ export function getDefaultGrpcCrudServiceWrapper<
     }
 
     async findOne(
-      id: string | FindOneOptions<To> | FindOptionsWhere<To>,
+      id: FindOneOptions<To> | FindOptionsWhere<To>,
       options?: FindOneOptions<To>,
     ): Promise<To> {
-      return this.grpcSvc.findOne({ id } as any) as any;
+      return this.grpcSvc.findOne(id as any) as any;
     }
 
     async count(filter?: FindManyOptions<To>): Promise<number> {

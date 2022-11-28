@@ -112,9 +112,13 @@ export function convertServiceFilterToGrpc<T>(where: FindOptionsWhere<T> | FindO
     for (const key of Object.keys(where) as any[]) {
       const comparisonField = where[key as keyof FindOptionsWhere<T>] as any;
       if (comparisonField._type) {
-        if (comparisonField._type === 'in') grpcFilter[key] = { in: comparisonField._value };
-      } else {
+        if (comparisonField._type === 'in')
+          grpcFilter[key] = { in: { values: comparisonField._value } };
+      } else if (isObject(comparisonField)) {
         grpcFilter[key] = convertServiceFilterToGrpc(comparisonField);
+      } else {
+        // if it's a simple field like a string
+        grpcFilter[key] = { eq: comparisonField };
       }
     }
   }
