@@ -10,9 +10,9 @@ import { FindByIdInput } from '../grpc.dto';
 import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import { convertGrpcFilterToTypeorm } from '@bits/grpc/grpc.utils';
 import { convertGrpcOrderByToTypeorm } from '@bits/db/db.utils';
 import { Logger } from '../../../../src/infrastructure/logger/logger';
+import { convertGrpcFilterToService } from '@bits/bits.utils';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -22,8 +22,9 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
   defineService = true,
   Base: B = class {} as any,
   FindOneInputDTO?: Type,
+  isSimple = false,
 ): Type<IGrpcReadController<M> & InstanceType<B>> {
-  const FindMany = getOrCreateFindManyInput(ModelCls);
+  const FindMany = getOrCreateFindManyInput(ModelCls, isSimple);
   const FindManyResp = getOrCreateConnection(ModelCls);
   const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 
@@ -42,7 +43,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       responseType: () => FindManyResp,
     })
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
-      const filter = convertGrpcFilterToTypeorm(input.filter);
+      const filter = convertGrpcFilterToService(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
       console.log({ in: input.filter, filter });

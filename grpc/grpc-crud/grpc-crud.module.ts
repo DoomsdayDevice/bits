@@ -29,6 +29,7 @@ export interface GrpcReadableCrudConfig<M> {
   FindOneDTO?: Type;
   Service?: Type;
   imports?: any[];
+  isSimple?: boolean; // no paging, sorting, filtering (for enums and such)
 }
 
 export class GRPCCrudModule {
@@ -77,11 +78,13 @@ export class GRPCCrudModule {
     FindOneDTO,
     Controller,
     imports = [],
+    isSimple,
   }: GrpcReadableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || ReadableRepoMixin(Model)();
     const FinalService = Service || ReadableCrudService(Model, FinalRepo);
     const FinalController =
-      Controller || ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO);
+      Controller ||
+      ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO, isSimple);
 
     @Module({
       providers: [FinalRepo, FinalService],

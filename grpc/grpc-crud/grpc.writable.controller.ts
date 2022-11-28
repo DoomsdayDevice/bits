@@ -15,8 +15,8 @@ import {
   getDefaultUpdateInput,
   StatusMsg,
 } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
-import { FindConditions } from 'typeorm';
 import { applyFieldMask } from '@bits/grpc/field-mask.grpc.utils';
+import { FindOptionsWhere } from 'typeorm';
 
 export function WritableGrpcController<WriteModel, B extends Type, ReadModel = WriteModel>({
   WriteModelCls,
@@ -62,7 +62,7 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
       requestType: () => GenericDeleteInput,
       responseType: () => StatusMsg,
     })
-    async deleteOne(input: FindConditions<WriteModel>): Promise<StatusMsg> {
+    async deleteOne(input: FindOptionsWhere<WriteModel>): Promise<StatusMsg> {
       const i = input as any;
       return { success: Boolean(await this.writeSvc.deleteOne(i.id || i.name)) };
     }

@@ -1,6 +1,6 @@
 import { IWritableRepo } from '../db/repo.interface';
 import { IWritableCrudService } from './interface.service';
-import { DeepPartial, FindConditions } from 'typeorm';
+import { DeepPartial, FindOptionsWhere } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Inject, Injectable, Type } from '@nestjs/common';
 
@@ -20,7 +20,7 @@ export function WritableCrudService<Entity, B extends Type, R extends IWritableR
       return this.writeRepo.deleteOne(id);
     }
     updateOne(
-      idOrConditions: string | FindConditions<Entity>,
+      idOrConditions: string | FindOptionsWhere<Entity>,
       partialEntity: QueryDeepPartialEntity<Entity>,
     ): // ...options: any[]
     Promise<boolean> {

@@ -1,5 +1,5 @@
 import { IReadableRepo } from '../db/repo.interface';
-import { DeepPartial, FindConditions, FindManyOptions, FindOneOptions } from 'typeorm';
+import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
 import { IReadableCrudService } from './interface.service';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import { IConnection } from '@bits/bits.types';
@@ -26,7 +26,7 @@ export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
       return this.readRepo.findNestedAndCount(filter);
     }
     findOne(
-      id: string | FindOneOptions<M> | FindConditions<M>,
+      id: string | FindOneOptions<M> | FindOptionsWhere<M>,
       options?: FindOneOptions<M>,
     ): Promise<M> {
       return this.readRepo.findOne(id, options);

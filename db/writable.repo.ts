@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException, Type } from '@nestjs/common';
-import { Repository, DeepPartial, FindConditions, UpdateResult, DeleteResult } from 'typeorm';
+import { Repository, DeepPartial, UpdateResult, DeleteResult, FindOptionsWhere } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
@@ -19,7 +19,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
       }
 
       public async update(
-        idOrConditions: string | FindConditions<Entity>,
+        idOrConditions: string | FindOptionsWhere<Entity>,
         partialEntity: QueryDeepPartialEntity<Entity>,
         // ...options: any[]
       ): Promise<boolean> {
@@ -61,7 +61,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
 
       // fast query
       public async hardDelete(
-        criteria: string | number | FindConditions<Entity>,
+        criteria: string | number | FindOptionsWhere<Entity>,
         /* ...options: any[] */
       ): Promise<DeleteResult> {
         try {

@@ -9,8 +9,13 @@ import { memoize } from 'lodash';
 import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
 
 export const getOrCreateFindManyInput = memoize(
-  <M>(ModelCls: Type<M>): Type<IGrpcFindManyInput<M>> => {
+  <M>(ModelCls: Type<M>, isSimple = false): Type<IGrpcFindManyInput<M>> => {
     const F = getOrCreateDefaultFilter(ModelCls);
+    if (isSimple) {
+      @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
+      class GenericFindManyInput {}
+      return GenericFindManyInput;
+    }
     @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
     class GenericFindManyInput {
       @GrpcFieldDef(() => OffsetPagination, { nullable: true })

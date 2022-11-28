@@ -1,17 +1,13 @@
-import { EntityFieldsNames } from 'typeorm/common/EntityFieldsNames';
 import { Sort } from '../grpc/grpc.dto';
 import { renameKeyNames } from '../bits.utils';
 import { allParsingInstructions, MongoQueryParser } from '@ucast/mongo';
 import { allInterpreters, createSqlInterpreter } from '@ucast/sql';
+import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 
-type TypeORMOrderBy<Entity> = {
-  [P in EntityFieldsNames<Entity>]?: 'ASC' | 'DESC' | 1 | -1;
-};
-
-export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): TypeORMOrderBy<T> {
-  const obj: TypeORMOrderBy<T> = {};
+export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOptionsOrder<T> {
+  const obj: FindOptionsOrder<T> = {};
   for (const o of orderBy) {
-    obj[o.field as keyof TypeORMOrderBy<T>] = o.direction;
+    obj[o.field] = o.direction;
   }
   return obj;
 }

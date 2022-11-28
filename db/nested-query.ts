@@ -7,7 +7,7 @@ import {
   // WhereExpression,
   FindOperator,
   Repository,
-  FindConditions,
+  FindOptionsRelationByString,
 } from 'typeorm';
 import * as _ from 'lodash';
 // import { Class } from '@nestjs-query/core';
@@ -208,7 +208,12 @@ export class NestedQuery<T> {
     // get relations from filter
     const filterRels = this.getRelsFromFilter(where);
     // const relUnion = union(, relations || []);
-    this.applyJoins(relations || [], filterRels, this.query, aliasMap);
+    this.applyJoins(
+      (relations as FindOptionsRelationByString) || [],
+      filterRels,
+      this.query,
+      aliasMap,
+    );
     if (where) this.applyFilter(this.baseAlias, where, this.query, aliasMap);
     if (orderBy) {
       for (const o of Object.keys(orderBy)) {
