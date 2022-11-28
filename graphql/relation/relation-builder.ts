@@ -2,10 +2,10 @@ import { Inject, Type } from '@nestjs/common';
 import { Info, Parent, ResolveField } from '@nestjs/graphql';
 import { ICrudService } from '@bits/services/interface.service';
 import { GraphQLResolveInfo } from 'graphql/type';
-import { getRelations } from './relation.decorator';
-import { crudServiceReflector } from '../../services/crud.constants';
 import { lowercaseFirstLetter } from '@core/utils';
 import { In } from 'typeorm';
+import { getRelations } from './relation.decorator';
+import { crudServiceReflector } from '../../services/crud.constants';
 
 const servicesToInjectIntoResolvers: { dto: any; resolver: any; svcName: string }[] = [];
 
@@ -46,12 +46,12 @@ export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver:
         info: GraphQLResolveInfo,
       ) {
         // get the corresponding service and run
-        const svc = this[svcName(relName)];
+        const relSvc = this[svcName(relName)];
         const opts = one[relName];
 
-        const ownForeignKey = opts.customForeignKey?.ownForeignKey || `${relName}Id`;
+        const ownForeignKey = opts.customForeignKey?.ownForeignKey || (`${relName}Id` as keyof T);
         const value = parent[ownForeignKey];
-        return svc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
+        return relSvc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
       };
       buildRel(true, relName, CrudResolver, one[relName].DTO, svcName(relName));
     }
@@ -60,32 +60,34 @@ export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver:
     for (const relName of Object.keys(many)) {
       CrudResolver.prototype[relName] = async function resolveMany(parent: T) {
         // get the corresponding service and run
-        const svc: ICrudService<any> = this[svcName(relName)];
+        const relSvc: ICrudService<any> = this[svcName(relName)];
         const opts = many[relName];
         // IF simpleArray - join with the other table
 
         let nodes;
 
         if (opts.manyToManyByArr) {
-          const refArray = parent[opts.manyToManyByArr.arrayName!];
+          const refArray = parent[opts.manyToManyByArr.arrayName];
+          if (!Array.isArray(refArray))
+            throw new Error(`${opts.manyToManyByArr.arrayName} not an array!`);
           const refField = opts.manyToManyByArr.referencedFieldName!;
-          nodes = await svc.findMany({
+          nodes = await relSvc.findMany({
             where: { [refField]: In(refArray) },
           });
         } else if (opts.manyToManyByRefs) {
-          const refField = opts.manyToManyByRefs.ownFieldThatIsReferenced!;
-          const ownIdField = opts.manyToManyByRefs.ownIdField || 'id';
-          nodes = await svc.findMany({
+          const refField = opts.manyToManyByRefs.ownFieldThatIsReferenced;
+          const ownIdField = opts.manyToManyByRefs.ownIdField || ('id' as keyof T);
+          nodes = await relSvc.findMany({
             where: { [refField]: parent[ownIdField] },
           });
         } else {
           // simple one to many
           // TODO
           const defaultIdField = `${lowercaseFirstLetter(DTOCls.name)}Id`;
-          nodes = await svc.findMany({
+          nodes = await relSvc.findMany({
             where: {
               [opts.oneToMany?.referencedFieldName || defaultIdField]:
-                parent[opts.oneToMany?.ownIdField || 'id'],
+                parent[opts.oneToMany?.ownIdField || ('id' as keyof T)],
             },
           });
         }

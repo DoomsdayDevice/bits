@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
-import { convertServiceFilterToGrpc, renameFunc } from '@bits/bits.utils';
+import { convertServiceInputToGrpc, renameFunc } from '@bits/bits.utils';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IConnection } from '@bits/bits.types';
@@ -11,11 +11,12 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 
-export type WrappedGrpcService<Svc, From extends ObjectLiteral, To> = Omit<
-  Svc,
-  'findMany' | 'createOne' | 'findOne' | 'updateOne' | 'deleteOne'
-> &
-  ICrudService<From> & {
+export type WrappedGrpcService<
+  Svc extends IGrpcService<From>,
+  From extends ObjectLiteral,
+  To,
+> = Omit<Svc, 'findMany' | 'createOne' | 'findOne' | 'updateOne' | 'deleteOne'> &
+  ICrudService<To> & {
     grpcSvc: Svc;
     validate(input: From): To;
     validate(input: From[]): To[];
@@ -25,15 +26,17 @@ export type WrappedGrpcService<Svc, From extends ObjectLiteral, To> = Omit<
  * создает и оборачивает gRPC сервис
  */
 export function getDefaultGrpcCrudServiceWrapper<
-  Service extends IGrpcService<Enums, T>,
-  T extends object,
-  Enums,
-  DTO extends object = T,
+  Service extends IGrpcService<From>,
+  From extends object,
+  To extends object = From,
   Excluded extends keyof Service = never,
->(packageToken: string, serviceName: string, DTOCls?: Type<DTO>): any {
-  // ): Type<Omit<WrappedGrpcService<Service, T, DTO>, Excluded>> {
+>(
+  packageToken: string,
+  serviceName: string,
+  DTOCls?: Type<To>,
+): Type<Omit<WrappedGrpcService<Service, From, To>, Excluded>> {
   @Injectable()
-  class GenericGrpcService implements OnModuleInit, ICrudService<T> {
+  class GenericGrpcService implements OnModuleInit, ICrudService<To> {
     public grpcSvc!: Service;
 
     constructor(
@@ -50,47 +53,49 @@ export function getDefaultGrpcCrudServiceWrapper<
       }
     }
 
-    validate(input: T): T;
-    validate(input: T[]): T[];
-    validate(input: T | T[]): T | T[] {
+    validate(input: From): To;
+    validate(input: From[]): To[];
+    validate(input: From | From[]): To | To[] {
       if (DTOCls) return transformAndValidate(DTOCls, input as any);
-      return input as T;
+      return input as any;
     }
 
     // findOne(input: FindOneInput) {
     //   return this.svc.findOne(input);
     // }
 
-    async findMany(input: FindManyOptions<T>): Promise<T[]> {
-      const many = await this.grpcSvc.findMany(convertServiceFilterToGrpc(input));
+    async findMany(input: FindManyOptions<To>): Promise<To[]> {
+      const many = await this.grpcSvc.findMany(
+        convertServiceInputToGrpc(this.convertDtoInputToGrpc(input)),
+      );
       const valid = this.validate(many.nodes);
       return valid;
     }
 
-    async findManyAndCount(filter?: NestedFindManyOpts<T>): Promise<IConnection<T>> {
+    async findManyAndCount(filter?: NestedFindManyOpts<To>): Promise<IConnection<To>> {
       const many = await this.grpcSvc.findMany(filter as any);
       const valid = this.validate(many.nodes);
 
       return { ...many, nodes: valid };
     }
 
-    async createOne(input: any): Promise<T> {
+    async createOne(input: any): Promise<To> {
       if (DTOCls) {
         // TODO add validation with CreateOneDTO
         const newOne = transformAndValidate(DTOCls, input as any);
         return transformAndValidate(DTOCls, (await this.grpcSvc.createOne(newOne)) as any);
       }
-      return (await this.grpcSvc.createOne(input)) as T;
+      return (await this.grpcSvc.createOne(input)) as To;
     }
 
-    async deleteOne(id: string | FindOptionsWhere<T>): Promise<boolean> {
+    async deleteOne(id: string | FindOptionsWhere<To>): Promise<boolean> {
       await this.grpcSvc.deleteOne(id);
       return true;
     }
 
     async updateOne(
-      idOrConditions: string | FindOptionsWhere<T>,
-      partialEntity: QueryDeepPartialEntity<T>,
+      idOrConditions: string | FindOptionsWhere<To>,
+      partialEntity: QueryDeepPartialEntity<To>,
       // ...options: any[]
     ): Promise<boolean> {
       const update: any = { ...partialEntity, id: idOrConditions };
@@ -104,15 +109,19 @@ export function getDefaultGrpcCrudServiceWrapper<
     }
 
     async findOne(
-      id: string | FindOneOptions<T> | FindOptionsWhere<T>,
-      options?: FindOneOptions<T>,
-    ): Promise<T> {
-      return this.grpcSvc.findOne({ id } as any);
+      id: string | FindOneOptions<To> | FindOptionsWhere<To>,
+      options?: FindOneOptions<To>,
+    ): Promise<To> {
+      return this.grpcSvc.findOne({ id } as any) as any;
     }
 
-    async count(filter?: FindManyOptions<T>): Promise<number> {
+    async count(filter?: FindManyOptions<To>): Promise<number> {
       const { totalCount } = await this.grpcSvc.findMany(filter as any);
       return totalCount;
+    }
+
+    convertDtoInputToGrpc(input: FindManyOptions<To>): FindManyOptions<From> {
+      return input as any;
     }
   }
   renameFunc(GenericGrpcService, serviceName);

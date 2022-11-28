@@ -13,6 +13,7 @@ import { getGenericCrudService } from '@bits/db/generic-crud.service';
 import { ObjectLiteral } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
+import { IGrpcService } from '@bits/grpc/grpc.interface';
 
 export class GqlCrudModule<T extends ObjectLiteral> {
   private modelName: string;
@@ -61,7 +62,10 @@ export class GqlCrudModule<T extends ObjectLiteral> {
   }
 
   buildGrpcService(): Type<ICrudService<T>> {
-    return getDefaultGrpcCrudServiceWrapper('CORE_PACKAGE', this.grpcServiceName);
+    return getDefaultGrpcCrudServiceWrapper<IGrpcService<unknown>, any, T>(
+      'CORE_PACKAGE',
+      this.grpcServiceName,
+    );
   }
 
   buildTypeormService(): Type<ICrudService<T>> {

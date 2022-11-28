@@ -2,9 +2,11 @@
 import * as _ from 'lodash';
 import { Transform, TransformFnParams } from 'class-transformer';
 import { Defined } from '@bits/bits.types';
-import { clone, cloneDeep, isObject } from 'lodash';
+import { clone, isNil, isObject } from 'lodash';
 import { Inject } from '@nestjs/common';
-import { FindOptionsWhere, ILike, In, Like } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
+import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
+import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -92,16 +94,39 @@ export function convertGraphqlFilterToService<T>(filter: any) {
   return convertGrpcFilterToService<T>(filter);
 }
 
-export function convertServiceFilterToGrpc<T>(filter: any) {
-  const newFilter: any = {};
-  for (const key of Object.keys(filter)) {
-    const comparisonField = filter[key];
-    if (comparisonField._type) {
-      if (comparisonField._type === 'in') newFilter[key] = { in: comparisonField._value };
-    } else {
-      newFilter[key] = convertServiceFilterToGrpc(comparisonField);
+export function convertServiceInputToGrpc<T>(input: FindManyOptions<T>): IGrpcFindManyInput<T> {
+  const grpcInput: IGrpcFindManyInput<T> = {};
+
+  if (input.where) grpcInput.filter = convertServiceFilterToGrpc(input.where);
+  if (input.order) grpcInput.sorting = convertServiceOrderByToGrpc(input.order);
+  if (!isNil(input.skip) && !isNil(input.take))
+    grpcInput.paging = { offset: input.skip, limit: input.take };
+
+  return grpcInput;
+}
+
+export function convertServiceFilterToGrpc<T>(where: FindOptionsWhere<T> | FindOptionsWhere<T>[]) {
+  const grpcFilter: any = {};
+  if (Array.isArray(where)) {
+  } else {
+    for (const key of Object.keys(where) as any[]) {
+      const comparisonField = where[key as keyof FindOptionsWhere<T>] as any;
+      if (comparisonField._type) {
+        if (comparisonField._type === 'in') grpcFilter[key] = { in: comparisonField._value };
+      } else {
+        grpcFilter[key] = convertServiceFilterToGrpc(comparisonField);
+      }
     }
   }
 
-  return filter;
+  return grpcFilter;
+}
+
+export function convertServiceOrderByToGrpc<T>(order: FindOptionsOrder<T>) {
+  return {
+    values: (Object.keys(order) as (keyof FindOptionsOrder<T>)[]).map(k => ({
+      field: k as string,
+      direction: (order[k] as any).direction,
+    })),
+  };
 }

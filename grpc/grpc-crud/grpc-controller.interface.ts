@@ -11,9 +11,9 @@ export interface IGrpcWriteController<M, RM = M> {
   deleteOne(user: FindOptionsWhere<M>): Promise<DeleteOneResponse>;
 }
 
-export interface IGrpcReadController<M, Enums> {
+export interface IGrpcReadController<M> {
   findOne(input: FindByIdInput): Promise<M>;
-  findMany(input: IGrpcFindManyInput<M, Enums>): Promise<IGrpcFindManyResponse<M>>;
+  findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
 }
 
 export interface IWritableGrpcControllerOpts<M extends ObjectLiteral, B extends Type, RM = M> {
@@ -32,10 +32,10 @@ export interface IGrpcFindManyResponse<M> {
   nodes: M[];
 }
 
-export interface IGrpcFindManyInput<M, Enums> {
+export interface IGrpcFindManyInput<M> {
   paging?: OffsetPagination;
 
-  filter?: IGrpcFilter<M, Enums>;
+  filter?: IGrpcFilter<M>;
 
   sorting?: IListValue<Sort>;
 }

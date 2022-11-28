@@ -69,30 +69,30 @@ export interface ResolverRelationReference<DTO, Reference>
   complexity?: Complexity;
 }
 
-export type ResolverRelation<Relation> = {
+export type ResolverRelation<T, Relation> = {
   /**
    * The class type of the relation.
    */
   DTO: Type<Relation>;
 
   customForeignKey?: {
-    ownForeignKey: string;
-    referencedKey: string;
+    ownForeignKey: keyof T;
+    referencedKey: keyof Relation;
   };
 
   manyToManyByArr?: {
-    arrayName: string;
-    referencedFieldName: string;
+    arrayName: keyof T;
+    referencedFieldName: keyof Relation;
   };
 
   manyToManyByRefs?: {
-    ownFieldThatIsReferenced: string;
-    ownIdField: string;
+    ownFieldThatIsReferenced: keyof Relation;
+    ownIdField: keyof T;
     simplify?: boolean;
   };
   oneToMany?: {
-    referencedFieldName: string;
-    ownIdField?: string;
+    referencedFieldName: keyof Relation;
+    ownIdField?: keyof T;
   };
 
   /**
@@ -141,27 +141,27 @@ export interface AuthorizerOptions<DTO> {
   authorize: (context: any) => IGqlFilter<DTO> | Promise<IGqlFilter<DTO>>;
 }
 
-export type RelationsOpts = {
+export type RelationsOpts<T> = {
   /**
    * All relations that are a single record
    */
-  one?: RelationTypeMap<ResolverRelation<unknown>>;
+  one?: RelationTypeMap<ResolverRelation<T, unknown>>;
   /**
    * All relations that have multiple records
    */
-  many?: RelationTypeMap<ResolverRelation<unknown>>;
+  many?: RelationTypeMap<ResolverRelation<T, unknown>>;
 };
 
-export interface RelationDescriptor<Relation> {
+export interface RelationDescriptor<T, Relation> {
   name: string;
   relationTypeFunc: () => Type<Relation> | Type<Relation>[];
   isMany: boolean;
-  relationOpts?: RelationsOpts;
+  relationOpts?: RelationsOpts<T>;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ReferencesOpts<DTO> = RelationTypeMap<ResolverRelationReference<DTO, any>>;
 
-export type RelationDecoratorOpts<Relation> = Omit<ResolverRelation<Relation>, 'DTO'>;
+export type RelationDecoratorOpts<T, Relation> = Omit<ResolverRelation<T, Relation>, 'DTO'>;
 export type RelationTypeFunc<Relation> = () => Type<Relation> | Type<Relation>[];
 export type ConnectionTypeFunc<Relation> = () => Type<Relation>;
 export type RelationClassDecorator<DTO> = <Cls extends Type<DTO>>(DTOClass: Cls) => Cls | void;

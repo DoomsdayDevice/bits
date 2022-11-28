@@ -65,19 +65,17 @@ export type GrpcStringFieldComparison =
       notILike: string;
     };
 
-export type ArrayComparisonType<T, Enums> = {
-  elemMatch: GrpcFilterComparisons<T, Enums>;
+export type ArrayComparisonType<T> = {
+  elemMatch: GrpcFilterComparisons<T>;
 };
 
 export type GrpcBooleanFieldComparisons = { is: boolean; isNot: boolean };
 
 type GrpcFilterFieldComparison<
   FieldType,
-  Enums,
   IsKeys extends true | false,
-> = FieldType extends Enums
-  ? GrpcCommonFieldComparisonType<FieldType>
-  : FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
+> /* FieldType extends ProjectEnums
+  ? GrpcCommonFieldComparisonType<FieldType> */ = FieldType extends string | String // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcStringFieldComparison
   : FieldType extends boolean | Boolean // eslint-disable-line @typescript-eslint/ban-types
   ? GrpcBooleanFieldComparisons
@@ -86,17 +84,15 @@ type GrpcFilterFieldComparison<
   : FieldType extends number | Date | RegExp | bigint | BuiltInTypes[] | symbol
   ? GrpcCommonFieldComparisonType<FieldType>
   : FieldType extends Array<infer U>
-  ? ArrayComparisonType<U, Enums> // eslint-disable-next-line @typescript-eslint/ban-types
+  ? ArrayComparisonType<U> // eslint-disable-next-line @typescript-eslint/ban-types
   : FieldType extends { values: Array<infer U> }
-  ? ArrayComparisonType<U, Enums>
+  ? ArrayComparisonType<U>
   : IsKeys extends true
-  ? GrpcCommonFieldComparisonType<FieldType> &
-      GrpcStringFieldComparison &
-      IGrpcFilter<FieldType, Enums>
-  : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType, Enums>;
+  ? GrpcCommonFieldComparisonType<FieldType> & GrpcStringFieldComparison & IGrpcFilter<FieldType>
+  : GrpcCommonFieldComparisonType<FieldType> | IGrpcFilter<FieldType>;
 
-export type GrpcFilterComparisons<T, Enums> = {
-  [K in keyof T]?: GrpcFilterFieldComparison<T[K], Enums, false>;
+export type GrpcFilterComparisons<T> = {
+  [K in keyof T]?: GrpcFilterFieldComparison<T[K], false>;
 };
 
-export type IGrpcFilter<M, Enums> = GrpcFilterComparisons<M, Enums>;
+export type IGrpcFilter<M> = GrpcFilterComparisons<M>;

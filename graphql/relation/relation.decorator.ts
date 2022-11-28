@@ -33,16 +33,16 @@ export const mergeBaseResolverOpts = <Into extends BaseResolverOptions>(
   return { ...into, guards, interceptors, pipes, filters, decorators };
 };
 
-export function getRelations<DTO>(DTOClass: Type<DTO>, opts?: any): RelationsOpts {
+export function getRelations<DTO>(DTOClass: Type<DTO>, opts?: any): RelationsOpts<DTO> {
   const relationDescriptors = getRelationsDescriptors(DTOClass);
   return convertRelationsToOpts(relationDescriptors, opts);
 }
 
-function convertRelationsToOpts(
-  relations: RelationDescriptor<unknown>[],
+function convertRelationsToOpts<T>(
+  relations: RelationDescriptor<T, unknown>[],
   baseOpts?: BaseResolverOptions,
-): RelationsOpts {
-  const relationOpts: RelationsOpts = {};
+): RelationsOpts<T> {
+  const relationOpts: RelationsOpts<T> = {};
   relations.forEach(r => {
     const relationType = r.relationTypeFunc();
     const DTO = Array.isArray(relationType) ? relationType[0] : relationType;
@@ -65,18 +65,18 @@ export function getRelationNames<DTO>(DTOCls: Type<DTO>): (keyof DTO)[] {
   return rels as any;
 }
 
-function getRelationsDescriptors<DTO>(DTOClass: Type<DTO>): RelationDescriptor<unknown>[] {
+function getRelationsDescriptors<DTO>(DTOClass: Type<DTO>): RelationDescriptor<DTO, unknown>[] {
   return getPrototypeChain(DTOClass).reduce((relations, cls) => {
     const relationNames = relations.map(t => t.name);
-    const metaRelations = reflector.get<unknown, RelationDescriptor<unknown>>(cls) ?? [];
+    const metaRelations = reflector.get<unknown, RelationDescriptor<DTO, unknown>>(cls) ?? [];
     const inheritedRelations = metaRelations.filter(t => !relationNames.includes(t.name));
     return [...inheritedRelations, ...relations];
-  }, [] as RelationDescriptor<unknown>[]);
+  }, [] as RelationDescriptor<DTO, unknown>[]);
 }
 
 export function FilterableGqlRelation<DTO extends Type<unknown>, Relation>(
   relationTypeFunc: RelationTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
+  options?: RelationDecoratorOpts<DTO, Relation>,
 ) {
   return GqlRelation<DTO, Relation>(relationTypeFunc, { ...options, allowFiltering: true });
 }
@@ -84,7 +84,7 @@ export function FilterableGqlRelation<DTO extends Type<unknown>, Relation>(
 export function Connection<DTO, Relation>(
   name: string,
   relationTypeFunc: ConnectionTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
+  options?: RelationDecoratorOpts<DTO, Relation>,
 ): RelationClassDecorator<DTO> {
   return <Cls extends Type<DTO>>(DTOClass: Cls): Cls | void => {
     reflector.append(DTOClass, { name, isMany: true, relationOpts: options, relationTypeFunc });
@@ -95,14 +95,14 @@ export function Connection<DTO, Relation>(
 export function FilterableConnection<DTO, Relation>(
   name: string,
   relationTypeFunc: ConnectionTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
+  options?: RelationDecoratorOpts<DTO, Relation>,
 ): RelationClassDecorator<DTO> {
   return Connection<DTO, Relation>(name, relationTypeFunc, { ...options, allowFiltering: true });
 }
 
 export function GqlRelation<DTO extends Object, Relation>(
   relationTypeFunc: RelationTypeFunc<Relation>,
-  options?: RelationDecoratorOpts<Relation>,
+  options?: RelationDecoratorOpts<DTO, Relation>,
 ) {
   return <Cls extends Type<DTO>>(dto: DTO, name: string): void => {
     const DTOClass = dto.constructor;
