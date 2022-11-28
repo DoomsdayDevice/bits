@@ -1,6 +1,5 @@
 import { Type } from '@nestjs/common';
 import { IEnumEntity } from '../../../src/core/db/db.interface';
-import { registerEnum } from '../grpc/decorators/enum.decorator';
 import { BeforeInsert, BeforeUpdate, Entity, PrimaryColumn, Unique } from 'typeorm';
 import { GrpcMessageDef } from '../grpc/decorators/message.decorator';
 import { IsAlpha } from 'class-validator';

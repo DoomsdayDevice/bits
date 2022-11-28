@@ -14,7 +14,7 @@ import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 export type WrappedGrpcService<
   Svc extends IGrpcService<From>,
   From extends ObjectLiteral,
-  To,
+  To extends ObjectLiteral,
 > = Omit<Svc, 'findMany' | 'createOne' | 'findOne' | 'updateOne' | 'deleteOne'> &
   ICrudService<To> & {
     grpcSvc: Svc;

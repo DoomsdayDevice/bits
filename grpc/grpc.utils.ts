@@ -1,5 +1,3 @@
-import { FindOptionsWhere, ILike, In, Like } from 'typeorm';
-
 /**
  * promisify all methods on service except specified
  * for example for streaming

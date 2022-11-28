@@ -69,7 +69,7 @@ export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver:
         if (opts.manyToManyByArr) {
           const refArray = parent[opts.manyToManyByArr.arrayName];
           if (!Array.isArray(refArray))
-            throw new Error(`${opts.manyToManyByArr.arrayName} not an array!`);
+            throw new Error(`${String(opts.manyToManyByArr.arrayName)} not an array!`);
           const refField = opts.manyToManyByArr.referencedFieldName!;
           nodes = await relSvc.findMany({
             where: { [refField]: In(refArray) },
