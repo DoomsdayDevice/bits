@@ -47,7 +47,7 @@ export const WriteResolverMixin =
         return this.svc.createOne(input);
       }
     }
-    renameFunc(GenericResolver, `${modelName}Resolver`);
+    renameFunc(GenericResolver, `Generic${modelName}Resolver`);
 
     return GenericResolver as any;
   };

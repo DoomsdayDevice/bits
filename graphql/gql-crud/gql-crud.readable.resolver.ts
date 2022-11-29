@@ -84,7 +84,7 @@ export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUs
       return null;
     }
   }
-  renameFunc(GenericResolver, `${modelName}Resolver`);
+  renameFunc(GenericResolver, `Generic${modelName}Resolver`);
 
   return GenericResolver as any;
 }
