@@ -5,9 +5,11 @@ import { GraphQLResolveInfo } from 'graphql/type';
 import { lowercaseFirstLetter } from '@core/utils';
 import { In } from 'typeorm';
 import * as DataLoader from 'dataloader';
-import { lowerFirst, upperFirst } from 'lodash';
+import { lowerFirst, memoize, upperFirst } from 'lodash';
 import { getRelations } from './relation.decorator';
 import { crudServiceReflector } from '../../services/crud.constants';
+import { ensureOrder } from '@bits/db/conversion.utils';
+import { ResolverRelation } from '@bits/graphql/relation/relation.interface';
 
 const servicesToInjectIntoResolvers: { dto: any; resolver: any; svcName: string }[] = [];
 
@@ -31,7 +33,14 @@ export function injectServices() {
   }
 }
 
-function buildRel<T>(one: boolean, relName: string, Resolver: Type, relDTO: Type, svcName: string) {
+function buildRel<T>(
+  one: boolean,
+  relName: string,
+  Resolver: Type,
+  relDTO: Type,
+  svcName: string,
+  opts: ResolverRelation<T, unknown>,
+) {
   // send to inject service
   servicesToInjectIntoResolvers.push({ dto: relDTO, resolver: Resolver, svcName });
 
@@ -43,9 +52,13 @@ function buildRel<T>(one: boolean, relName: string, Resolver: Type, relDTO: Type
   // Context(loaderName)(Resolver.prototype, relName, 2);
   // dataloaders[loaderName] = createLoader()
 
-  ResolveField(relName, () => (one ? relDTO : [relDTO]))(Resolver.prototype, relName, {
-    value: Resolver.prototype[relName],
-  });
+  ResolveField(relName, () => (one ? relDTO : [relDTO]), { nullable: opts.nullable })(
+    Resolver.prototype,
+    relName,
+    {
+      value: Resolver.prototype[relName],
+    },
+  );
 }
 
 export const createLoader = (
@@ -55,7 +68,7 @@ export const createLoader = (
   return new DataLoader(async (ids: readonly string[]) => {
     const { svc } = dataloaders.find(l => loaderName === l.name)!;
     const many = await svc.findMany({ where: { id: In(ids as any) } });
-    return many;
+    return ensureOrder({ docs: many, keys: ids, prop: 'id' });
   });
 };
 
@@ -68,36 +81,38 @@ export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver:
   if (one)
     // TODO apply filters like getFilterForResource
     for (const relName of Object.keys(one)) {
-      const loaderName = `${lowerFirst(DTOCls.name)}${upperFirst(relName)}Loader`;
+      const opts = one[relName];
+      const loaderName = `${lowerFirst(opts.DTO.name)}Loader`;
       CrudResolver.prototype[relName] = async function resolveOne(
         parent: T,
         info: GraphQLResolveInfo,
       ) {
         // get the corresponding service and run
         const relSvc = this[svcName(relName)];
-        const opts = one[relName];
 
         const ownForeignKey = opts.customForeignKey?.ownForeignKey || (`${relName}Id` as keyof T);
         const value = parent[ownForeignKey];
-        return relSvc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
+        if (!value) return null;
         return dataloaders.find(l => loaderName === l.name)!.loader.load(value);
         // TODO referencedKey in dataloaders
         // return svc.findOne({ [opts.customForeignKey?.referencedKey || 'id']: value });
       };
-      dataloaders.push({
-        name: loaderName,
-        loader: createLoader(CrudResolver, loaderName),
-        RelDTO: one[relName].DTO,
-      } as any);
-      buildRel(true, relName, CrudResolver, one[relName].DTO, svcName(relName));
+      const exists = dataloaders.find(dl => dl.name === loaderName);
+      if (!exists)
+        dataloaders.push({
+          name: loaderName,
+          loader: createLoader(CrudResolver, loaderName),
+          RelDTO: one[relName].DTO,
+        } as any);
+      buildRel(true, relName, CrudResolver, one[relName].DTO, svcName(relName), opts);
     }
 
   if (many)
     for (const relName of Object.keys(many)) {
+      const opts = many[relName];
       CrudResolver.prototype[relName] = async function resolveMany(parent: T) {
         // get the corresponding service and run
         const relSvc: ICrudService<any> = this[svcName(relName)];
-        const opts = many[relName];
         // IF simpleArray - join with the other table
 
         let nodes;
@@ -131,6 +146,6 @@ export function buildRelationsForModelResolver<T>(DTOCls: Type<T>, CrudResolver:
 
         return nodes;
       };
-      buildRel<T>(false, relName, CrudResolver, many[relName].DTO, svcName(relName));
+      buildRel<T>(false, relName, CrudResolver, many[relName].DTO, svcName(relName), opts);
     }
 }

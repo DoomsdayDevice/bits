@@ -15,7 +15,7 @@ export interface IReadableCrudService<Entity extends ObjectLiteral> {
   findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
   findManyAndCount(filter?: NestedFindManyOpts<Entity>): Promise<IConnection<Entity>>;
   findOne(
-    id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
+    id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
 }
