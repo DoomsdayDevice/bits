@@ -46,12 +46,14 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       const filter = convertGrpcFilterToService(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
-      console.log({ in: input.filter, filter });
 
-      return await this.readSvc.findManyAndCount({
+      const res = await this.readSvc.findManyAndCount({
         where: filter,
         orderBy: order as any,
+        skip: input.paging?.offset,
+        take: input.paging?.limit,
       });
+      return res;
     }
   }
 

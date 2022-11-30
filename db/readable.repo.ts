@@ -74,7 +74,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         return nodes;
       }
 
-      public async findNestedAndCount({
+      public async findAndCount({
         relations,
         where,
         take,
@@ -82,13 +82,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         order,
       }: // orderBy,
       NestedFindManyOpts<Entity>): Promise<IConnection<Entity>> {
-        const complexQuery = new NestedQuery(
-          EntityCls,
-          this.readRepo.metadata.discriminatorValue as any,
-          this.readRepo,
-        );
-
-        const { totalCount, nodes } = await complexQuery.execute({
+        const [nodes, totalCount] = await this.readRepo.findAndCount({
           relations,
           where,
           take,
@@ -96,6 +90,20 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
           order,
         });
         return { totalCount, nodes };
+        // const complexQuery = new NestedQuery(
+        //   EntityCls,
+        //   this.readRepo.metadata.discriminatorValue as any,
+        //   this.readRepo,
+        // );
+        //
+        // const { totalCount, nodes } = await complexQuery.execute({
+        //   relations,
+        //   where,
+        //   take,
+        //   skip,
+        //   order,
+        // });
+        // return { totalCount, nodes };
       }
     }
     return ReadableRepo as any;

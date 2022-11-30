@@ -23,7 +23,7 @@ export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
       return this.readRepo.findNested(filter);
     }
     findManyAndCount(filter?: FindManyOptions<M>): Promise<IConnection<M>> {
-      return this.readRepo.findNestedAndCount(filter);
+      return this.readRepo.findAndCount(filter);
     }
     findOne(
       id: string | FindOneOptions<M> | FindOptionsWhere<M>,
