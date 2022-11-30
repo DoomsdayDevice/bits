@@ -32,6 +32,10 @@ export class GqlCrudModule<T extends ObjectLiteral> {
 
   private type: 'grpc' | 'typeorm';
 
+  private resources: readonly any[];
+
+  private abilityFactory: any;
+
   constructor({
     Model,
     modelName,
@@ -42,6 +46,8 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     imports,
     type = 'typeorm',
     readOnly = false,
+    resources,
+    abilityFactory,
   }: GqlWritableCrudConfig<T>) {
     this.Model = Model;
     this.modelName = modelName || Model.name;
@@ -49,6 +55,8 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     this.type = type;
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
     this.imports = imports || [];
+    this.resources = resources;
+    this.abilityFactory = abilityFactory;
 
     if (!Service) {
       if (type === 'grpc' || grpcServiceName) this.Service = this.buildGrpcService();
@@ -79,11 +87,27 @@ export class GqlCrudModule<T extends ObjectLiteral> {
       this.Model,
       this.Service,
       this.modelName,
-    )(ReadResolverMixin(this.Model, this.Service, this.pagination, this.modelName));
+    )(
+      ReadResolverMixin(
+        this.Model,
+        this.Service,
+        this.pagination,
+        this.resources,
+        this.modelName,
+        this.abilityFactory,
+      ),
+    );
   }
 
   buildReadResolver(): any {
-    return ReadResolverMixin(this.Model, this.Service, this.pagination, this.modelName);
+    return ReadResolverMixin(
+      this.Model,
+      this.Service,
+      this.pagination,
+      this.resources,
+      this.modelName,
+      this.abilityFactory,
+    );
   }
 
   makeCrud(): DynamicModule {

@@ -26,14 +26,19 @@ interface ICaslAbilityFactory<IUser> {
   createForUser(u: IUser): AnyAbility;
 }
 
-export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUser>(
+export function ReadResolverMixin<
+  T extends ObjectLiteral,
+  N extends string,
+  IUser,
+  Resources extends readonly any[],
+>(
   Model: Type<T>,
   Service: Type<ICrudService<T>>,
   pagination: boolean,
   // CurrentUser: () => ParameterDecorator,
+  resources: Resources,
   myModelName?: N,
-  CaslAbilityFactory?: ICaslAbilityFactory<IUser>,
-  resources?: any[],
+  CaslAbilityFactory?: Type<ICaslAbilityFactory<IUser>>,
 ): Type<IBaseServiceRead<T, N>> {
   const modelName = myModelName || Model.name;
   const plural = getPlural(modelName);
@@ -48,7 +53,7 @@ export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUs
   class GenericResolver {
     @Inject(Service) private svc!: ICrudService<T>;
 
-    @OptionalInject(CaslAbilityFactory) private abilityFactory?: ICaslAbilityFactory<IUser>;
+    private abilityFactory?: ICaslAbilityFactory<IUser>;
 
     @Query(() => Model)
     async [singular](@Args('input', { type: () => FindOneInput }) input: FindOneInput): Promise<T> {
@@ -72,7 +77,7 @@ export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUs
     /** filter that only leaves owned rows */
     getFilterForResource(resource: any, user: IUser, origFilter: any = {}): MongoQuery | null {
       if (!user) return origFilter;
-      if (resources?.includes(resource)) {
+      if (resources.includes(resource)) {
         let filter = null;
         if (this.abilityFactory) {
           const ability = this.abilityFactory.createForUser(user);
@@ -81,7 +86,7 @@ export function ReadResolverMixin<T extends ObjectLiteral, N extends string, IUs
         if (filter)
           return merge(origFilter, renameKeyNames(filter, { $elemMatch: 'elemMatch', $eq: 'eq' }));
       }
-      return null;
+      throw new Error('Endpoint not defined in resources');
     }
   }
   renameFunc(GenericResolver, `Generic${modelName}Resolver`);

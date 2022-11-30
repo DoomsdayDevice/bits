@@ -13,6 +13,8 @@ export interface GqlWritableCrudConfig<M> {
   /** using grpc or simply typeorm */
   type: 'grpc' | 'typeorm';
   readOnly?: boolean;
+  resources: readonly any[];
+  abilityFactory: any;
 }
 
 export interface IUpdateOneInput<T> {
