@@ -3,7 +3,7 @@ import { IsBoolean, IsDate, IsOptional } from 'class-validator';
 import { GraphQLUUID } from 'graphql-scalars';
 import { Type } from '@nestjs/common';
 import { FilterFieldComparison } from './filter-field-comparison.interface';
-import { IsUndefined } from './is-undefined.validator';
+import { IsUndefined } from '../validators/is-undefined.validator';
 
 /** @internal */
 let uuidFieldComparison: Type<FilterFieldComparison<string>>;

@@ -7,6 +7,7 @@ import { Inject } from '@nestjs/common';
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
 import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
+import { Sort } from '@bits/grpc/grpc.dto';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -94,13 +95,22 @@ export function convertGraphqlFilterToService<T>(filter: any) {
   return convertGrpcFilterToService<T>(filter);
 }
 
+export function applyCursorPagingToInput(input: any): { where: any; take: any; order: any } {
+  // add id > after
+  // how to add AND condition for the same field
+  input.order = { id: 'DESC' };
+  input.where.id = input.where.id || {};
+  // input.where.id;
+  return input;
+}
+
 export function convertServiceInputToGrpc<T>(input: FindManyOptions<T>): IGrpcFindManyInput<T> {
   const grpcInput: IGrpcFindManyInput<T> = {};
 
   if (input.where) grpcInput.filter = convertServiceFilterToGrpc(input.where);
   if (input.order) grpcInput.sorting = convertServiceOrderByToGrpc(input.order);
-  if (!isNil(input.skip) && !isNil(input.take))
-    grpcInput.paging = { offset: input.skip, limit: input.take };
+  if (!isNil(input.skip) || !isNil(input.take))
+    grpcInput.paging = { offset: input.skip || 0, limit: input.take || 0 };
 
   return grpcInput;
 }
@@ -114,6 +124,10 @@ export function convertServiceFilterToGrpc<T>(where: FindOptionsWhere<T> | FindO
       if (comparisonField._type) {
         if (comparisonField._type === 'in')
           grpcFilter[key] = { in: { values: comparisonField._value } };
+        else if (comparisonField._type === 'like')
+          grpcFilter[key] = { like: comparisonField._value };
+        else if (comparisonField._type === 'ilike')
+          grpcFilter[key] = { iLike: comparisonField._value };
       } else if (isObject(comparisonField)) {
         grpcFilter[key] = convertServiceFilterToGrpc(comparisonField);
       } else {
@@ -133,4 +147,20 @@ export function convertServiceOrderByToGrpc<T>(order: FindOptionsOrder<T>) {
       direction: (order[k] as any).direction,
     })),
   };
+}
+
+export function convertGqlOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOptionsOrder<T> {
+  const obj: FindOptionsOrder<T> = {};
+  for (const o of orderBy) {
+    obj[o.field as keyof FindOptionsOrder<T>] = o.direction as any;
+  }
+  return obj;
+}
+
+export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOptionsOrder<T> {
+  const obj: FindOptionsOrder<T> = {};
+  for (const o of orderBy) {
+    obj[o.field as keyof FindOptionsOrder<T>] = o.direction as any;
+  }
+  return obj;
 }

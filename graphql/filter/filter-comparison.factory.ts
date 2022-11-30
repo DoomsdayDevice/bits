@@ -15,7 +15,7 @@ import { EnumMetadata } from '@nestjs/graphql/dist/schema-builder/metadata';
 import { LazyMetadataStorage } from '@nestjs/graphql/dist/schema-builder/storages/lazy-metadata.storage';
 import { IsBoolean, IsOptional } from 'class-validator';
 import { SkipIf } from '@bits/graphql/filter/skip-if.decorator';
-import { IsUndefined } from '@bits/graphql/filter/is-undefined.validator';
+import { IsUndefined } from '@bits/graphql/validators/is-undefined.validator';
 import { Type as TransformerType } from 'class-transformer';
 import { GraphQLUUID } from 'graphql-scalars';
 import { getOrCreateUUIDFieldComparison } from '@bits/graphql/filter/uuid-field-comparison.type';

@@ -60,6 +60,10 @@ export function getGenericCrudService<T extends ObjectLiteral, DTO = T, Enums = 
     count(input: any) {
       return this.readRepo.count(input);
     }
+
+    getPrimaryColumnName() {
+      return 'id';
+    }
   }
 
   return GenericCrudService;

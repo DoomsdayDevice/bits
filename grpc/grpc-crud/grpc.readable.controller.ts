@@ -10,9 +10,8 @@ import { FindByIdInput } from '../grpc.dto';
 import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import { convertGrpcOrderByToTypeorm } from '@bits/db/db.utils';
 import { Logger } from '../../../../src/infrastructure/logger/logger';
-import { convertGrpcFilterToService } from '@bits/bits.utils';
+import { convertGrpcFilterToService, convertGrpcOrderByToTypeorm } from '@bits/bits.utils';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
@@ -47,6 +46,7 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
 
+      console.log({ o: input.paging?.offset, take: input.paging?.limit });
       const res = await this.readSvc.findManyAndCount({
         where: filter,
         orderBy: order as any,

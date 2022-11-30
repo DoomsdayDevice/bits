@@ -105,6 +105,9 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         // });
         // return { totalCount, nodes };
       }
+      getPrimaryColumnName(): keyof Entity {
+        return 'id' as any;
+      }
     }
     return ReadableRepo as any;
   };

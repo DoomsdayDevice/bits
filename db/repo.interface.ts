@@ -38,6 +38,8 @@ export interface IReadableRepo<Entity extends ObjectLiteral> {
     orderBy,
   }: NestedFindManyOpts<Entity>): Promise<Entity[]>;
   findAndCount({ relations, where, take, skip, orderBy }: NestedFindManyOpts<Entity>): Promise<any>;
+
+  getPrimaryColumnName(): keyof Entity;
 }
 
 export interface IWritableRepo<Entity extends ObjectLiteral> {

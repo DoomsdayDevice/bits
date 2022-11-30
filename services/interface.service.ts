@@ -18,6 +18,7 @@ export interface IReadableCrudService<Entity extends ObjectLiteral> {
     id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
+  getPrimaryColumnName(): keyof Entity;
 }
 
 export interface IWritableCrudService<Entity extends ObjectLiteral> {

@@ -1,5 +1,4 @@
 import { Global, Module, Type } from '@nestjs/common';
-import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/gql-crud.interface';
 
 import { getDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
@@ -10,12 +9,18 @@ import { buildRelationsForModelResolver } from '@bits/graphql/relation/relation-
 import { Resolver } from '@nestjs/graphql';
 import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
 import { getGenericCrudService } from '@bits/db/generic-crud.service';
-import { ObjectLiteral } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { renameFunc } from '@bits/bits.utils';
+import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/crud-config.interface';
+import { PagingStrategy } from '../../common/paging-strategy.enum';
 
-export class GqlCrudModule<T extends ObjectLiteral> {
+export class GqlCrudModule<
+  T extends ModelResource,
+  Resources extends readonly any[],
+  N extends string,
+> {
   private modelName: string;
 
   private Model: Type<T>;
@@ -24,7 +29,7 @@ export class GqlCrudModule<T extends ObjectLiteral> {
 
   private Service: Type<ICrudService<T>>;
 
-  private pagination: boolean;
+  private pagination: PagingStrategy;
 
   private grpcServiceName: string;
 
@@ -32,14 +37,16 @@ export class GqlCrudModule<T extends ObjectLiteral> {
 
   private type: 'grpc' | 'typeorm';
 
-  private resources: readonly any[];
+  private resources: Resources;
 
   private abilityFactory: any;
+
+  private RequirePrivileges?: any;
 
   constructor({
     Model,
     modelName,
-    pagination = true,
+    pagination = PagingStrategy.OFFSET,
     grpcServiceName,
     ModelResolver,
     Service,
@@ -47,8 +54,9 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     type = 'typeorm',
     readOnly = false,
     resources,
-    abilityFactory,
-  }: GqlWritableCrudConfig<T>) {
+    AbilityFactory,
+    RequirePrivileges,
+  }: GqlWritableCrudConfig<T, Resources, N>) {
     this.Model = Model;
     this.modelName = modelName || Model.name;
     this.pagination = pagination;
@@ -56,7 +64,8 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
     this.imports = imports || [];
     this.resources = resources;
-    this.abilityFactory = abilityFactory;
+    this.abilityFactory = AbilityFactory;
+    this.RequirePrivileges = RequirePrivileges;
 
     if (!Service) {
       if (type === 'grpc' || grpcServiceName) this.Service = this.buildGrpcService();
@@ -70,10 +79,11 @@ export class GqlCrudModule<T extends ObjectLiteral> {
   }
 
   buildGrpcService(): Type<ICrudService<T>> {
-    return getDefaultGrpcCrudServiceWrapper<IGrpcService<unknown>, any, T>(
-      'CORE_PACKAGE',
-      this.grpcServiceName,
-    );
+    return getDefaultGrpcCrudServiceWrapper<IGrpcService<unknown>, any, T>({
+      packageToken: 'CORE_PACKAGE',
+      DTOCls: this.Model,
+      serviceName: this.grpcServiceName,
+    });
   }
 
   buildTypeormService(): Type<ICrudService<T>> {
@@ -83,31 +93,33 @@ export class GqlCrudModule<T extends ObjectLiteral> {
   }
 
   buildWriteResolver(): any {
-    return WriteResolverMixin(
-      this.Model,
-      this.Service,
-      this.modelName,
-    )(
-      ReadResolverMixin(
-        this.Model,
-        this.Service,
-        this.pagination,
-        this.resources,
-        this.modelName,
-        this.abilityFactory,
-      ),
+    return WriteResolverMixin({
+      Model: this.Model,
+      Service: this.Service,
+      modelName: this.modelName,
+      RequirePrivileges: this.RequirePrivileges,
+    })(
+      ReadResolverMixin({
+        Model: this.Model,
+        Service: this.Service,
+        pagination: this.pagination,
+        resources: this.resources,
+        modelName: this.modelName,
+        AbilityFactory: this.abilityFactory,
+        RequirePrivileges: this.RequirePrivileges,
+      }),
     );
   }
 
   buildReadResolver(): any {
-    return ReadResolverMixin(
-      this.Model,
-      this.Service,
-      this.pagination,
-      this.resources,
-      this.modelName,
-      this.abilityFactory,
-    );
+    return ReadResolverMixin({
+      Model: this.Model,
+      Service: this.Service,
+      pagination: this.pagination,
+      resources: this.resources,
+      modelName: this.modelName,
+      AbilityFactory: this.abilityFactory,
+    });
   }
 
   makeCrud(): DynamicModule {
@@ -131,11 +143,17 @@ export class GqlCrudModule<T extends ObjectLiteral> {
     return GenericModule as any;
   }
 
+  /**  */
   onlyRelations(): DynamicModule {
     @Resolver(() => this.Model)
     class GenericResolver {}
+    renameFunc(GenericResolver, `GenericRelOnly${this.Model}Resolver`);
+    // TODO раскостылить
+    (GenericResolver.prototype as any).svc = {
+      getPrimaryColumnName: () => 'id',
+    };
 
-    buildRelationsForModelResolver(this.Model, GenericResolver);
+    buildRelationsForModelResolver(this.Model, GenericResolver as any);
 
     @Module({
       providers: [GenericResolver],

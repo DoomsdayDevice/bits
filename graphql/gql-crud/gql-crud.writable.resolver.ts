@@ -9,14 +9,24 @@ import { GraphQLUUID } from 'graphql-scalars';
 import { ICrudService } from '@bits/services/interface.service';
 import { ObjectLiteral } from 'typeorm';
 import { renameFunc } from '@bits/bits.utils';
+import { Action } from '@bits/auth/action.enum';
+
+interface Input<T extends ObjectLiteral, N extends string> {
+  Model: Type<T>;
+  Service: Type<ICrudService<T>>;
+  modelName?: N;
+  Create?: Type;
+  RequirePrivileges?: any;
+}
 
 export const WriteResolverMixin =
-  <T extends ObjectLiteral, N extends string>(
-    Model: Type<T>,
-    Service: Type<ICrudService<T>>,
-    modelName?: N,
-    Create?: Type,
-  ) =>
+  <T extends ObjectLiteral, N extends string>({
+    Model,
+    Service,
+    modelName,
+    Create,
+    RequirePrivileges,
+  }: Input<T, N>) =>
   <B extends Type>(Base: B): Type<IBaseServiceWrite<T, N> & InstanceType<B>> => {
     const name = modelName || Model.name;
     const UpdateOne = getDefaultUpdateOneInput(Model, name);
@@ -47,7 +57,10 @@ export const WriteResolverMixin =
         return this.svc.createOne(input);
       }
     }
-    renameFunc(GenericResolver, `Generic${modelName}Resolver`);
+
+    if (RequirePrivileges)
+      RequirePrivileges([(Model || modelName) as any, Action.Write])(GenericResolver);
+    renameFunc(GenericResolver, `Generic${modelName}WriteResolver`);
 
     return GenericResolver as any;
   };

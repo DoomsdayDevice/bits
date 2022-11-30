@@ -1,8 +1,8 @@
-import { IReadableRepo } from '../db/repo.interface';
 import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
-import { IReadableCrudService } from './interface.service';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import { IConnection } from '@bits/bits.types';
+import { IReadableCrudService } from './interface.service';
+import { IReadableRepo } from '../db/repo.interface';
 
 export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
   Model: Type<M>,
@@ -30,6 +30,10 @@ export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
       options?: FindOneOptions<M>,
     ): Promise<M> {
       return this.readRepo.findOne(id, options);
+    }
+
+    getPrimaryColumnName(): keyof M {
+      return this.readRepo.getPrimaryColumnName();
     }
   }
 

@@ -4,14 +4,6 @@ import { renameKeyNames } from '../bits.utils';
 // import { allInterpreters, createSqlInterpreter } from '@ucast/sql';
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 
-export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOptionsOrder<T> {
-  const obj: FindOptionsOrder<T> = {};
-  for (const o of orderBy) {
-    obj[o.field] = o.direction;
-  }
-  return obj;
-}
-
 // export function convertGrpcFilterToUcast(filter: any) {
 //   const con = renameKeyNames(filter, { elemMatch: '$elemMatch', eq: '$eq' });
 //   const parser = new MongoQueryParser(allParsingInstructions);

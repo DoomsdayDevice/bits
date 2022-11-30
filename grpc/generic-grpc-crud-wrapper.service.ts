@@ -10,6 +10,8 @@ import { FindManyOptions, FindOneOptions, FindOptionsWhere, ObjectLiteral } from
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
+import { namedModels } from '../../../src/auth/oqto-resources';
+import { upperFirst } from 'lodash';
 
 export type WrappedGrpcService<
   Svc extends IGrpcService<From>,
@@ -22,6 +24,12 @@ export type WrappedGrpcService<
     validate(input: From[]): To[];
   };
 
+interface Input<To> {
+  packageToken: string;
+  serviceName?: string;
+  DTOCls: Type<To>;
+}
+
 /**
  * создает и оборачивает gRPC сервис
  */
@@ -30,18 +38,22 @@ export function getDefaultGrpcCrudServiceWrapper<
   From extends object,
   To extends object = From,
   Excluded extends keyof Service = never,
->(
-  packageToken: string,
-  serviceName: string,
-  DTOCls?: Type<To>,
-): Type<Omit<WrappedGrpcService<Service, From, To>, Excluded>> {
+>({
+  packageToken,
+  DTOCls,
+  serviceName = `${upperFirst(DTOCls.name)}Service`,
+}: Input<To>): Type<Omit<WrappedGrpcService<Service, From, To>, Excluded>> {
   @Injectable()
   class GenericGrpcService implements OnModuleInit, ICrudService<To> {
     public grpcSvc!: Service;
 
+    private primaryColName: keyof To;
+
     constructor(
       @Inject(packageToken) private client: ClientGrpc, // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
-    ) {}
+    ) {
+      this.primaryColName = namedModels.includes(DTOCls as any) ? ('name' as any) : ('id' as any);
+    }
 
     onModuleInit(): any {
       this.grpcSvc = promisify(this.client.getService<Service>(serviceName));
@@ -65,15 +77,14 @@ export function getDefaultGrpcCrudServiceWrapper<
     // }
 
     async findMany(input: FindManyOptions<To>): Promise<To[]> {
-      const many = await this.grpcSvc.findMany(
-        convertServiceInputToGrpc(this.convertDtoInputToGrpc(input)),
-      );
+      const filter = convertServiceInputToGrpc(this.convertDtoInputToGrpc(input));
+      const many = await this.grpcSvc.findMany(filter);
       const valid = this.validate(many.nodes);
       return valid;
     }
 
-    async findManyAndCount(filter?: NestedFindManyOpts<To>): Promise<IConnection<To>> {
-      const many = await this.grpcSvc.findMany(filter as any);
+    async findManyAndCount(input?: NestedFindManyOpts<To>): Promise<IConnection<To>> {
+      const many = await this.grpcSvc.findMany(convertServiceInputToGrpc(input as any));
       const valid = this.validate(many.nodes);
 
       return { ...many, nodes: valid };
@@ -112,7 +123,8 @@ export function getDefaultGrpcCrudServiceWrapper<
       id: FindOneOptions<To> | FindOptionsWhere<To>,
       options?: FindOneOptions<To>,
     ): Promise<To> {
-      return this.grpcSvc.findOne(id as any) as any;
+      const where = (id as FindOneOptions<To>).where || id;
+      return this.grpcSvc.findOne(where as any) as any;
     }
 
     async count(filter?: FindManyOptions<To>): Promise<number> {
@@ -122,6 +134,10 @@ export function getDefaultGrpcCrudServiceWrapper<
 
     convertDtoInputToGrpc(input: FindManyOptions<To>): FindManyOptions<From> {
       return input as any;
+    }
+
+    getPrimaryColumnName() {
+      return this.primaryColName;
     }
   }
   renameFunc(GenericGrpcService, serviceName);

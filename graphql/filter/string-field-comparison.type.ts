@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
 import { Type } from '@nestjs/common';
-import { IsUndefined } from '@bits/graphql/filter/is-undefined.validator';
+import { IsUndefined } from '@bits/graphql/validators/is-undefined.validator';
 import { FilterFieldComparison } from './filter-field-comparison.interface';
 
 /** @internal */

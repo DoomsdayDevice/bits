@@ -9,17 +9,21 @@ import {
 } from '@nestjs/graphql';
 import { GraphQLUUID } from 'graphql-scalars';
 import { Type } from '@nestjs/common';
-import { IFindManyArgs, IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
+import { IFindManyArgs, IPaging, IUpdateOneInput } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { IGqlFilter } from '@bits/graphql/filter/filter.interface';
 import {
   createFilterComparisonType,
   getFilterableFields,
 } from '@bits/graphql/filter/filter-comparison.factory';
 import * as _ from 'lodash';
+import { memoize } from 'lodash';
 import { ValidateNested } from 'class-validator';
 import { Type as TransformerType } from 'class-transformer';
 import { IConnection } from '@bits/bits.types';
-import { memoize } from 'lodash';
+import { PagingStrategy } from '@bits/common/paging-strategy.enum';
+import { ICursorPagination } from '@bits/graphql/paging/pagination.interface';
+import { getOrCreateCursorPagingType } from '@bits/graphql/paging/get-or-create-cursor-paging';
+import { OffsetPagination } from '@bits/graphql/paging/offset-paging';
 
 @InputType({ isAbstract: true })
 export class DeleteByIDInput {
@@ -105,13 +109,26 @@ export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IGq
 }
 
 export const getDefaultFindManyArgs = memoize(
-  <T>(Model: Type<T>, modelName: string): Type<IFindManyArgs<T>> => {
+  <T, P extends PagingStrategy>(
+    Model: Type<T>,
+    modelName: string,
+    paginationStrategy: P,
+  ): Type<IFindManyArgs<T, P>> => {
     const Filter = getDefaultFilter(Model, modelName);
 
     @ArgsType()
     class FindManyArgs {
       @Field(() => Filter, { nullable: true })
       filter?: IGqlFilter<T>;
+
+      paging?: IPaging<P>;
+    }
+
+    if (paginationStrategy === PagingStrategy.CURSOR) {
+      const PagingType = getOrCreateCursorPagingType();
+      Field(() => PagingType, { nullable: true })(FindManyArgs.prototype, 'paging');
+    } else if (paginationStrategy === PagingStrategy.OFFSET) {
+      Field(() => OffsetPagination, { nullable: true })(FindManyArgs.prototype, 'paging');
     }
 
     return FindManyArgs;

@@ -92,7 +92,7 @@ export type ResolverRelation<T, Relation> = {
   };
   oneToMany?: {
     referencedFieldName: keyof Relation;
-    ownIdField?: keyof T;
+    ownPrimaryColName?: keyof T;
   };
 
   /**
