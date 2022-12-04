@@ -5,7 +5,7 @@ import { convertServiceInputToGrpc, renameFunc } from '@bits/bits.utils';
 import { IGrpcService } from '@bits/grpc/grpc.interface';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IConnection } from '@bits/bits.types';
-import { ICrudService } from '@bits/services/interface.service';
+import { ICrudService, IFindManyServiceInput } from '@bits/services/interface.service';
 import { FindManyOptions, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { NestedFindManyOpts } from '@bits/db/repo.interface';
@@ -76,14 +76,14 @@ export function getDefaultGrpcCrudServiceWrapper<
     //   return this.svc.findOne(input);
     // }
 
-    async findMany(input: FindManyOptions<To>): Promise<To[]> {
+    async findMany(input: IFindManyServiceInput<To>): Promise<To[]> {
       const filter = convertServiceInputToGrpc(this.convertDtoInputToGrpc(input));
       const many = await this.grpcSvc.findMany(filter);
       const valid = this.validate(many.nodes);
       return valid;
     }
 
-    async findManyAndCount(input?: NestedFindManyOpts<To>): Promise<IConnection<To>> {
+    async findManyAndCount(input?: IFindManyServiceInput<To>): Promise<IConnection<To>> {
       const many = await this.grpcSvc.findMany(convertServiceInputToGrpc(input as any));
       const valid = this.validate(many.nodes);
 
@@ -132,7 +132,7 @@ export function getDefaultGrpcCrudServiceWrapper<
       return totalCount;
     }
 
-    convertDtoInputToGrpc(input: FindManyOptions<To>): FindManyOptions<From> {
+    convertDtoInputToGrpc(input: IFindManyServiceInput<To>): IFindManyServiceInput<From> {
       return input as any;
     }
 

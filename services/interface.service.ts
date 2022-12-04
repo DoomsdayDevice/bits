@@ -6,12 +6,11 @@ import {
   ObjectLiteral,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { IConnection } from '@bits/bits.types';
 
 export type IServiceWhere<T> = FindOptionsWhere<T> & {
-  AND: IServiceWhere<T>[];
-  OR: IServiceWhere<T>[];
+  AND?: IServiceWhere<T>[];
+  OR?: IServiceWhere<T>[];
 };
 
 export interface IFindManyServiceInput<T> extends Omit<FindManyOptions, 'where'> {
@@ -21,8 +20,8 @@ export interface IFindManyServiceInput<T> extends Omit<FindManyOptions, 'where'>
 export interface IReadableCrudService<Entity extends ObjectLiteral> {
   // readRepo: IReadableRepo<Entity>;
   count(filter?: FindManyOptions<Entity>): Promise<number>;
-  findMany(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
-  findManyAndCount(filter?: NestedFindManyOpts<Entity>): Promise<IConnection<Entity>>;
+  findMany(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]>;
+  findManyAndCount(filter?: IFindManyServiceInput<Entity>): Promise<IConnection<Entity>>;
   findOne(
     id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,

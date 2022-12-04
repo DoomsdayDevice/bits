@@ -7,9 +7,10 @@ import {
   ObjectLiteral,
   Repository,
 } from 'typeorm';
-import { ICrudService } from '@bits/services/interface.service';
+import { ICrudService, IFindManyServiceInput } from '@bits/services/interface.service';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { IConnection } from '@bits/bits.types';
+import { convertServiceFindManyInputToTypeorm } from '@bits/bits.utils';
 
 export function getGenericCrudService<T extends ObjectLiteral, DTO = T, Enums = never>(
   TClass: Type<T>,
@@ -20,14 +21,14 @@ export function getGenericCrudService<T extends ObjectLiteral, DTO = T, Enums = 
 
     @InjectRepository(TClass) readRepo!: Repository<T>;
 
-    async findMany(input: FindManyOptions<T>): Promise<T[]> {
-      const nodes = await this.readRepo.find(input);
+    async findMany(input: IFindManyServiceInput<T>): Promise<T[]> {
+      const nodes = await this.readRepo.find(convertServiceFindManyInputToTypeorm(input));
       return nodes;
     }
 
-    async findManyAndCount(input: FindManyOptions<T>): Promise<IConnection<T>> {
-      const nodes = await this.readRepo.find(input);
-      const totalCount = await this.readRepo.count(input);
+    async findManyAndCount(input: IFindManyServiceInput<T>): Promise<IConnection<T>> {
+      const nodes = await this.readRepo.find(convertServiceFindManyInputToTypeorm(input));
+      const totalCount = await this.readRepo.count(convertServiceFindManyInputToTypeorm(input));
       return { totalCount, nodes };
     }
 
