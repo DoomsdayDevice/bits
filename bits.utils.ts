@@ -80,7 +80,9 @@ export function convertGrpcFilterToService<T>(filter: any = {}): FindOptionsWher
   for (const key of Object.keys(filter)) {
     const value = filter[key];
     if (key === '_or' || key === '_and') {
-      newFilter[toUpper(key.slice(1))] = value.values.map(f => convertGraphqlFilterToService(f));
+      newFilter[toUpper(key.slice(1))] = value.values.map((f: any) =>
+        convertGraphqlFilterToService(f),
+      );
     } else if (value.eq !== undefined) newFilter[key] = value.eq;
     else if (value.in) newFilter[key] = In(value.in.values);
     else if (value.like) newFilter[key] = Like(value.like);

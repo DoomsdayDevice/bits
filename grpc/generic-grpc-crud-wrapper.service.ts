@@ -127,7 +127,7 @@ export function getDefaultGrpcCrudServiceWrapper<
       return this.grpcSvc.findOne(where as any) as any;
     }
 
-    async count(filter?: FindManyOptions<To>): Promise<number> {
+    async count(filter?: IFindManyServiceInput<To>): Promise<number> {
       const { totalCount } = await this.grpcSvc.findMany(filter as any);
       return totalCount;
     }
