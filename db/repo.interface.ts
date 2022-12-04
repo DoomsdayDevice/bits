@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
+import { IFindManyServiceInput } from '@bits/services/interface.service';
 
 export type OrderByInput = {
   [P in string]: 'ASC' | 'DESC';
@@ -22,22 +23,16 @@ export interface NestedFindManyOpts<T> extends FindManyOptions<T> {
 export interface IReadableRepo<Entity extends ObjectLiteral> {
   readRepo: Repository<Entity>;
 
-  count(filter?: FindManyOptions<Entity>): Promise<number>;
+  count(filter?: IFindManyServiceInput<Entity>): Promise<number>;
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]>;
-  findAllWithDeleted(filter: FindManyOptions<Entity>): Promise<Entity[]>;
+  findAll(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]>;
+  findAllWithDeleted(filter: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findOne(
     id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity> | undefined;
-  findNested({
-    relations,
-    where,
-    take,
-    skip,
-    orderBy,
-  }: NestedFindManyOpts<Entity>): Promise<Entity[]>;
-  findAndCount({ relations, where, take, skip, orderBy }: NestedFindManyOpts<Entity>): Promise<any>;
+  findNested({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<Entity[]>;
+  findAndCount({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<any>;
 
   getPrimaryColumnName(): keyof Entity;
 }

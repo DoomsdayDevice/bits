@@ -44,12 +44,12 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = convertGrpcFilterToService(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
-      const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values);
+      const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values); // TODO this sorting isn't added
 
       console.log({ o: input.paging?.offset, take: input.paging?.limit });
       const res = await this.readSvc.findManyAndCount({
         where: filter,
-        orderBy: order as any,
+        order,
         skip: input.paging?.offset,
         take: input.paging?.limit,
       });

@@ -141,7 +141,13 @@ export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGr
       f.name,
     );
   }
+  for (const name of ['_and', '_or'])
+    GrpcFieldDef(() => [`${ModelCls.name}Filter`], { name, nullable: true })(
+      GenericFilter.prototype,
+      name,
+    );
 
   GrpcMessageDef({ name: `${ModelCls.name}Filter` })(GenericFilter);
+
   return GenericFilter as any;
 });

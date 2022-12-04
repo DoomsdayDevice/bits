@@ -5,11 +5,14 @@ import {
   FindOneOptions,
   FindManyOptions,
   FindOptionsWhere,
+  ILike,
 } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IConnection } from '@bits/bits.types';
 import { NestedQuery } from './nested-query';
 import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
+import { IFindManyServiceInput } from '@bits/services/interface.service';
+import { convertServiceFindManyInputToTypeorm } from '@bits/bits.utils';
 
 export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
@@ -17,8 +20,8 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
     class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
       @InjectRepository(EntityCls) public readonly readRepo!: Repository<Entity>;
 
-      public count(filter?: FindManyOptions<Entity>): Promise<number> {
-        return this.readRepo.count(filter);
+      public count(filter?: IFindManyServiceInput<Entity>): Promise<number> {
+        return this.readRepo.count(convertServiceFindManyInputToTypeorm(filter));
       }
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
@@ -27,15 +30,15 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         return this.readRepo.save(obj);
       }
 
-      public findAll(filter?: FindManyOptions<Entity>): Promise<Entity[]> {
-        return this.readRepo.find(filter);
+      public findAll(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]> {
+        return this.readRepo.find(convertServiceFindManyInputToTypeorm(filter));
       }
 
       public findAllWithDeleted(
-        filter: FindManyOptions<Entity> = { withDeleted: true },
+        filter: IFindManyServiceInput<Entity> = { withDeleted: true },
       ): Promise<Entity[]> {
         filter.withDeleted = true;
-        return this.readRepo.find(filter);
+        return this.readRepo.find(convertServiceFindManyInputToTypeorm(filter));
       }
 
       public async findOne(
@@ -56,8 +59,8 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         where,
         take,
         skip,
-        orderBy,
-      }: NestedFindManyOpts<Entity>): Promise<Entity[]> {
+        order,
+      }: IFindManyServiceInput<Entity>): Promise<Entity[]> {
         const complexQuery = new NestedQuery(
           EntityCls,
           this.readRepo.metadata.discriminatorValue as any,
@@ -69,26 +72,17 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
           where,
           take,
           skip,
-          orderBy,
+          order,
         });
         return nodes;
       }
 
-      public async findAndCount({
-        relations,
-        where,
-        take,
-        skip,
-        order,
-      }: // orderBy,
-      NestedFindManyOpts<Entity>): Promise<IConnection<Entity>> {
-        const [nodes, totalCount] = await this.readRepo.findAndCount({
-          relations,
-          where,
-          take,
-          skip,
-          order,
-        });
+      public async findAndCount(
+        input: IFindManyServiceInput<Entity>,
+      ): Promise<IConnection<Entity>> {
+        const [nodes, totalCount] = await this.readRepo.findAndCount(
+          convertServiceFindManyInputToTypeorm(input),
+        );
         return { totalCount, nodes };
         // const complexQuery = new NestedQuery(
         //   EntityCls,

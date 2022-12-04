@@ -2,7 +2,7 @@
 import * as _ from 'lodash';
 import { Transform, TransformFnParams } from 'class-transformer';
 import { Defined } from '@bits/bits.types';
-import { clone, isNil, isObject } from 'lodash';
+import { clone, isNil, isObject, toUpper } from 'lodash';
 import { Inject } from '@nestjs/common';
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
 import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
@@ -78,15 +78,16 @@ export const OptionalInject = (token: any) => {
 export function convertGrpcFilterToService<T>(filter: any = {}): FindOptionsWhere<T> {
   const newFilter: any = {};
   for (const key of Object.keys(filter)) {
-    const comparisonField = filter[key];
-    if (comparisonField.eq !== undefined) newFilter[key] = comparisonField.eq;
-    else if (comparisonField.in) newFilter[key] = In(comparisonField.in.values);
-    else if (comparisonField.like) newFilter[key] = Like(comparisonField.like);
-    else if (comparisonField.iLike) newFilter[key] = ILike(comparisonField.iLike);
-    else if (comparisonField.elemMatch)
-      newFilter[key] = convertGrpcFilterToService(comparisonField.elemMatch);
+    const value = filter[key];
+    if (key === '_or' || key === '_and') {
+      newFilter[toUpper(key.slice(1))] = value.values.map(f => convertGraphqlFilterToService(f));
+    } else if (value.eq !== undefined) newFilter[key] = value.eq;
+    else if (value.in) newFilter[key] = In(value.in.values);
+    else if (value.like) newFilter[key] = Like(value.like);
+    else if (value.iLike) newFilter[key] = ILike(value.iLike);
+    else if (value.elemMatch) newFilter[key] = convertGrpcFilterToService(value.elemMatch);
     else {
-      newFilter[key] = convertGrpcFilterToService(comparisonField);
+      newFilter[key] = convertGrpcFilterToService(value);
     }
   }
   return newFilter;

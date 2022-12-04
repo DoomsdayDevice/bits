@@ -19,7 +19,7 @@ export interface IFindManyServiceInput<T> extends Omit<FindManyOptions, 'where'>
 
 export interface IReadableCrudService<Entity extends ObjectLiteral> {
   // readRepo: IReadableRepo<Entity>;
-  count(filter?: FindManyOptions<Entity>): Promise<number>;
+  count(filter?: IFindManyServiceInput<Entity>): Promise<number>;
   findMany(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findManyAndCount(filter?: IFindManyServiceInput<Entity>): Promise<IConnection<Entity>>;
   findOne(
