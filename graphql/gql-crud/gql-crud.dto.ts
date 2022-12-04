@@ -21,7 +21,6 @@ import { ValidateNested } from 'class-validator';
 import { Type as TransformerType } from 'class-transformer';
 import { IConnection } from '@bits/bits.types';
 import { PagingStrategy } from '@bits/common/paging-strategy.enum';
-import { ICursorPagination } from '@bits/graphql/paging/pagination.interface';
 import { getOrCreateCursorPagingType } from '@bits/graphql/paging/get-or-create-cursor-paging';
 import { OffsetPagination } from '@bits/graphql/paging/offset-paging';
 
@@ -90,7 +89,13 @@ export const getDefaultModelConnection = memoize(
 // TODO add getOrCreate with memoize for nested filters
 export function getDefaultFilter<T>(Model: Type<T>, modelName: string): Type<IGqlFilter<T>> {
   @InputType(`${modelName}Filter`)
-  class GraphQLFilter {}
+  class GraphQLFilter {
+    @Field(() => [GraphQLFilter], { nullable: true })
+    AND!: GraphQLFilter[];
+
+    @Field(() => [GraphQLFilter], { nullable: true })
+    OR!: GraphQLFilter[];
+  }
   const filterableFields = getFilterableFields(Model);
   filterableFields.forEach(({ propertyName, target, advancedOptions, returnTypeFunc }) => {
     const FC = createFilterComparisonType({

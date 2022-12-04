@@ -9,6 +9,15 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { IConnection } from '@bits/bits.types';
 
+export type IServiceWhere<T> = FindOptionsWhere<T> & {
+  AND: IServiceWhere<T>[];
+  OR: IServiceWhere<T>[];
+};
+
+export interface IFindManyServiceInput<T> extends Omit<FindManyOptions, 'where'> {
+  where?: IServiceWhere<T>;
+}
+
 export interface IReadableCrudService<Entity extends ObjectLiteral> {
   // readRepo: IReadableRepo<Entity>;
   count(filter?: FindManyOptions<Entity>): Promise<number>;

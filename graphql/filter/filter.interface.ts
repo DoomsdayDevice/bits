@@ -57,11 +57,11 @@ type FilterGrouping<T> = {
   /**
    * Group an array of filters with an AND operation.
    */
-  and?: IGqlFilter<T>[];
+  AND?: IGqlFilter<T>[];
   /**
    * Group an array of filters with an OR operation.
    */
-  or?: IGqlFilter<T>[];
+  OR?: IGqlFilter<T>[];
 };
 
 /**

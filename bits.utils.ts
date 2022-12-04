@@ -8,6 +8,7 @@ import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
 import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 import { Sort } from '@bits/grpc/grpc.dto';
+import { IFindManyServiceInput, IServiceWhere } from '@bits/services/interface.service';
 
 export function renameFunc(func: Function, newName: string): any {
   Object.defineProperty(func, 'name', { value: newName });
@@ -104,7 +105,9 @@ export function applyCursorPagingToInput(input: any): { where: any; take: any; o
   return input;
 }
 
-export function convertServiceInputToGrpc<T>(input: FindManyOptions<T>): IGrpcFindManyInput<T> {
+export function convertServiceInputToGrpc<T>(
+  input: IFindManyServiceInput<T>,
+): IGrpcFindManyInput<T> {
   const grpcInput: IGrpcFindManyInput<T> = {};
 
   if (input.where) grpcInput.filter = convertServiceFilterToGrpc(input.where);
@@ -115,7 +118,7 @@ export function convertServiceInputToGrpc<T>(input: FindManyOptions<T>): IGrpcFi
   return grpcInput;
 }
 
-export function convertServiceFilterToGrpc<T>(where: FindOptionsWhere<T> | FindOptionsWhere<T>[]) {
+export function convertServiceFilterToGrpc<T>(where: IServiceWhere<T>) {
   const grpcFilter: any = {};
   if (Array.isArray(where)) {
   } else {
@@ -129,7 +132,8 @@ export function convertServiceFilterToGrpc<T>(where: FindOptionsWhere<T> | FindO
         else if (comparisonField._type === 'ilike')
           grpcFilter[key] = { iLike: comparisonField._value };
       } else if (isObject(comparisonField)) {
-        grpcFilter[key] = convertServiceFilterToGrpc(comparisonField);
+        // TODO
+        grpcFilter[key] = convertServiceFilterToGrpc(comparisonField as any);
       } else {
         // if it's a simple field like a string
         grpcFilter[key] = { eq: comparisonField };
