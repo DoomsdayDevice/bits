@@ -2,15 +2,13 @@ import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
 import { convertServiceInputToGrpc, renameFunc } from '@bits/bits.utils';
-import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { IGrpcService } from '@bits/grpc/common/types';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IConnection } from '@bits/bits.types';
 import { ICrudService, IFindManyServiceInput } from '@bits/services/interface.service';
 import { FindManyOptions, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { NestedFindManyOpts } from '@bits/db/repo.interface';
 import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
-import { namedModels } from '../../../src/auth/oqto-resources';
 import { upperFirst } from 'lodash';
 
 export type WrappedGrpcService<
@@ -52,7 +50,10 @@ export function getDefaultGrpcCrudServiceWrapper<
     constructor(
       @Inject(packageToken) private client: ClientGrpc, // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
     ) {
-      this.primaryColName = namedModels.includes(DTOCls as any) ? ('name' as any) : ('id' as any);
+      const namedModels = ['RoleDto', 'Motivation'];
+      this.primaryColName = namedModels.includes(DTOCls.name as any)
+        ? ('name' as any)
+        : ('id' as any);
     }
 
     onModuleInit(): any {

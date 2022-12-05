@@ -1,7 +1,6 @@
 import { memoize, upperFirst } from 'lodash';
 import { Type } from '@nestjs/common';
-import { GrpcMessageDef } from './message.decorator';
-import { GrpcFieldDef } from './field.decorator';
+import { GrpcFieldDef, GrpcMessageDef } from '.';
 
 export const getListValueOfCls = memoize(<T>(Cls: Type<T> | string) => {
   const name = upperFirst((Cls as any).name || Cls);

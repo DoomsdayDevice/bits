@@ -2,7 +2,7 @@ import { Type } from '@nestjs/common';
 import { IEnumEntity } from '../../../src/core/db/db.interface';
 import { BeforeInsert, BeforeUpdate, Entity, PrimaryColumn, Unique } from 'typeorm';
 import { GrpcMessageDef } from '../grpc/decorators/message.decorator';
-import { IsAlpha } from 'class-validator';
+import { IsAlpha, validate } from 'class-validator';
 import { GrpcFieldDef } from '../grpc/decorators/field.decorator';
 
 export function EnumEntity<Enum extends string>(

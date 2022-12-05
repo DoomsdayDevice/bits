@@ -6,12 +6,12 @@ import {
 } from './grpc-controller.interface';
 import { GrpcMethodDef } from '../decorators/method.decorator';
 import { GrpcServiceDef } from '../decorators/service.decorator';
-import { FindByIdInput } from '../grpc.dto';
 import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
 import { Logger } from '../../../../src/infrastructure/logger/logger';
 import { convertGrpcFilterToService, convertGrpcOrderByToTypeorm } from '@bits/bits.utils';
+import { FindByIdInput } from '@bits/grpc';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 

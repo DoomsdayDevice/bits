@@ -24,7 +24,7 @@ import {
   FilterableFieldDescriptor,
   FilterableFieldOptions,
 } from '@bits/graphql/filter/filterable-field.interface';
-import { ArrayReflector, getPrototypeChain, MapReflector } from '../../grpc/reflector';
+import { ArrayReflector, getPrototypeChain, MapReflector } from '../../grpc/common/reflectors';
 import {
   FilterComparisonOperators,
   FilterFieldComparison,

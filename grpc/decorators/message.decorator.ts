@@ -1,7 +1,12 @@
-import { fieldReflector, grpcFields, grpcMessages, messageReflector } from './decorators';
-import { getPrototypeChain } from '@bits/grpc/reflector';
-import { GFieldInput } from '@bits/grpc/grpc.interface';
 import { Type } from '@nestjs/common';
+import {
+  fieldReflector,
+  getPrototypeChain,
+  GFieldInput,
+  grpcFields,
+  grpcMessages,
+  messageReflector,
+} from '@bits/grpc';
 
 type GrpcMessageOpts = {
   name?: string;
@@ -15,6 +20,7 @@ export function GrpcMessageDef(opts?: GrpcMessageOpts): ClassDecorator {
     const messageName = opts?.name || target.name;
 
     if (!opts?.isAbstract) {
+      if (!target) console.error({ opts });
       for (const field of getFieldDataForClass(target as any)) {
         grpcFields.push({ ...(field as any), messageName });
       }

@@ -1,4 +1,4 @@
-import { fieldReflector } from './decorators/decorators';
+import { fieldReflector } from './common/variables';
 import { Type } from '@nestjs/common';
 import { getFieldDataForClass } from '@bits/grpc/decorators/message.decorator';
 

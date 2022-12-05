@@ -7,7 +7,7 @@ import { FindByIdInput, OffsetPagination, Sort } from '../grpc.dto';
 
 export interface IGrpcWriteController<M, RM = M> {
   createOne(newUser: CreateInput<M>): Promise<RM>;
-  updateOne(user: UpdateInput<M>): Promise<StatusMsg>;
+  updateOne(user: IUpdateInput<M>): Promise<StatusMsg>;
   deleteOne(user: FindOptionsWhere<M>): Promise<DeleteOneResponse>;
 }
 
@@ -50,11 +50,11 @@ export interface DeleteOneInput {
 
 export type CreateInput<M> = Omit<M, 'createdAt' | 'id'>;
 
-export type FieldMask = {
+export type IFieldMask = {
   paths: string[];
 };
 
-export type UpdateInput<M> = { update: Partial<M>; updateMask: FieldMask };
+export type IUpdateInput<M> = { update: Partial<M>; updateMask: IFieldMask };
 
 export type IListValue<T> = {
   values: T[];

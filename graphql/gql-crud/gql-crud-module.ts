@@ -11,7 +11,7 @@ import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.
 import { getGenericCrudService } from '@bits/db/generic-crud.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
-import { IGrpcService } from '@bits/grpc/grpc.interface';
+import { IGrpcService } from '../../grpc/common/types';
 import { renameFunc } from '@bits/bits.utils';
 import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/crud-config.interface';
 import { PagingStrategy } from '../../common/paging-strategy.enum';

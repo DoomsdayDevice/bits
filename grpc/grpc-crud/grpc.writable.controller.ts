@@ -1,22 +1,20 @@
 import { Controller, Inject, Type } from '@nestjs/common';
-import { GrpcServiceDef } from '../decorators/service.decorator';
-import { GrpcMethodDef } from '../decorators/method.decorator';
-import {
-  CreateInput,
-  IGrpcWriteController,
-  IWritableGrpcControllerOpts,
-  UpdateInput,
-} from './grpc-controller.interface';
 import { IWritableCrudService } from '@bits/services/interface.service';
+import { FindOptionsWhere } from 'typeorm';
 import {
+  applyFieldMask,
+  CreateInput,
   getDefaultCreateInput,
   getDefaultDeleteInput,
   getDefaultDeleteResponse,
   getDefaultUpdateInput,
+  GrpcMethodDef,
+  GrpcServiceDef,
+  IGrpcWriteController,
+  IWritableGrpcControllerOpts,
   StatusMsg,
-} from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
-import { applyFieldMask } from '@bits/grpc/field-mask.grpc.utils';
-import { FindOptionsWhere } from 'typeorm';
+  IUpdateInput,
+} from '@bits/grpc';
 
 export function WritableGrpcController<WriteModel, B extends Type, ReadModel = WriteModel>({
   WriteModelCls,
@@ -49,7 +47,7 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
     }
 
     @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => StatusMsg })
-    async updateOne(input: UpdateInput<WriteModel>): Promise<StatusMsg> {
+    async updateOne(input: IUpdateInput<WriteModel>): Promise<StatusMsg> {
       const update = applyFieldMask(input.update, input.updateMask.paths);
       const res = (await this.writeSvc.updateOne(
         (update as any).id,

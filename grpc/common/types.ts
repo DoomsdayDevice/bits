@@ -1,10 +1,9 @@
-import { StatusMsg } from '@bits/grpc/grpc-crud/dto/grpc-crud.dto';
 import { Type } from '@nestjs/common';
-import {
-  IGrpcFindManyInput,
-  IGrpcFindManyResponse,
-  UpdateInput,
-} from '@bits/grpc/grpc-crud/grpc-controller.interface';
+import { IGrpcFindManyInput, IGrpcFindManyResponse, IUpdateInput } from '../index';
+
+export interface IStatusMsg {
+  success: boolean;
+}
 
 export type GMethodInput = {
   name: string;
@@ -38,7 +37,7 @@ export type GEnumInput = {
 export interface IGrpcService<WriteModel = any, ReadModel = WriteModel> {
   findOne(opts: { id: string }): Promise<WriteModel>;
   findMany(input: IGrpcFindManyInput<WriteModel>): Promise<IGrpcFindManyResponse<WriteModel>>;
-  deleteOne(input: any): Promise<StatusMsg>;
-  updateOne(input: UpdateInput<WriteModel>): Promise<StatusMsg>;
+  deleteOne(input: any): Promise<IStatusMsg>;
+  updateOne(input: IUpdateInput<WriteModel>): Promise<IStatusMsg>;
   createOne(input: any): Promise<WriteModel>;
 }

@@ -1,12 +1,16 @@
 import { Type } from '@nestjs/common';
 import { IGrpcFilter } from '@bits/grpc/grpc-filter.interface';
 import { memoize } from 'lodash';
-import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
-import { IGrpcFindManyInput, IListValue } from '../grpc-controller.interface';
-import { GrpcMessageDef } from '../../decorators/message.decorator';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { OffsetPagination, Sort } from '../../grpc.dto';
-import { getOrCreateDefaultFilter } from './default-filter.grpc';
+import {
+  getListValueOfCls,
+  getOrCreateDefaultFilter,
+  GrpcFieldDef,
+  GrpcMessageDef,
+  IGrpcFindManyInput,
+  IListValue,
+  OffsetPagination,
+  Sort,
+} from '@bits/grpc';
 
 export const getOrCreateFindManyInput = memoize(
   <M>(ModelCls: Type<M>, isSimple = false): Type<IGrpcFindManyInput<M>> => {

@@ -1,11 +1,5 @@
-import { ArrayReflector, MapReflector, ValueReflector } from '../reflector';
-import {
-  GEnumInput,
-  GFieldInput,
-  GMessageInput,
-  GMethodInput,
-  GServiceInput,
-} from '../grpc.interface';
+import { ArrayReflector, ValueReflector } from '.';
+import { GEnumInput, GFieldInput, GMessageInput, GMethodInput, GServiceInput } from '../index';
 
 export const GRPC_FIELD_KEY = 'GRPC_FIELD_KEY';
 export const GRPC_METHOD_KEY = 'GRPC_METHOD_KEY';

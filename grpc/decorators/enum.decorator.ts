@@ -1,4 +1,4 @@
-import { grpcEnums } from './decorators';
+import { grpcEnums } from '../common/variables';
 
 export function GrpcEnumDef(keys: string[]): PropertyDecorator {
   return (target: any, propertyKey: string | symbol) => {};

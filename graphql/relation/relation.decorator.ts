@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { ArrayReflector, getPrototypeChain } from '../../grpc/reflector';
+import { ArrayReflector, getPrototypeChain } from '../../grpc/common/reflectors';
 import {
   BaseResolverOptions,
   ConnectionTypeFunc,

@@ -2,18 +2,17 @@ import { Type } from '@nestjs/common';
 import * as _ from 'lodash';
 import { memoize, upperFirst } from 'lodash';
 import {
+  getFieldDataForClass,
+  getListValueOfCls,
   GrpcBooleanFieldComparisons,
+  grpcEnums,
   GrpcStringFieldComparison,
   IGrpcFilter,
-} from '@bits/grpc/grpc-filter.interface';
+  IListValue,
+  GrpcFieldDef,
+  GrpcMessageDef,
+} from '@bits/grpc';
 import { Merge } from 'ts-toolbelt/out/Union/Merge';
-import { grpcEnums } from '../../decorators/decorators';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { getFieldDataForClass, GrpcMessageDef } from '../../decorators/message.decorator';
-import { IListValue } from '../grpc-controller.interface';
-import { getListValueOfCls } from '@bits/grpc/decorators/list-value';
-
-const StringListValue = getListValueOfCls(String);
 
 // @GrpcMessageDef({ oneOf: true })
 // export class CommonFieldComparison {}
@@ -32,7 +31,7 @@ export class StringFieldComparison
   extends BooleanFieldComparison
   implements Merge<GrpcStringFieldComparison>
 {
-  @GrpcFieldDef(() => StringListValue)
+  @GrpcFieldDef(() => getListValueOfCls(String))
   in: IListValue<string>;
 
   @GrpcFieldDef()
@@ -141,6 +140,7 @@ export const getOrCreateDefaultFilter = memoize(<M>(ModelCls: Type<M>): Type<IGr
       f.name,
     );
   }
+  // TODO get model name from metadata
   for (const name of ['_and', '_or'])
     GrpcFieldDef(() => [`${ModelCls.name}Filter`], { name, nullable: true })(
       GenericFilter.prototype,

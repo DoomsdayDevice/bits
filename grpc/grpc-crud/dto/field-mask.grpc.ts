@@ -1,5 +1,4 @@
-import { GrpcMessageDef } from '../../decorators/message.decorator';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
+import { GrpcFieldDef, GrpcMessageDef } from '@bits/grpc';
 
 @GrpcMessageDef()
 export class FieldMask {

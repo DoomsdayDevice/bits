@@ -1,18 +1,20 @@
 import { Type } from '@nestjs/common';
 import {
-  CreateInput,
+  IFieldMask,
+  GrpcFieldDef,
+  GrpcMessageDef,
+  OmitType,
+  PartialType,
+  IUpdateInput,
+  FieldMask,
   DeleteOneInput,
   DeleteOneResponse,
-  UpdateInput,
-} from '../grpc-controller.interface';
+  CreateInput,
+} from '@bits/grpc';
 import { memoize } from 'lodash';
-import { GrpcMessageDef } from '../../decorators/message.decorator';
-import { OmitType, PartialType } from '../../mapped-types';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { FieldMask } from '@bits/grpc/grpc-crud/dto/field-mask.grpc';
 
 export const getDefaultUpdateInput = memoize(
-  <M>(ModelCls: Type<M>, modelName?: string): Type<UpdateInput<M>> => {
+  <M>(ModelCls: Type<M>, modelName?: string): Type<IUpdateInput<M>> => {
     @GrpcMessageDef({ name: `${modelName || ModelCls.name}Update` })
     class UpdType extends PartialType(ModelCls as Type) {}
 
@@ -22,7 +24,7 @@ export const getDefaultUpdateInput = memoize(
       update!: Partial<M>;
 
       @GrpcFieldDef(() => FieldMask)
-      updateMask!: FieldMask;
+      updateMask!: IFieldMask;
     }
 
     return GenericUpdateInput as any;

@@ -1,9 +1,7 @@
 import { Type } from '@nestjs/common';
-import { IConnection } from '../../../bits.types';
-import { GrpcMessageDef } from '../../decorators/message.decorator';
-import { GrpcFieldDef } from '../../decorators/field.decorator';
-import { UInt32 } from '../../grpc.scalars';
 import { memoize } from 'lodash';
+import { GrpcFieldDef, GrpcMessageDef, UInt32 } from '@bits/grpc';
+import { IConnection } from '@bits/bits.types';
 
 export const getOrCreateConnection = memoize(<M>(ModelCls: Type<M>): Type<IConnection<M>> => {
   @GrpcMessageDef({ name: `${ModelCls.name}Connection` })

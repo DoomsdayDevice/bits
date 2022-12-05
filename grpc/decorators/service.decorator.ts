@@ -1,8 +1,8 @@
-import { GFieldInput, GMethodInput } from '../grpc.interface';
+import { GFieldInput, GMethodInput } from '../common/types';
 import { GrpcMethod } from '@nestjs/microservices';
-import { fieldReflector, grpcMethods, grpcServices, methodReflector } from './decorators';
+import { fieldReflector, grpcMethods, grpcServices, methodReflector } from '../common/variables';
 import { Type } from '@nestjs/common';
-import { getPrototypeChain } from '@bits/grpc/reflector';
+import { getPrototypeChain } from '@bits/grpc/common/reflectors';
 
 export function GrpcServiceDef(name?: string): ClassDecorator {
   return target => {
