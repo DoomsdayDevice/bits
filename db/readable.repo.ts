@@ -1,18 +1,11 @@
 import { Injectable, Type } from '@nestjs/common';
-import {
-  Repository,
-  DeepPartial,
-  FindOneOptions,
-  FindManyOptions,
-  FindOptionsWhere,
-  ILike,
-} from 'typeorm';
+import { Repository, DeepPartial, FindOneOptions, FindOptionsWhere } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IConnection } from '@bits/bits.types';
 import { NestedQuery } from './nested-query';
-import { NestedFindManyOpts, IReadableRepo } from './repo.interface';
+import { IReadableRepo } from './repo.interface';
 import { IFindManyServiceInput } from '@bits/services/interface.service';
-import { convertServiceFindManyInputToTypeorm } from '@bits/bits.utils';
+import { convertServiceFindManyInputToTypeorm } from '@bits/utils/conversions';
 
 export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {

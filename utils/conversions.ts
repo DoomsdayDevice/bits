@@ -3,6 +3,7 @@ import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interfa
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 import { Sort } from '@bits/grpc/grpc.dto';
 import { IFindManyServiceInput, IServiceWhere } from '@bits/services/interface.service';
+import { isNil, isObject, toUpper } from 'lodash';
 
 /** to typeorm/service layer filter */
 export function convertGrpcFilterToService<T>(filter: any = {}): FindOptionsWhere<T> {

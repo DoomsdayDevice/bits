@@ -1,15 +1,16 @@
 import { Inject, Injectable, OnModuleInit, Type } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { promisify } from '@bits/grpc/grpc.utils';
-import { convertServiceInputToGrpc, renameFunc } from '@bits/bits.utils';
 import { IGrpcService } from '@bits/grpc/common/types';
 import { transformAndValidate } from '@bits/dto.utils';
 import { IConnection } from '@bits/bits.types';
 import { ICrudService, IFindManyServiceInput } from '@bits/services/interface.service';
-import { FindManyOptions, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { generateFieldMask } from '@bits/grpc/field-mask.grpc.utils';
 import { upperFirst } from 'lodash';
+import { renameFunc } from '@bits/bits.utils';
+import { convertServiceInputToGrpc } from '@bits/utils/conversions';
 
 export type WrappedGrpcService<
   Svc extends IGrpcService<From>,
