@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException, Type } from '@nestjs/common';
-import { Repository, DeepPartial, UpdateResult, DeleteResult, FindOptionsWhere } from 'typeorm';
+import { Repository, DeepPartial, DeleteResult, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { SaveOptions } from 'typeorm/repository/SaveOptions';
 import { IWritableRepo } from '@bits/db/repo.interface';
 import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 
-export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
+export const WritableRepoMixin = <Entity extends ObjectLiteral>(EntityCls: Type<Entity>) => {
   return <B extends {}>(BaseCls: Type<B> = class {} as any): Type<IWritableRepo<Entity> & B> => {
     @Injectable()
     class WritableRepo extends (BaseCls as any) {
@@ -44,7 +44,7 @@ export const WritableRepoMixin = <Entity>(EntityCls: Type<Entity>) => {
       }
 
       public async deleteOne(id: string | FindOneOptions<Entity>): Promise<boolean> {
-        const e = await this.writeRepo.findOne(id as any);
+        const e = await this.writeRepo.findOneOrFail(id as any);
         const result = await this.writeRepo.remove(e);
         // const result = await this.hardDelete(id);
         // const result = await this.writeRepo.softDelete(id);

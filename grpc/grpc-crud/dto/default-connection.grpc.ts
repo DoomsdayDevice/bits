@@ -7,10 +7,10 @@ export const getOrCreateConnection = memoize(<M>(ModelCls: Type<M>): Type<IConne
   @GrpcMessageDef({ name: `${ModelCls.name}Connection` })
   class GenericFindManyResponse {
     @GrpcFieldDef(() => UInt32)
-    totalCount: number;
+    totalCount!: number;
 
     @GrpcFieldDef(() => [ModelCls])
-    nodes: M[];
+    nodes!: M[];
   }
 
   return GenericFindManyResponse;

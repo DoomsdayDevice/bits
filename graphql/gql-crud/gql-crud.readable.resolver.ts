@@ -1,15 +1,7 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { transformAndValidate } from '@bits/dto.utils';
-import {
-  applyCursorPagingToInput,
-  convertGqlOrderByToTypeorm,
-  convertGraphqlFilterToService,
-  getPlural,
-  getSingular,
-  renameFunc,
-  renameKeyNames,
-} from '@bits/bits.utils';
+import { getPlural, getSingular, renameFunc, renameKeyNames } from '@bits/bits.utils';
 import {
   FindOneInput,
   getDefaultFindManyArgs,
@@ -28,6 +20,11 @@ import {
   IReadResolverConfig,
 } from '@bits/graphql/gql-crud/crud-config.interface';
 import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
+import {
+  applyCursorPagingToInput,
+  convertGqlOrderByToTypeorm,
+  convertGraphqlFilterToService,
+} from '@bits/utils/conversions';
 
 export function ReadResolverMixin<
   T extends ModelResource,

@@ -9,7 +9,7 @@ import {
   FieldMask,
   DeleteOneInput,
   DeleteOneResponse,
-  CreateInput,
+  ICreateInput,
 } from '@bits/grpc';
 import { memoize } from 'lodash';
 
@@ -58,7 +58,7 @@ export function getDefaultDeleteResponse<M>(
 export function getDefaultCreateInput<M>(
   ModelCls: Type<M>,
   modelName?: string,
-): Type<CreateInput<M>> {
+): Type<ICreateInput<M>> {
   @GrpcMessageDef({ name: `Create${modelName || ModelCls.name}Input` })
   class GenericCreateInput extends (OmitType(ModelCls, [
     'createdAt' as keyof M,

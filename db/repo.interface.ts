@@ -30,7 +30,7 @@ export interface IReadableRepo<Entity extends ObjectLiteral> {
   findOne(
     id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
-  ): Promise<Entity> | undefined;
+  ): Promise<Entity>;
   findNested({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findAndCount({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<any>;
 

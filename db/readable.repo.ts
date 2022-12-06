@@ -1,20 +1,22 @@
 import { Injectable, Type } from '@nestjs/common';
-import { Repository, DeepPartial, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { Repository, DeepPartial, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IConnection } from '@bits/bits.types';
-import { NestedQuery } from './nested-query';
-import { IReadableRepo } from './repo.interface';
 import { IFindManyServiceInput } from '@bits/services/interface.service';
 import { convertServiceFindManyInputToTypeorm } from '@bits/utils/conversions';
+import { NestedQuery } from './nested-query';
+import { IReadableRepo } from './repo.interface';
 
-export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: Type<Entity>) => {
+export const ReadableRepoMixin = <Entity extends ObjectLiteral, Base extends Type<object>>(
+  EntityCls: Type<Entity>,
+) => {
   return (BaseCls: Base = class {} as Base): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
     @Injectable()
     class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
       @InjectRepository(EntityCls) public readonly readRepo!: Repository<Entity>;
 
       public count(filter?: IFindManyServiceInput<Entity>): Promise<number> {
-        return this.readRepo.count(convertServiceFindManyInputToTypeorm(filter));
+        return this.readRepo.count(filter && convertServiceFindManyInputToTypeorm(filter));
       }
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
@@ -24,7 +26,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
       }
 
       public findAll(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]> {
-        return this.readRepo.find(convertServiceFindManyInputToTypeorm(filter));
+        return this.readRepo.find(filter && convertServiceFindManyInputToTypeorm(filter));
       }
 
       public findAllWithDeleted(
@@ -39,10 +41,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         options: FindOneOptions<Entity> = {},
       ): Promise<Entity> {
         options.where = id as any;
-        const record = await this.readRepo.findOne(options);
-        // if (!record) {
-        //   throw new NotFoundException('the requested record was not found');
-        // }
+        const record = await this.readRepo.findOneOrFail(options);
         return record;
       }
 
@@ -92,6 +91,7 @@ export const ReadableRepoMixin = <Entity, Base extends Type<object>>(EntityCls: 
         // });
         // return { totalCount, nodes };
       }
+
       getPrimaryColumnName(): keyof Entity {
         return 'id' as any;
       }

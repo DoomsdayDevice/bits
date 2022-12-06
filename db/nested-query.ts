@@ -8,6 +8,7 @@ import {
   FindOperator,
   Repository,
   FindOptionsRelationByString,
+  ObjectLiteral,
 } from 'typeorm';
 import * as _ from 'lodash';
 // import { Class } from '@nestjs-query/core';
@@ -20,7 +21,7 @@ import { getRelations } from '@bits/db/get-relations';
 import { IConnection } from '@bits/bits.types';
 // type CustomOperator<T> = FindOperator<T> | BossOperator;
 
-export class NestedQuery<T> {
+export class NestedQuery<T extends ObjectLiteral> {
   currentNum = 0;
 
   query: SelectQueryBuilder<T>;

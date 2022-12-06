@@ -1,8 +1,4 @@
 import { DynamicModule, Module, Type } from '@nestjs/common';
-import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
-import { WritableRepoMixin } from '../../db/writable.repo';
-import { ReadableRepoMixin } from '../../db/readable.repo';
-import { IGrpcWriteController } from './grpc-controller.interface';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WritableCrudService } from '@bits/services/writable-crud.service';
 import { WritableGrpcController } from '@bits/grpc/grpc-crud/grpc.writable.controller';
@@ -10,10 +6,15 @@ import { ReadableGrpcController } from '@bits/grpc/grpc-crud/grpc.readable.contr
 import { ReadableCrudService } from '@bits/services/readable-crud.service';
 import { getRepositoryToken } from '@bits/db/inject-repo.decorator';
 import { renameFunc } from '@bits/bits.utils';
+import { IGrpcWriteController } from '@bits/grpc';
+import { ObjectLiteral } from 'typeorm';
+import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
+import { WritableRepoMixin } from '../../db/writable.repo';
+import { ReadableRepoMixin } from '../../db/readable.repo';
 
-type IWRRepo<M> = IWritableRepo<M> & IReadableRepo<M>;
+type IWRRepo<M extends ObjectLiteral> = IWritableRepo<M> & IReadableRepo<M>;
 
-export interface GrpcWritableCrudConfig<M> {
+export interface GrpcWritableCrudConfig<M extends ObjectLiteral> {
   Model: Type<M>;
   Repo?: Type<IWRRepo<M>>;
   Controller?: Type<IGrpcWriteController<M>>;
@@ -22,7 +23,7 @@ export interface GrpcWritableCrudConfig<M> {
   DeleteDTO?: Type;
   imports?: any[];
 }
-export interface GrpcReadableCrudConfig<M> {
+export interface GrpcReadableCrudConfig<M extends ObjectLiteral> {
   Model: Type<M>;
   Repo?: Type<IReadableRepo<M>>;
   Controller?: Type<IGrpcWriteController<M>>;
@@ -33,7 +34,7 @@ export interface GrpcReadableCrudConfig<M> {
 }
 
 export class GRPCCrudModule {
-  static makeWritableCrud<M extends Object>({
+  static makeWritableCrud<M extends ObjectLiteral>({
     Model,
     Repo,
     Controller,
@@ -71,7 +72,7 @@ export class GRPCCrudModule {
     return WritableModule as any;
   }
 
-  static makeReadableCrud<M extends Object>({
+  static makeReadableCrud<M extends ObjectLiteral>({
     Model,
     Repo,
     Service,

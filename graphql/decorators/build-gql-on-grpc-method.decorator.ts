@@ -1,5 +1,5 @@
 import * as protobuf from 'protobufjs';
-import { Args, Field, InputType, Int, Mutation } from '@nestjs/graphql';
+import { Args, Field, Float, InputType, Int, Mutation } from '@nestjs/graphql';
 import { CurrentUser } from '@bits/auth/current-user.decorator';
 
 const root = protobuf.loadSync('libs/common/proto/core.proto');
@@ -20,7 +20,14 @@ export const BuildGqlOnGrpcMethodDecorator =
     class Input {}
     for (const f of Object.keys(input.fields)) {
       // Reflect.defineMetadata(PARAM_METADATA_KEY, String, target.prototype, f);
-      Field(() => Int, { name: f })(Input.prototype, f);
+
+      const grpcType = input.fields[f].type;
+      let Type: any;
+      if (grpcType === 'string') Type = String;
+      else if (grpcType === 'uint32') Type = Int;
+      else if (grpcType === 'bool') Type = Boolean;
+      else if (grpcType === 'float') Type = Float;
+      Field(() => Type, { name: f })(Input.prototype, f);
     }
     target.prototype[methodName] = async function (input: any, user: any) {
       const ans = await this[servicePropName][methodName](input);

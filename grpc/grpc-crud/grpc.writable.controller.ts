@@ -1,9 +1,9 @@
 import { Controller, Inject, Type } from '@nestjs/common';
 import { IWritableCrudService } from '@bits/services/interface.service';
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import {
   applyFieldMask,
-  CreateInput,
+  ICreateInput,
   getDefaultCreateInput,
   getDefaultDeleteInput,
   getDefaultDeleteResponse,
@@ -16,7 +16,11 @@ import {
   IUpdateInput,
 } from '@bits/grpc';
 
-export function WritableGrpcController<WriteModel, B extends Type, ReadModel = WriteModel>({
+export function WritableGrpcController<
+  WriteModel extends ObjectLiteral,
+  B extends Type,
+  ReadModel = WriteModel,
+>({
   WriteModelCls,
   ServiceCls,
   CreateDTO,
@@ -35,10 +39,10 @@ export function WritableGrpcController<WriteModel, B extends Type, ReadModel = W
 
   @Controller()
   class WriteModelController extends Base implements IGrpcWriteController<WriteModel, ReadModel> {
-    @Inject(ServiceCls) private writeSvc: IWritableCrudService<WriteModel>;
+    @Inject(ServiceCls) private writeSvc!: IWritableCrudService<WriteModel>;
 
     @GrpcMethodDef({ requestType: () => CreateInput, responseType: () => ReadModelCls })
-    async createOne(newEntity: CreateInput<WriteModel>): Promise<ReadModel> {
+    async createOne(newEntity: ICreateInput<WriteModel>): Promise<ReadModel> {
       const writeRes = await this.writeSvc.createOne(newEntity as any);
       if (separateRead && (this as any).readSvc && (writeRes as any).id) {
         return this.readSvc.findOne({ id: (writeRes as any).id } as any);

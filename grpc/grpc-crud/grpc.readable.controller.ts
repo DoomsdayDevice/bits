@@ -1,21 +1,21 @@
 import { Controller, Inject, Type } from '@nestjs/common';
 import {
+  FindByIdInput,
+  GrpcMethodDef,
+  GrpcServiceDef,
   IGrpcFindManyInput,
   IGrpcFindManyResponse,
   IGrpcReadController,
-} from './grpc-controller.interface';
-import { GrpcMethodDef } from '../decorators/method.decorator';
-import { GrpcServiceDef } from '../decorators/service.decorator';
+} from '@bits/grpc';
 import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
 import { IReadableCrudService } from '@bits/services/interface.service';
 import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import { Logger } from '../../../../src/infrastructure/logger/logger';
-import { FindByIdInput } from '@bits/grpc';
+import { ObjectLiteral } from 'typeorm';
 import { convertGrpcFilterToService, convertGrpcOrderByToTypeorm } from '@bits/utils/conversions';
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
-export function ReadableGrpcController<M, B extends AnyConstructor>(
+export function ReadableGrpcController<M extends ObjectLiteral, B extends AnyConstructor>(
   ModelCls: Type<M>,
   ServiceCls: Type<IReadableCrudService<M>>,
   defineService = true,
@@ -29,8 +29,8 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
 
   @Controller()
   class ModelController extends Base implements IGrpcReadController<M> {
-    @Inject(ServiceCls) private readSvc: IReadableCrudService<M>;
-    @Inject(Logger) private logger: Logger;
+    @Inject(ServiceCls) private readSvc!: IReadableCrudService<M>;
+    // @Inject(Logger) private logger: Logger;
 
     @GrpcMethodDef({ requestType: () => FinalFindOneInput, responseType: () => ModelCls })
     async findOne(input: FindByIdInput): Promise<M> {
@@ -46,7 +46,6 @@ export function ReadableGrpcController<M, B extends AnyConstructor>(
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values); // TODO this sorting isn't added
 
-      console.log({ o: input.paging?.offset, take: input.paging?.limit });
       const res = await this.readSvc.findManyAndCount({
         where: filter,
         order,

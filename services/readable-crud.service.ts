@@ -1,14 +1,21 @@
-import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import {
+  DeepPartial,
+  FindManyOptions,
+  FindOneOptions,
+  FindOptionsWhere,
+  ObjectLiteral,
+} from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import { IConnection } from '@bits/bits.types';
 import { IFindManyServiceInput, IReadableCrudService } from './interface.service';
 import { IReadableRepo } from '../db/repo.interface';
 
-export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
+export const ReadableCrudService = <M extends ObjectLiteral, R extends IReadableRepo<M>>(
   Model: Type<M>,
   Repo: Type<R>,
 ): Type<IReadableCrudService<M> & { readRepo: R }> => {
   @Injectable()
+  // eslint-disable-next-line no-shadow
   class ReadableCrudService implements IReadableCrudService<M> {
     @Inject(Repo) readRepo!: R;
 
@@ -19,12 +26,15 @@ export const ReadableCrudService = <M, R extends IReadableRepo<M>>(
     createOne(newEntity: DeepPartial<M>): Promise<M> {
       return this.readRepo.create(newEntity);
     }
-    findMany(filter?: IFindManyServiceInput<M>): Promise<M[]> {
+
+    findMany(filter: IFindManyServiceInput<M> = {}): Promise<M[]> {
       return this.readRepo.findNested(filter);
     }
-    findManyAndCount(filter?: IFindManyServiceInput<M>): Promise<IConnection<M>> {
+
+    findManyAndCount(filter: IFindManyServiceInput<M> = {}): Promise<IConnection<M>> {
       return this.readRepo.findAndCount(filter);
     }
+
     findOne(
       id: string | FindOneOptions<M> | FindOptionsWhere<M>,
       options?: FindOneOptions<M>,

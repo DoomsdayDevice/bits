@@ -6,7 +6,7 @@ import { IWritableCrudService } from '@bits/services/interface.service';
 import { FindByIdInput, OffsetPagination, Sort } from '../grpc.dto';
 
 export interface IGrpcWriteController<M, RM = M> {
-  createOne(newUser: CreateInput<M>): Promise<RM>;
+  createOne(newUser: ICreateInput<M>): Promise<RM>;
   updateOne(user: IUpdateInput<M>): Promise<StatusMsg>;
   deleteOne(user: FindOptionsWhere<M>): Promise<DeleteOneResponse>;
 }
@@ -48,7 +48,7 @@ export interface DeleteOneInput {
   id: string;
 }
 
-export type CreateInput<M> = Omit<M, 'createdAt' | 'id'>;
+export type ICreateInput<M> = Omit<M, 'createdAt' | 'id'>;
 
 export type IFieldMask = {
   paths: string[];

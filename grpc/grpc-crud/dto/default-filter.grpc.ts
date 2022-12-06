@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import * as _ from 'lodash';
-import { memoize, upperFirst } from 'lodash';
+import { memoize } from 'lodash';
 import {
   getFieldDataForClass,
   getListValueOfCls,
@@ -20,10 +20,10 @@ import { Merge } from 'ts-toolbelt/out/Union/Merge';
 @GrpcMessageDef({ oneOf: true })
 export class BooleanFieldComparison implements Merge<GrpcBooleanFieldComparisons> {
   @GrpcFieldDef()
-  is: boolean;
+  is!: boolean;
 
   @GrpcFieldDef()
-  isNot: boolean;
+  isNot!: boolean;
 }
 
 @GrpcMessageDef({ oneOf: true })
@@ -32,46 +32,46 @@ export class StringFieldComparison
   implements Merge<GrpcStringFieldComparison>
 {
   @GrpcFieldDef(() => getListValueOfCls(String))
-  in: IListValue<string>;
+  in!: IListValue<string>;
 
   @GrpcFieldDef()
-  eq: string;
+  eq!: string;
 
   @GrpcFieldDef()
-  neq: string;
+  neq!: string;
 
   @GrpcFieldDef()
-  like: string;
+  like!: string;
 
   @GrpcFieldDef()
-  gt: string;
+  gt!: string;
 
   @GrpcFieldDef()
-  gte: string;
+  gte!: string;
 
   @GrpcFieldDef()
-  lt: string;
+  lt!: string;
 
   @GrpcFieldDef()
-  lte: string;
+  lte!: string;
 
   @GrpcFieldDef()
-  iLike: string;
+  iLike!: string;
 
   @GrpcFieldDef()
-  notLike: string;
+  notLike!: string;
 
   @GrpcFieldDef()
-  notILike: string;
+  notILike!: string;
 }
 
 @GrpcMessageDef({ oneOf: true })
 export class DateFieldComparison extends BooleanFieldComparison {
   @GrpcFieldDef()
-  eq: Date;
+  eq!: Date;
 
   @GrpcFieldDef()
-  neq: Date;
+  neq!: Date;
 }
 
 export const getEnumComparisonType = memoize(function <E>(Enum: E, enumName: string): any {

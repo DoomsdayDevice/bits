@@ -1,18 +1,12 @@
 import { Type } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindManyOptions,
-  FindOneOptions,
-  FindOptionsWhere,
-  ObjectLiteral,
-  Repository,
-} from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, ObjectLiteral, Repository } from 'typeorm';
 import { ICrudService, IFindManyServiceInput } from '@bits/services/interface.service';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { IConnection } from '@bits/bits.types';
-import { convertServiceFindManyInputToTypeorm } from '@bits/bits.utils';
+import { convertServiceFindManyInputToTypeorm } from '@bits/utils/conversions';
 
-export function getGenericCrudService<T extends ObjectLiteral, DTO = T, Enums = never>(
+export function getGenericCrudService<T extends ObjectLiteral, DTO = T>(
   TClass: Type<T>,
   DTOClass?: Type<DTO>,
 ): Type<ICrudService<T>> {
