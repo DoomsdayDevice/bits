@@ -1,10 +1,10 @@
-import { GFieldInput, GMethodInput } from '../common/types';
+import { GMethodInput } from '../common/types';
 import { GrpcMethod } from '@nestjs/microservices';
-import { fieldReflector, grpcMethods, grpcServices, methodReflector } from '../common/variables';
+import { grpcMethods, grpcServices, methodReflector } from '../common/variables';
 import { Type } from '@nestjs/common';
 import { getPrototypeChain } from '@bits/grpc/common/reflectors';
 
-export function GrpcServiceDef(name?: string): ClassDecorator {
+export function GrpcServiceDef(name?: string, stack: boolean = false): ClassDecorator {
   return target => {
     const serviceName = name || target.name;
 
@@ -18,7 +18,8 @@ export function GrpcServiceDef(name?: string): ClassDecorator {
         grpcMethods.push({ ...(meth as any), service: serviceName });
       }
     }
-    grpcServices.push({ name: serviceName });
+    const exists = grpcServices.find(s => s.name === serviceName);
+    if (!exists) grpcServices.push({ name: serviceName });
   };
 }
 
