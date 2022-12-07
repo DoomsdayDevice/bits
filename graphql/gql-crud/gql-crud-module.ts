@@ -20,6 +20,8 @@ import {
   convertGrpcTypeToTs,
   getGrpcTypeByName,
 } from '@bits/graphql/decorators/build-gql-on-grpc-method.decorator';
+import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
+import { endsWith } from 'lodash';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -93,8 +95,10 @@ export class GqlCrudModule<
     const grpcType = getGrpcTypeByName(name);
 
     for (const f of getKeys(grpcType.fields)) {
-      const FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
-      Field(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
+      let FieldType: any;
+      if (f === 'id' || endsWith(f.toString(), 'Id')) FieldType = GraphQLUUID;
+      else FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
+      FilterableField(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
     }
 
     return Model;
