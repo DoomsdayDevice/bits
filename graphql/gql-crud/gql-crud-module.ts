@@ -6,15 +6,20 @@ import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
 import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.resolver';
 import { buildRelationsForModelResolver } from '@bits/graphql/relation/relation-builder';
-import { Resolver } from '@nestjs/graphql';
+import { Field, ObjectType, Resolver } from '@nestjs/graphql';
 import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
 import { getGenericCrudService } from '@bits/db/generic-crud.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
 import { IGrpcService } from '../../grpc/common/types';
-import { renameFunc } from '@bits/bits.utils';
+import { getKeys, renameFunc } from '@bits/bits.utils';
 import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/crud-config.interface';
 import { PagingStrategy } from '../../common/paging-strategy.enum';
+import { GraphQLUUID } from 'graphql-scalars';
+import {
+  convertGrpcTypeToTs,
+  getGrpcTypeByName,
+} from '@bits/graphql/decorators/build-gql-on-grpc-method.decorator';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -57,8 +62,8 @@ export class GqlCrudModule<
     AbilityFactory,
     RequirePrivileges,
   }: GqlWritableCrudConfig<T, Resources, N>) {
-    this.Model = Model;
-    this.modelName = modelName || Model.name;
+    this.Model = Model || this.buildModelFromGrpcName(modelName);
+    this.modelName = modelName || this.Model.name;
     this.pagination = pagination;
     this.type = type;
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
@@ -76,6 +81,23 @@ export class GqlCrudModule<
       if (readOnly) this.Resolver = this.buildReadResolver();
       else this.Resolver = this.buildWriteResolver();
     } else this.Resolver = ModelResolver;
+  }
+
+  buildModelFromGrpcName(name?: string): Type {
+    if (!name) throw new Error('NO MODEL NAME PROVIDED');
+
+    @ObjectType(name)
+    class Model {}
+    // get fields
+
+    const grpcType = getGrpcTypeByName(name);
+
+    for (const f of getKeys(grpcType.fields)) {
+      const FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
+      Field(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
+    }
+
+    return Model;
   }
 
   buildGrpcService(): Type<ICrudService<T>> {
@@ -142,6 +164,27 @@ export class GqlCrudModule<
 
     return GenericModule as any;
   }
+
+  // makeProxyCrud(): DynamicModule{
+  //
+  //   crudServiceReflector.set(this.Model, this.Service);
+  //
+  //   buildRelationsForModelResolver(this.Model, this.Resolver);
+  //
+  //   @Global()
+  //   @Module({
+  //     providers: [
+  //       { provide: this.Service.name, useClass: this.Service },
+  //       this.Service,
+  //       this.Resolver,
+  //     ],
+  //     imports: [...this.imports],
+  //     exports: [this.Service, { provide: this.Service.name, useClass: this.Service }],
+  //   })
+  //   class GenericModule {}
+  //
+  //   return GenericModule as any;
+  // }
 
   /**  */
   onlyRelations(): DynamicModule {

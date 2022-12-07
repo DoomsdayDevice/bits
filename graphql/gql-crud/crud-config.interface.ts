@@ -21,7 +21,8 @@ export interface IReadResolverConfig<T extends ModelResource, Resources, N exten
 }
 
 export interface GqlWritableCrudConfig<T extends ModelResource, Resources, N extends string>
-  extends Omit<IReadResolverConfig<T, Resources, N>, 'Service' | 'pagination'> {
+  extends Omit<IReadResolverConfig<T, Resources, N>, 'Service' | 'pagination' | 'Model'> {
+  Model?: Type<T>;
   Service?: Type<ICrudService<T>>;
   imports?: ModuleImportElem[];
   grpcServiceName?: string;

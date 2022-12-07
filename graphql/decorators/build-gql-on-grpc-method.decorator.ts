@@ -1,20 +1,37 @@
 import * as protobuf from 'protobufjs';
 import { Args, Field, Float, InputType, Int, Mutation } from '@nestjs/graphql';
 import { CurrentUser } from '@bits/auth/current-user.decorator';
+import { lowerFirst } from 'lodash';
 
-const root = protobuf.loadSync('libs/common/proto/core.proto');
+export const protoRoot = protobuf.loadSync('libs/common/proto/core.proto');
 
 const PARAM_METADATA_KEY = 'design:paramtypes';
+
+export function getServiceFromModelName(modelName: string) {
+  protoRoot.lookupService(`${lowerFirst(modelName)}Service`);
+}
+
+export function getGrpcTypeByName(name: string) {
+  return protoRoot.lookupType(name);
+}
+
+export function convertGrpcTypeToTs(grpcType: string) {
+  if (grpcType === 'string') return String;
+  if (grpcType === 'uint32') return Int;
+  if (grpcType === 'bool') return Boolean;
+  if (grpcType === 'float') return Float;
+  return String; // TODO
+}
 
 export const BuildGqlOnGrpcMethodDecorator =
   (methodName: string, serviceName: string, servicePropName: string): ClassDecorator =>
   target => {
     // Obtain a message type
-    const test = root.lookupService(serviceName);
-    const method = test.methods[methodName];
+    const service = protoRoot.lookupService(serviceName);
+    const method = service.methods[methodName];
     const { requestType, responseType } = method;
 
-    const input = root.lookupType(requestType);
+    const input = protoRoot.lookupType(requestType);
 
     @InputType(requestType)
     class Input {}
@@ -22,11 +39,7 @@ export const BuildGqlOnGrpcMethodDecorator =
       // Reflect.defineMetadata(PARAM_METADATA_KEY, String, target.prototype, f);
 
       const grpcType = input.fields[f].type;
-      let Type: any;
-      if (grpcType === 'string') Type = String;
-      else if (grpcType === 'uint32') Type = Int;
-      else if (grpcType === 'bool') Type = Boolean;
-      else if (grpcType === 'float') Type = Float;
+      const Type = convertGrpcTypeToTs(grpcType);
       Field(() => Type, { name: f })(Input.prototype, f);
     }
     target.prototype[methodName] = async function (input: any, user: any) {
