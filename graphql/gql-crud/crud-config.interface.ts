@@ -1,10 +1,10 @@
 import { CustomDecorator, Type } from '@nestjs/common';
-import { ICrudService } from '../../services/interface.service';
-import { PagingStrategy } from '../../common/paging-strategy.enum';
-import { ModuleImportElem } from '../../bits.types';
 import { AnyAbility } from '@casl/ability';
 import { Privilege } from '@bits/auth/privilege.type';
 import { ObjectLiteral } from 'typeorm';
+import { ICrudService } from '../../services/interface.service';
+import { PagingStrategy } from '../../common/paging-strategy.enum';
+import { ModuleImportElem } from '../../bits.types';
 
 export interface ICaslAbilityFactory<IUser> {
   createForUser(u: IUser): AnyAbility;
