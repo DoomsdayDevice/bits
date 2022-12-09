@@ -1,4 +1,4 @@
-import { oqtoResources } from '../../../src/auth/oqto-resources';
+import { OQTO_RESOURCE_NAMES } from '../../../src/auth/oqto-resources';
 import { Action } from './action.enum';
 
-export type Privilege = [typeof oqtoResources[number] | string, Action];
+export type Privilege = [typeof OQTO_RESOURCE_NAMES[number] | string, Action];

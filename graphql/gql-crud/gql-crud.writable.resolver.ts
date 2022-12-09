@@ -10,14 +10,7 @@ import { ICrudService } from '@bits/services/interface.service';
 import { ObjectLiteral } from 'typeorm';
 import { renameFunc } from '@bits/bits.utils';
 import { Action } from '@bits/auth/action.enum';
-
-interface Input<T extends ObjectLiteral, N extends string> {
-  Model: Type<T>;
-  Service: Type<ICrudService<T>>;
-  modelName?: N;
-  Create?: Type;
-  RequirePrivileges?: any;
-}
+import { IWriteResolverConfig } from '@bits/graphql/gql-crud/crud-config.interface';
 
 export const WriteResolverMixin =
   <T extends ObjectLiteral, N extends string>({
@@ -26,7 +19,9 @@ export const WriteResolverMixin =
     modelName,
     Create,
     RequirePrivileges,
-  }: Input<T, N>) =>
+    AbilityFactory,
+    getResourceNameFromModel,
+  }: IWriteResolverConfig<T, N>) =>
   <B extends Type>(Base: B): Type<IBaseServiceWrite<T, N> & InstanceType<B>> => {
     const name = modelName || Model.name;
     const UpdateOne = getDefaultUpdateOneInput(Model, name);
@@ -59,7 +54,9 @@ export const WriteResolverMixin =
     }
 
     if (RequirePrivileges)
-      RequirePrivileges([(Model || modelName) as any, Action.Write])(GenericResolver);
+      RequirePrivileges([(modelName || getResourceNameFromModel(Model)) as any, Action.Write])(
+        GenericResolver,
+      );
     renameFunc(GenericResolver, `Generic${modelName}WriteResolver`);
 
     return GenericResolver as any;

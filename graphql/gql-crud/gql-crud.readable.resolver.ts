@@ -19,27 +19,23 @@ import {
   ICaslAbilityFactory,
   IReadResolverConfig,
 } from '@bits/graphql/gql-crud/crud-config.interface';
-import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
 import {
   applyCursorPagingToInput,
   convertGqlOrderByToTypeorm,
   convertGraphqlFilterToService,
 } from '@bits/utils/conversions';
+import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
 
-export function ReadResolverMixin<
-  T extends ModelResource,
-  N extends string,
-  IUser,
-  Resources extends readonly any[],
->({
+export function ReadResolverMixin<T extends ModelResource, N extends string, IUser>({
   Model,
   Service,
   pagination,
-  resources,
+  modelIsInResources,
   modelName = Model.name as N,
   AbilityFactory,
   RequirePrivileges,
-}: IReadResolverConfig<T, Resources, N>): Type<IBaseServiceRead<T, N>> {
+  getResourceNameFromModel,
+}: IReadResolverConfig<T, N>): Type<IBaseServiceRead<T, N>> {
   const plural = getPlural(modelName);
   const singular = getSingular(modelName);
 
@@ -91,9 +87,9 @@ export function ReadResolverMixin<
     }
 
     /** filter that only leaves owned rows */
-    getFilterForResource(resource: any, user: IUser, origFilter: any = {}): MongoQuery | null {
+    getFilterForResource(Model: Type, user: IUser, origFilter: any = {}): MongoQuery | null {
       if (!user) return origFilter;
-      if (resources.includes(resource)) {
+      if (modelIsInResources(Model)) {
         let filter = null;
         if (this.abilityFactory) {
           const ability = this.abilityFactory.createForUser(user);
@@ -102,11 +98,13 @@ export function ReadResolverMixin<
         if (filter)
           return merge(origFilter, renameKeyNames(filter, { $elemMatch: 'elemMatch', $eq: 'eq' }));
       }
-      throw new Error(`Endpoint for ${resource.name} not defined in resources`);
+      throw new Error(`Endpoint for ${Model.name} not defined in resources`);
     }
   }
   if (RequirePrivileges)
-    RequirePrivileges([(Model || modelName) as any, Action.Read])(GenericResolver);
+    RequirePrivileges([(modelName || getResourceNameFromModel(Model)) as any, Action.Read])(
+      GenericResolver,
+    );
   if (AbilityFactory) Inject(AbilityFactory)(GenericResolver.prototype, 'abilityFactory');
   renameFunc(GenericResolver, `Generic${modelName}ReadResolver`);
 

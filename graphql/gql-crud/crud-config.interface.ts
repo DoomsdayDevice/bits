@@ -4,24 +4,31 @@ import { PagingStrategy } from '../../common/paging-strategy.enum';
 import { ModuleImportElem } from '../../bits.types';
 import { AnyAbility } from '@casl/ability';
 import { Privilege } from '@bits/auth/privilege.type';
+import { ObjectLiteral } from 'typeorm';
 
 export interface ICaslAbilityFactory<IUser> {
   createForUser(u: IUser): AnyAbility;
 }
 
-export interface IReadResolverConfig<T extends ModelResource, Resources, N extends string> {
+export interface IWriteResolverConfig<T extends ObjectLiteral, N extends string>
+  extends Omit<IReadResolverConfig<T, N>, 'pagination'> {
+  Create?: Type;
+}
+
+export interface IReadResolverConfig<T extends ObjectLiteral, N extends string> {
   Model: Type<T>;
   Service: Type<ICrudService<T>>;
   pagination: PagingStrategy;
   // CurrentUser: () => ParameterDecorator,
-  resources: Resources;
+  modelIsInResources: (Model: Type) => boolean;
+  getResourceNameFromModel: (Model: Type) => string;
   modelName?: N;
   AbilityFactory?: Type<ICaslAbilityFactory<unknown>>;
   RequirePrivileges?: (...p: Privilege[]) => CustomDecorator<string>;
 }
 
-export interface GqlWritableCrudConfig<T extends ModelResource, Resources, N extends string>
-  extends Omit<IReadResolverConfig<T, Resources, N>, 'Service' | 'pagination' | 'Model'> {
+export interface GqlWritableCrudConfig<T extends ModelResource, N extends string>
+  extends Omit<IReadResolverConfig<T, N>, 'Service' | 'pagination' | 'Model'> {
   Model?: Type<T>;
   Service?: Type<ICrudService<T>>;
   imports?: ModuleImportElem[];

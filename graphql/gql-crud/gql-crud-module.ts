@@ -44,7 +44,8 @@ export class GqlCrudModule<
 
   private type: 'grpc' | 'typeorm';
 
-  private resources: Resources;
+  private modelIsInResources: any;
+  private getResourceNameFromModel: any;
 
   private abilityFactory: any;
 
@@ -60,17 +61,20 @@ export class GqlCrudModule<
     imports,
     type = 'typeorm',
     readOnly = false,
-    resources,
+    modelIsInResources,
     AbilityFactory,
     RequirePrivileges,
-  }: GqlWritableCrudConfig<T, Resources, N>) {
+    getResourceNameFromModel,
+  }: GqlWritableCrudConfig<T, N>) {
     this.Model = Model || this.buildModelFromGrpcName(modelName);
     this.modelName = modelName || this.Model.name;
     this.pagination = pagination;
     this.type = type;
     this.grpcServiceName = grpcServiceName || `${this.modelName}Service`;
     this.imports = imports || [];
-    this.resources = resources;
+    this.modelIsInResources = modelIsInResources;
+    this.getResourceNameFromModel = getResourceNameFromModel;
+
     this.abilityFactory = AbilityFactory;
     this.RequirePrivileges = RequirePrivileges;
 
@@ -100,6 +104,7 @@ export class GqlCrudModule<
       else FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
       FilterableField(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
     }
+    renameFunc(Model, name);
 
     return Model;
   }
@@ -124,15 +129,18 @@ export class GqlCrudModule<
       Service: this.Service,
       modelName: this.modelName,
       RequirePrivileges: this.RequirePrivileges,
+      getResourceNameFromModel: this.getResourceNameFromModel,
+      modelIsInResources: this.modelIsInResources,
     })(
       ReadResolverMixin({
         Model: this.Model,
         Service: this.Service,
         pagination: this.pagination,
-        resources: this.resources,
+        modelIsInResources: this.modelIsInResources,
         modelName: this.modelName,
         AbilityFactory: this.abilityFactory,
         RequirePrivileges: this.RequirePrivileges,
+        getResourceNameFromModel: this.getResourceNameFromModel,
       }),
     );
   }
@@ -142,7 +150,9 @@ export class GqlCrudModule<
       Model: this.Model,
       Service: this.Service,
       pagination: this.pagination,
-      resources: this.resources,
+      modelIsInResources: this.modelIsInResources,
+      getResourceNameFromModel: this.getResourceNameFromModel,
+
       modelName: this.modelName,
       AbilityFactory: this.abilityFactory,
     });
