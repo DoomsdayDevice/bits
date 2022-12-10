@@ -38,6 +38,6 @@ export interface IGrpcService<WriteModel = any, ReadModel = WriteModel> {
   findOne(opts: { id: string }): Promise<WriteModel>;
   findMany(input: IGrpcFindManyInput<WriteModel>): Promise<IGrpcFindManyResponse<WriteModel>>;
   deleteOne(input: any): Promise<IStatusMsg>;
-  updateOne(input: IUpdateInput<WriteModel>): Promise<IStatusMsg>;
+  updateOne(input: IUpdateInput<WriteModel>): Promise<WriteModel>;
   createOne(input: any): Promise<WriteModel>;
 }

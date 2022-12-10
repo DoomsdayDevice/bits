@@ -50,14 +50,16 @@ export function WritableGrpcController<
       return writeRes as unknown as ReadModel;
     }
 
-    @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => StatusMsg })
-    async updateOne(input: IUpdateInput<WriteModel>): Promise<StatusMsg> {
+    @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => ReadModelCls })
+    async updateOne(input: IUpdateInput<WriteModel>): Promise<WriteModel> {
       const update = applyFieldMask(input.update, input.updateMask.paths);
       const res = (await this.writeSvc.updateOne(
         (update as any).id,
         update as any,
       )) as unknown as Promise<WriteModel>;
-      return { success: true };
+      // TODO
+      const readEntity = (this as any).readSvc.findOne({ id: input.update.id });
+      return readEntity;
     }
 
     @GrpcMethodDef({
@@ -66,7 +68,7 @@ export function WritableGrpcController<
     })
     async deleteOne(input: FindOptionsWhere<WriteModel>): Promise<StatusMsg> {
       const i = input as any;
-      return { success: Boolean(await this.writeSvc.deleteOne(i.id || i.name)) };
+      return { success: Boolean(await this.writeSvc.deleteOne(i)) };
     }
   }
   if (defineService) GrpcServiceDef(`${WriteModelCls.name}Service`)(WriteModelController);

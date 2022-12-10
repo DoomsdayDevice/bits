@@ -57,7 +57,7 @@ export class GRPCCrudModule {
         Base: ReadableGrpcController(Model, FinalService, false),
       });
 
-    const exports = [];
+    const exports: Type[] = [];
     if (!Repo) exports.push(FinalRepo);
     if (!Service) exports.push(FinalService);
 

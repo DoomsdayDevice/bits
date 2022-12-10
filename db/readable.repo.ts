@@ -37,7 +37,7 @@ export const ReadableRepoMixin = <Entity extends ObjectLiteral, Base extends Typ
       }
 
       public async findOne(
-        id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
+        id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
         options: FindOneOptions<Entity> = {},
       ): Promise<Entity> {
         options.where = id as any;

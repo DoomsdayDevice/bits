@@ -43,8 +43,8 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(EntityCls: Type<
         }
       }
 
-      public async deleteOne(id: string | FindOneOptions<Entity>): Promise<boolean> {
-        const e = await this.writeRepo.findOneOrFail(id as any);
+      public async deleteOne(id: FindOneOptions<Entity>): Promise<boolean> {
+        const e = await this.writeRepo.findOneByOrFail(id as any);
         const result = await this.writeRepo.remove(e);
         // const result = await this.hardDelete(id);
         // const result = await this.writeRepo.softDelete(id);

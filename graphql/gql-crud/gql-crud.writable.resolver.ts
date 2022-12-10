@@ -4,6 +4,7 @@ import { IBaseServiceWrite, IUpdateOneInput } from '@bits/graphql/gql-crud/gql-c
 import {
   getDefaultCreateOneInput,
   getDefaultUpdateOneInput,
+  getUpdateOneInputInputMain,
 } from '@bits/graphql/gql-crud/gql-crud.dto';
 import { GraphQLUUID } from 'graphql-scalars';
 import { ICrudService } from '@bits/services/interface.service';
@@ -18,13 +19,16 @@ export const WriteResolverMixin =
     Service,
     modelName,
     Create,
+    Update,
     RequirePrivileges,
     AbilityFactory,
     getResourceNameFromModel,
   }: IWriteResolverConfig<T, N>) =>
   <B extends Type>(Base: B): Type<IBaseServiceWrite<T, N> & InstanceType<B>> => {
     const name = modelName || Model.name;
-    const UpdateOne = getDefaultUpdateOneInput(Model, name);
+    const UpdateOne = Update
+      ? getUpdateOneInputInputMain(Update, name)
+      : getDefaultUpdateOneInput(Model, name);
     const CreateOne = Create || getDefaultCreateOneInput(Model, name);
 
     @Resolver(() => Model)
@@ -35,16 +39,15 @@ export const WriteResolverMixin =
       async [`deleteOne${name}`](
         @Args('id', { type: () => GraphQLUUID }) id: string,
       ): Promise<boolean> {
-        const res = await this.svc.deleteOne(id);
+        const res = await this.svc.deleteOne({ id } as any);
         return res;
       }
 
-      @Mutation(() => Boolean)
+      @Mutation(() => Model)
       async [`updateOne${name}`](
         @Args('input', { type: () => UpdateOne }) input: IUpdateOneInput<T>,
-      ): Promise<boolean> {
-        const res = await this.svc.updateOne(input.id, input.update);
-        return res;
+      ): Promise<T> {
+        return this.svc.updateOne(input.id, input.update);
       }
 
       @Mutation(() => Model)

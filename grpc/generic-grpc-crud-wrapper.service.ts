@@ -110,15 +110,15 @@ export function getDefaultGrpcCrudServiceWrapper<
       idOrConditions: string | FindOptionsWhere<To>,
       partialEntity: QueryDeepPartialEntity<To>,
       // ...options: any[]
-    ): Promise<boolean> {
+    ): Promise<To> {
       const update: any = { ...partialEntity, id: idOrConditions };
       const updateMask = { paths: generateFieldMask(update) };
 
-      await this.grpcSvc.updateOne({
+      const updated = await this.grpcSvc.updateOne({
         update,
         updateMask,
       });
-      return true;
+      return updated as To;
     }
 
     async findOne(

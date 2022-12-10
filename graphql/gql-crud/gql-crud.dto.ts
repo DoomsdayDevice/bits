@@ -35,6 +35,22 @@ export class FindOneInput {
   id!: string;
 }
 
+export function getUpdateOneInputInputMain<T>(
+  Update: Type,
+  modelName: string,
+): Type<IUpdateOneInput<T>> {
+  @InputType(`UpdateOne${modelName}Input`)
+  class UpdateOneInput {
+    @Field(() => GraphQLUUID)
+    id!: string;
+
+    @Field(() => Update)
+    update!: Partial<T>;
+  }
+
+  return UpdateOneInput;
+}
+
 export function getDefaultUpdateOneInput<T>(
   ModelCls: Type<T>,
   modelName?: string,

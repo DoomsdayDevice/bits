@@ -1,5 +1,5 @@
 import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
-import { IGrpcFindManyInput } from '@bits/grpc/grpc-crud/grpc-controller.interface';
+import { IGrpcFindManyInput, IListValue } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 import { Sort } from '@bits/grpc/grpc.dto';
 import { IFindManyServiceInput, IServiceWhere } from '@bits/services/interface.service';
@@ -110,9 +110,11 @@ export function convertGqlOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOption
   return obj;
 }
 
-export function convertGrpcOrderByToTypeorm<T = any>(orderBy: Sort[]): FindOptionsOrder<T> {
+export function convertGrpcOrderByToTypeorm<T = any>(
+  sorting: IListValue<Sort>,
+): FindOptionsOrder<T> {
   const obj: FindOptionsOrder<T> = {};
-  for (const o of orderBy) {
+  for (const o of sorting.values) {
     obj[o.field as keyof FindOptionsOrder<T>] = o.direction as any;
   }
   return obj;

@@ -35,10 +35,7 @@ export const ReadableCrudService = <M extends ObjectLiteral, R extends IReadable
       return this.readRepo.findAndCount(filter);
     }
 
-    findOne(
-      id: string | FindOneOptions<M> | FindOptionsWhere<M>,
-      options?: FindOneOptions<M>,
-    ): Promise<M> {
+    findOne(id: FindOneOptions<M> | FindOptionsWhere<M>, options?: FindOneOptions<M>): Promise<M> {
       return this.readRepo.findOne(id, options);
     }
 

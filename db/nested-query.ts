@@ -188,7 +188,7 @@ export class NestedQuery<T extends ObjectLiteral> {
     );
     const rels = [...oneToManyRelations, ...manyToOneRelations, ...manyToManyRelations];
     const relNames = rels.map(r => r.propertyName);
-    const relsInFilter = [];
+    const relsInFilter: string[] = [];
     for (const key of Object.keys(filter)) {
       const val = filter[key];
       // has fields that are themselves objects

@@ -32,12 +32,12 @@ export interface IReadableCrudService<Entity extends ObjectLiteral> {
 export interface IWritableCrudService<Entity extends ObjectLiteral> {
   // writeRepo: IWritableRepo<Entity>;
   createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  deleteOne(id: string | FindOptionsWhere<Entity>): Promise<boolean>;
+  deleteOne(id: FindOptionsWhere<Entity>): Promise<boolean>;
   updateOne(
     idOrConditions: string | FindOptionsWhere<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
-  ): Promise<boolean>;
+  ): Promise<Entity>;
 }
 
 export type ICrudService<Entity extends ObjectLiteral> = IWritableCrudService<Entity> &

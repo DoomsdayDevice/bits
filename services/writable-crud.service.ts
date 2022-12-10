@@ -22,7 +22,7 @@ export function WritableCrudService<
       return this.writeRepo.create(newEntity);
     }
 
-    deleteOne(id: string): Promise<boolean> {
+    deleteOne(id: FindOptionsWhere<Entity>): Promise<boolean> {
       return this.writeRepo.deleteOne(id);
     }
 
@@ -30,7 +30,7 @@ export function WritableCrudService<
       idOrConditions: string | FindOptionsWhere<Entity>,
       partialEntity: QueryDeepPartialEntity<Entity>,
     ): // ...options: any[]
-    Promise<boolean> {
+    Promise<Entity> {
       return this.writeRepo.update(idOrConditions, partialEntity);
     }
   }

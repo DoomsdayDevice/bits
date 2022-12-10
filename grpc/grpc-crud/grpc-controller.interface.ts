@@ -7,7 +7,7 @@ import { FindByIdInput, OffsetPagination, Sort } from '../grpc.dto';
 
 export interface IGrpcWriteController<M, RM = M> {
   createOne(newUser: ICreateInput<M>): Promise<RM>;
-  updateOne(user: IUpdateInput<M>): Promise<StatusMsg>;
+  updateOne(user: IUpdateInput<M>): Promise<M>;
   deleteOne(user: FindOptionsWhere<M>): Promise<DeleteOneResponse>;
 }
 

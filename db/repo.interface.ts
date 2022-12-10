@@ -28,7 +28,7 @@ export interface IReadableRepo<Entity extends ObjectLiteral> {
   findAll(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findAllWithDeleted(filter: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findOne(
-    id: string | FindOneOptions<Entity> | FindOptionsWhere<Entity>,
+    id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
   findNested({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<Entity[]>;
@@ -45,12 +45,12 @@ export interface IWritableRepo<Entity extends ObjectLiteral> {
     idOrConditions: string | FindOptionsWhere<Entity>,
     partialEntity: QueryDeepPartialEntity<Entity>,
     // ...options: any[]
-  ): Promise<boolean>;
+  ): Promise<Entity>;
   save<T extends DeepPartial<Entity>>(
     entityOrEntities: T | T[],
     options?: SaveOptions,
   ): Promise<T | T[]>;
-  deleteOne(id: string | FindOptionsWhere<Entity>): Promise<boolean>;
+  deleteOne(id: FindOptionsWhere<Entity>): Promise<boolean>;
   restoreOne(id: string): Promise<boolean>;
   hardDelete(
     criteria: string | number | FindOptionsWhere<Entity>,

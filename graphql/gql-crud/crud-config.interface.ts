@@ -13,6 +13,7 @@ export interface ICaslAbilityFactory<IUser> {
 export interface IWriteResolverConfig<T extends ObjectLiteral, N extends string>
   extends Omit<IReadResolverConfig<T, N>, 'pagination'> {
   Create?: Type;
+  Update?: Type;
 }
 
 export interface IReadResolverConfig<T extends ObjectLiteral, N extends string> {

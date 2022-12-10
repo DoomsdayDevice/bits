@@ -44,7 +44,7 @@ export function ReadableGrpcController<M extends ObjectLiteral, B extends AnyCon
     async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
       const filter = convertGrpcFilterToService(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
-      const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting.values); // TODO this sorting isn't added
+      const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting); // TODO this sorting isn't added
 
       const res = await this.readSvc.findManyAndCount({
         where: filter,

@@ -43,9 +43,8 @@ export function getGenericCrudService<T extends ObjectLiteral, DTO = T>(
     async updateOne(
       idOrConditions: string | FindOptionsWhere<T>,
       partialEntity: QueryDeepPartialEntity<T>,
-    ): Promise<boolean> {
-      await this.writeRepo.save({ id: idOrConditions, ...partialEntity } as any);
-      return true;
+    ): Promise<T> {
+      return this.writeRepo.save({ id: idOrConditions, ...partialEntity } as any);
     }
 
     async createOne(input: any): Promise<T> {
