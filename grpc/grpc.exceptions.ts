@@ -1,11 +1,30 @@
 import * as grpc from '@grpc/grpc-js';
+import { ServiceError } from '@grpc/grpc-js';
 
-export class GrpcException extends Error {
-  public readonly message: string;
-  public constructor(public readonly code: number, private readonly error: string | object) {
-    super();
-    this.message = error.toString();
+export class GrpcException implements ServiceError {
+  // extends (RpcException as any) {
+  public message: string;
+
+  details = '1233';
+
+  name = 'ServiceError';
+
+  metadata = {} as any;
+
+  public constructor(public code: grpc.status, private readonly error: string | object | string[]) {
+    // super(error);
+    this.error = error;
+    this.message = this.getInitMessage();
   }
+
+  getInitMessage() {
+    if (Array.isArray(this.error)) {
+      return this.error.join('\n');
+    }
+    // super.initMessage();
+    return this.error.toString();
+  }
+
   public getError() {
     return this.error;
   }

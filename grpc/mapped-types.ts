@@ -1,6 +1,11 @@
 import { fieldReflector } from './common/variables';
 import { Type } from '@nestjs/common';
 import { getFieldDataForClass } from '@bits/grpc/decorators/message.decorator';
+import {
+  applyIsOptionalDecorator,
+  inheritTransformationMetadata,
+  inheritValidationMetadata,
+} from '@bits/grpc/grpc.utils';
 
 export function PartialType<T extends Type>(MsgClass: T): Type<Partial<InstanceType<T>>> {
   // take all field metadatas for class
@@ -12,6 +17,15 @@ export function PartialType<T extends Type>(MsgClass: T): Type<Partial<InstanceT
     fieldReflector.append(PartialCls, {
       ...fm,
       nullable: true,
+    });
+  }
+
+  const propertyKeys = inheritValidationMetadata(MsgClass, PartialCls);
+  inheritTransformationMetadata(MsgClass, PartialCls);
+
+  if (propertyKeys) {
+    propertyKeys.forEach(key => {
+      applyIsOptionalDecorator(PartialCls, key);
     });
   }
   return PartialCls;

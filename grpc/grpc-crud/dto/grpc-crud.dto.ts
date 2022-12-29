@@ -12,6 +12,8 @@ import {
   ICreateInput,
 } from '@bits/grpc';
 import { memoize } from 'lodash';
+import { ValidateNested } from 'class-validator';
+import { Type as TypeTr } from 'class-transformer';
 
 export const getDefaultUpdateInput = memoize(
   <M>(ModelCls: Type<M>, modelName?: string): Type<IUpdateInput<M>> => {
@@ -21,6 +23,8 @@ export const getDefaultUpdateInput = memoize(
     @GrpcMessageDef({ name: `Update${modelName || ModelCls.name}Input` })
     class GenericUpdateInput {
       @GrpcFieldDef(() => UpdType)
+      @ValidateNested()
+      @TypeTr(() => UpdType)
       update!: Partial<M>;
 
       @GrpcFieldDef(() => FieldMask)

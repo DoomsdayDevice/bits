@@ -22,6 +22,7 @@ export interface GrpcWritableCrudConfig<M extends ObjectLiteral> {
   CreateDTO?: Type;
   DeleteDTO?: Type;
   imports?: any[];
+  providers?: any[];
 }
 export interface GrpcReadableCrudConfig<M extends ObjectLiteral> {
   Model: Type<M>;
@@ -30,6 +31,7 @@ export interface GrpcReadableCrudConfig<M extends ObjectLiteral> {
   FindOneDTO?: Type;
   Service?: Type;
   imports?: any[];
+  providers?: any[];
   isSimple?: boolean; // no paging, sorting, filtering (for enums and such)
 }
 
@@ -42,6 +44,7 @@ export class GRPCCrudModule {
     CreateDTO,
     DeleteDTO,
     imports = [],
+    providers = [],
   }: GrpcWritableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || WritableRepoMixin(Model)(ReadableRepoMixin(Model)());
     const FinalService =
@@ -62,7 +65,7 @@ export class GRPCCrudModule {
     if (!Service) exports.push(FinalService);
 
     @Module({
-      providers: [FinalRepo, FinalController, FinalService],
+      providers: [FinalRepo, FinalController, FinalService, ...providers],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports,
@@ -79,6 +82,7 @@ export class GRPCCrudModule {
     FindOneDTO,
     Controller,
     imports = [],
+    providers = [],
     isSimple,
   }: GrpcReadableCrudConfig<any>): DynamicModule {
     const FinalRepo = Repo || ReadableRepoMixin(Model)();
@@ -88,7 +92,7 @@ export class GRPCCrudModule {
       ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO, isSimple);
 
     @Module({
-      providers: [FinalRepo, FinalService],
+      providers: [FinalRepo, FinalService, ...providers],
       controllers: [FinalController],
       imports: [TypeOrmModule.forFeature([Model]), ...imports],
       exports: [FinalRepo, FinalService],

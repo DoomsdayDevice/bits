@@ -1,4 +1,4 @@
-import { Controller, Inject, Type } from '@nestjs/common';
+import { Controller, Inject, Type, UsePipes, ValidationPipe } from '@nestjs/common';
 import { IWritableCrudService } from '@bits/services/interface.service';
 import { FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import {
@@ -51,6 +51,7 @@ export function WritableGrpcController<
     }
 
     @GrpcMethodDef({ requestType: () => GenericUpdate, responseType: () => ReadModelCls })
+    @UsePipes(new ValidationPipe({ expectedType: GenericUpdate, transform: false }))
     async updateOne(input: IUpdateInput<WriteModel>): Promise<WriteModel> {
       const update = applyFieldMask(input.update, input.updateMask.paths);
       const res = (await this.writeSvc.updateOne(
