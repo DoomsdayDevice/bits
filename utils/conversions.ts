@@ -1,4 +1,4 @@
-import { FindManyOptions, FindOptionsWhere, ILike, In, Like } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, ILike, In, Like, Not } from 'typeorm';
 import { IGrpcFindManyInput, IListValue } from '@bits/grpc/grpc-crud/grpc-controller.interface';
 import { FindOptionsOrder } from 'typeorm/find-options/FindOptionsOrder';
 import { Sort } from '@bits/grpc/grpc.dto';
@@ -15,6 +15,7 @@ export function convertGrpcFilterToService<T>(filter: any = {}): FindOptionsWher
         convertGraphqlFilterToService(f),
       );
     } else if (value.eq !== undefined) newFilter[key] = value.eq;
+    else if (value.neq !== undefined) newFilter[key] = Not(value.neq);
     else if (value.in) newFilter[key] = In(value.in.values);
     else if (value.like) newFilter[key] = Like(value.like);
     else if (value.iLike) newFilter[key] = ILike(value.iLike);
@@ -33,6 +34,7 @@ export function convertGraphqlFilterToService<T>(filter: any): IServiceWhere<T> 
     if (key === 'OR' || key === 'AND') {
       newFilter[key] = value.map((f: any) => convertGrpcFilterToService(f));
     } else if (value.eq !== undefined) newFilter[key] = value.eq;
+    else if (value.neq !== undefined) newFilter[key] = Not(value.neq);
     else if (value.in) newFilter[key] = In(value.in.values);
     else if (value.like) newFilter[key] = Like(value.like);
     else if (value.iLike) newFilter[key] = ILike(value.iLike);
@@ -80,6 +82,7 @@ export function convertServiceFilterToGrpc<T>(where: IServiceWhere<T>) {
           grpcFilter[key] = { like: comparisonField._value };
         else if (comparisonField._type === 'ilike')
           grpcFilter[key] = { iLike: comparisonField._value };
+        else if (comparisonField._type === 'not') grpcFilter[key] = { neq: comparisonField._value };
       } else if (isObject(comparisonField)) {
         // TODO
         grpcFilter[key] = convertServiceFilterToGrpc(comparisonField as any);
