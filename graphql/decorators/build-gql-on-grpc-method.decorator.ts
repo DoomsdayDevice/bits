@@ -20,6 +20,7 @@ export function convertGrpcTypeToTs(grpcType: string) {
   if (grpcType === 'uint32') return Int;
   if (grpcType === 'bool') return Boolean;
   if (grpcType === 'float') return Float;
+  if (grpcType === 'google.protobuf.Timestamp') return Date;
   return String; // TODO
 }
 

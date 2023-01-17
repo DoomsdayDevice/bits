@@ -1,12 +1,12 @@
 import { Injectable, Type } from '@nestjs/common';
-import { Repository, DeepPartial, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { Repository, FindOneOptions, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IConnection } from '@bits/bits.types';
 import { IFindManyServiceInput } from '@bits/services/interface.service';
 import { convertServiceFindManyInputToTypeorm } from '@bits/utils/conversions';
-import { IReadableRepo } from './repo.interface';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { IReadableRepo } from './repo.interface';
 
 // TODO remove all any's
 export const MappedReadableRepoMixin = <
@@ -22,7 +22,7 @@ export const MappedReadableRepoMixin = <
     class ReadableRepo extends BaseCls implements IReadableRepo<Model> {
       @InjectRepository(EntityCls) public readonly readRepo!: Repository<Model>; // TODO fix this
       @InjectRepository(EntityCls) public readonly entityRepo!: Repository<Entity>;
-      @InjectMapper() mapper: Mapper;
+      @InjectMapper() mapper!: Mapper;
 
       public count(filter?: IFindManyServiceInput<Model>): Promise<number> {
         return this.entityRepo.count(filter && convertServiceFindManyInputToTypeorm(filter as any));

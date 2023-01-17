@@ -16,8 +16,16 @@ export interface IWriteResolverConfig<T extends ObjectLiteral, N extends string>
   Update?: Type;
 }
 
+export interface RelConf {
+  idFieldName: string;
+  fieldName: string;
+  relatedEntity?: Type<any>;
+  relatedEntityByName?: string;
+}
+
 export interface IReadResolverConfig<T extends ObjectLiteral, N extends string> {
   Model: Type<T>;
+  relations?: RelConf[];
   Service: Type<ICrudService<T>>;
   pagination: PagingStrategy;
   // CurrentUser: () => ParameterDecorator,

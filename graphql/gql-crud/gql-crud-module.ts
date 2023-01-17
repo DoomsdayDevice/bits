@@ -13,7 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
 import { IGrpcService } from '../../grpc/common/types';
 import { getKeys, renameFunc } from '@bits/bits.utils';
-import { GqlWritableCrudConfig } from '@bits/graphql/gql-crud/crud-config.interface';
+import { GqlWritableCrudConfig, RelConf } from '@bits/graphql/gql-crud/crud-config.interface';
 import { PagingStrategy } from '../../common/paging-strategy.enum';
 import { GraphQLUUID } from 'graphql-scalars';
 import {
@@ -22,6 +22,8 @@ import {
 } from '@bits/graphql/decorators/build-gql-on-grpc-method.decorator';
 import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
 import { endsWith } from 'lodash';
+import { getOrCreateModelByName } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
+import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -45,11 +47,14 @@ export class GqlCrudModule<
   private type: 'grpc' | 'typeorm';
 
   private modelIsInResources: any;
+
   private getResourceNameFromModel: any;
 
   private abilityFactory: any;
 
   private RequirePrivileges?: any;
+
+  private relations?: RelConf[];
 
   constructor({
     Model,
@@ -65,7 +70,9 @@ export class GqlCrudModule<
     AbilityFactory,
     RequirePrivileges,
     getResourceNameFromModel,
+    relations,
   }: GqlWritableCrudConfig<T, N>) {
+    if (relations) this.relations = relations;
     this.Model = Model || this.buildModelFromGrpcName(modelName);
     this.modelName = modelName || this.Model.name;
     this.pagination = pagination;
@@ -92,9 +99,20 @@ export class GqlCrudModule<
   buildModelFromGrpcName(name?: string): Type {
     if (!name) throw new Error('NO MODEL NAME PROVIDED');
 
-    @ObjectType(name)
-    class Model {}
     // get fields
+
+    const Model = getOrCreateModelByName(name);
+
+    // Build specified in config relations
+    if (this.relations)
+      for (const r of this.relations) {
+        if (r.relatedEntity) GqlRelation(() => r.relatedEntity!)(Model.prototype, r.fieldName);
+        if (r.relatedEntityByName)
+          GqlRelation(() => getOrCreateModelByName(r.relatedEntityByName))(
+            Model.prototype,
+            r.fieldName,
+          );
+      }
 
     const grpcType = getGrpcTypeByName(name);
 

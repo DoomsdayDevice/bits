@@ -7,12 +7,12 @@ import { ReadableCrudService } from '@bits/services/readable-crud.service';
 import { getRepositoryToken } from '@bits/db/inject-repo.decorator';
 import { renameFunc } from '@bits/bits.utils';
 import { IGrpcWriteController } from '@bits/grpc';
+import { MappedReadableRepoMixin } from '@bits/db/mapped-readable.repo';
+import { MappedWritableRepoMixin } from '@bits/db/mapped-writable.repo';
 import { ObjectLiteral } from 'typeorm';
 import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
 import { WritableRepoMixin } from '../../db/writable.repo';
 import { ReadableRepoMixin } from '../../db/readable.repo';
-import { MappedReadableRepoMixin } from '@bits/db/mapped-readable.repo';
-import { MappedWritableRepoMixin } from '@bits/db/mapped-writable.repo';
 
 type IWRRepo<M extends ObjectLiteral> = IWritableRepo<M> & IReadableRepo<M>;
 

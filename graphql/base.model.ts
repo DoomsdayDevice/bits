@@ -9,7 +9,7 @@ export class BaseModel {
   @FilterableField(() => GraphQLUUID)
   id!: string;
 
-  @Field({ nullable: true })
+  @Field()
   @Type(() => Date)
   createdAt!: Date;
 }
