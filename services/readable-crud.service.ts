@@ -28,7 +28,6 @@ export const ReadableCrudService = <M extends ObjectLiteral, R extends IReadable
     }
 
     findManyAndCount(filter: IFindManyServiceInput<M> = {}): Promise<IConnection<M>> {
-      console.log({ RR: this.readRepo });
       return this.readRepo.findAndCount(filter);
     }
 

@@ -108,7 +108,7 @@ export function GqlRelation<DTO extends Object, Relation>(
     const DTOClass = dto.constructor;
     const isMany = Array.isArray(relationTypeFunc());
     const relationOpts = isMany ? { pagingStrategy: 'offset', ...options } : options;
-    // Field(relationTypeFunc)(dto, name);
+    // Field(relationTypeFunc)(events, name);
     reflector.append(DTOClass as Type<DTO>, { name, isMany, relationOpts, relationTypeFunc });
   };
 }
