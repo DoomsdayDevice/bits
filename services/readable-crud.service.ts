@@ -23,15 +23,12 @@ export const ReadableCrudService = <M extends ObjectLiteral, R extends IReadable
       return this.readRepo.count(filter);
     }
 
-    createOne(newEntity: DeepPartial<M>): Promise<M> {
-      return this.readRepo.create(newEntity);
-    }
-
     findMany(filter: IFindManyServiceInput<M> = {}): Promise<M[]> {
-      return this.readRepo.findNested(filter);
+      return this.readRepo.findAll(filter);
     }
 
     findManyAndCount(filter: IFindManyServiceInput<M> = {}): Promise<IConnection<M>> {
+      console.log({ RR: this.readRepo });
       return this.readRepo.findAndCount(filter);
     }
 

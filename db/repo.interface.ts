@@ -24,14 +24,13 @@ export interface IReadableRepo<Entity extends ObjectLiteral> {
   readRepo: Repository<Entity>;
 
   count(filter?: IFindManyServiceInput<Entity>): Promise<number>;
-  create(newEntity: DeepPartial<Entity>): Promise<Entity>;
   findAll(filter?: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findAllWithDeleted(filter: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findOne(
     id: FindOneOptions<Entity> | FindOptionsWhere<Entity>,
     options?: FindOneOptions<Entity>,
   ): Promise<Entity>;
-  findNested({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<Entity[]>;
+  // findNested({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<Entity[]>;
   findAndCount({ relations, where, take, skip }: IFindManyServiceInput<Entity>): Promise<any>;
 
   getPrimaryColumnName(): keyof Entity;

@@ -11,6 +11,8 @@ import { ObjectLiteral } from 'typeorm';
 import { IReadableRepo, IWritableRepo } from '../../db/repo.interface';
 import { WritableRepoMixin } from '../../db/writable.repo';
 import { ReadableRepoMixin } from '../../db/readable.repo';
+import { MappedReadableRepoMixin } from '@bits/db/mapped-readable.repo';
+import { MappedWritableRepoMixin } from '@bits/db/mapped-writable.repo';
 
 type IWRRepo<M extends ObjectLiteral> = IWritableRepo<M> & IReadableRepo<M>;
 
@@ -24,6 +26,7 @@ export interface GrpcWritableCrudConfig<M extends ObjectLiteral> {
   imports?: any[];
   providers?: any[];
 }
+
 export interface GrpcReadableCrudConfig<M extends ObjectLiteral> {
   Model: Type<M>;
   Repo?: Type<IReadableRepo<M>>;
@@ -35,73 +38,16 @@ export interface GrpcReadableCrudConfig<M extends ObjectLiteral> {
   isSimple?: boolean; // no paging, sorting, filtering (for enums and such)
 }
 
-export class GRPCCrudModule {
-  static makeWritableCrud<M extends ObjectLiteral>({
-    Model,
-    Repo,
-    Controller,
-    Service,
-    CreateDTO,
-    DeleteDTO,
-    imports = [],
-    providers = [],
-  }: GrpcWritableCrudConfig<any>): DynamicModule {
-    const FinalRepo = Repo || WritableRepoMixin(Model)(ReadableRepoMixin(Model)());
-    const FinalService =
-      Service || WritableCrudService(Model, FinalRepo, ReadableCrudService(Model, FinalRepo));
-    const FinalController =
-      Controller ||
-      WritableGrpcController({
-        WriteModelCls: Model,
-        ServiceCls: FinalService,
-        CreateDTO,
-        DeleteDTO,
-        defineService: true,
-        Base: ReadableGrpcController(Model, FinalService, false),
-      });
+export interface GrpcMappedReadableCrudConfig<M extends ObjectLiteral, E extends ObjectLiteral>
+  extends GrpcReadableCrudConfig<M> {
+  Entity: Type<E>;
+}
+export interface GrpcMappedWritableCrudConfig<M extends ObjectLiteral, E extends ObjectLiteral>
+  extends GrpcWritableCrudConfig<M> {
+  Entity: Type<E>;
+}
 
-    const exports: Type[] = [];
-    if (!Repo) exports.push(FinalRepo);
-    if (!Service) exports.push(FinalService);
-
-    @Module({
-      providers: [FinalRepo, FinalController, FinalService, ...providers],
-      controllers: [FinalController],
-      imports: [TypeOrmModule.forFeature([Model]), ...imports],
-      exports,
-    })
-    class WritableModule {}
-
-    return WritableModule as any;
-  }
-
-  static makeReadableCrud<M extends ObjectLiteral>({
-    Model,
-    Repo,
-    Service,
-    FindOneDTO,
-    Controller,
-    imports = [],
-    providers = [],
-    isSimple,
-  }: GrpcReadableCrudConfig<any>): DynamicModule {
-    const FinalRepo = Repo || ReadableRepoMixin(Model)();
-    const FinalService = Service || ReadableCrudService(Model, FinalRepo);
-    const FinalController =
-      Controller ||
-      ReadableGrpcController(Model, FinalService, undefined, undefined, FindOneDTO, isSimple);
-
-    @Module({
-      providers: [FinalRepo, FinalService, ...providers],
-      controllers: [FinalController],
-      imports: [TypeOrmModule.forFeature([Model]), ...imports],
-      exports: [FinalRepo, FinalService],
-    })
-    class ReadableModule {}
-
-    return ReadableModule as any;
-  }
-
+export class GRPCCrudModuleBuilder {
   static makeAndProvideRepo(Model: Type, write: boolean = true): DynamicModule {
     const Repo = write
       ? WritableRepoMixin(Model)(ReadableRepoMixin(Model)())
@@ -113,10 +59,179 @@ export class GRPCCrudModule {
 
     return {
       global: true,
-      module: GRPCCrudModule,
+      module: GRPCCrudModuleBuilder,
       imports: [TypeOrmModule.forFeature([Model])],
       providers: [{ provide: token, useClass: Repo }],
       exports: [token],
     };
+  }
+}
+
+abstract class GRPCCrudModule {
+  getModule(
+    Repo: any,
+    Service: any,
+    Controller: any,
+    providers: any[],
+    imports: any[],
+    exports?: any[],
+  ) {
+    @Module({
+      providers: [Repo, Service, ...providers],
+      controllers: [Controller],
+      imports,
+      exports: exports || [Repo, Service],
+    })
+    class GrpcCrudModule {}
+
+    return GrpcCrudModule as any;
+  }
+}
+
+export class GRPCWritableCrudModule<T extends ObjectLiteral> extends GRPCCrudModule {
+  constructor(protected cfg: GrpcWritableCrudConfig<T>) {
+    super();
+  }
+
+  getRepo() {
+    return this.cfg.Repo || WritableRepoMixin(this.cfg.Model)(ReadableRepoMixin(this.cfg.Model)());
+  }
+
+  getService(Repo: any) {
+    return (
+      this.cfg.Service ||
+      WritableCrudService(this.cfg.Model, Repo, ReadableCrudService(this.cfg.Model, Repo))
+    );
+  }
+
+  getController(Service: any) {
+    const { CreateDTO, DeleteDTO, Model } = this.cfg;
+    return (
+      this.cfg.Controller ||
+      WritableGrpcController({
+        WriteModelCls: Model,
+        ServiceCls: Service,
+        CreateDTO,
+        DeleteDTO,
+        defineService: true,
+        Base: ReadableGrpcController(Model, Service, false),
+      })
+    );
+  }
+
+  build<M extends ObjectLiteral>(): DynamicModule {
+    const { Model, imports = [], providers = [] } = this.cfg;
+    const Repo = this.getRepo();
+    const FinalService = this.getService(Repo);
+
+    const FinalController = this.getController(FinalService);
+
+    const exports: Type[] = [];
+    if (!this.cfg.Repo) exports.push(Repo);
+    if (!this.cfg.Service) exports.push(FinalService);
+
+    return this.getModule(
+      Repo,
+      FinalService,
+      FinalController,
+      providers,
+      [TypeOrmModule.forFeature([Model]), ...imports],
+      exports,
+    );
+  }
+}
+
+export class GRPCReadableCrudModule<T extends ObjectLiteral> extends GRPCCrudModule {
+  constructor(protected cfg: GrpcReadableCrudConfig<any>) {
+    super();
+  }
+
+  getRepo() {
+    return this.cfg.Repo || ReadableRepoMixin(this.cfg.Model)();
+  }
+
+  getService(Repo: Type<IReadableRepo<T>>) {
+    return this.cfg.Service || ReadableCrudService(this.cfg.Model, Repo);
+  }
+
+  getController(Service: Type<any>) {
+    return (
+      this.cfg.Controller ||
+      ReadableGrpcController(
+        this.cfg.Model,
+        Service,
+        undefined,
+        undefined,
+        this.cfg.FindOneDTO,
+        this.cfg.isSimple,
+      )
+    );
+  }
+
+  build<M extends ObjectLiteral>(): DynamicModule {
+    const { Model, imports = [], providers = [] } = this.cfg;
+
+    const Repo = this.getRepo();
+    const Service = this.getService(Repo as any);
+    const Controller = this.getController(Service);
+
+    return this.getModule(Repo, Service, Controller, providers, [
+      TypeOrmModule.forFeature([Model]),
+      ...imports,
+    ]);
+  }
+}
+
+export class GRPCMappedWritableCrudModule<
+  M extends ObjectLiteral,
+  E extends ObjectLiteral,
+> extends GRPCWritableCrudModule<M> {
+  constructor(protected mappedCfg: GrpcMappedWritableCrudConfig<M, E>) {
+    super(mappedCfg);
+  }
+
+  getMappedRepo(): Type<IWRRepo<M>> {
+    const { Entity, Model } = this.mappedCfg;
+    return (this.cfg.Repo ||
+      MappedWritableRepoMixin(Entity, Model)(MappedReadableRepoMixin(Entity, Model)())) as any;
+  }
+
+  build(): DynamicModule {
+    const { Entity, providers = [], imports = [] } = this.mappedCfg;
+    const Repo = this.getMappedRepo();
+
+    const Service = this.getService(Repo);
+    const Controller = this.getController(Service);
+
+    return this.getModule(Repo, Service, Controller, providers, [
+      TypeOrmModule.forFeature([Entity]),
+      ...imports,
+    ]);
+  }
+}
+
+export class GRPCMappedReadableCrudModule<
+  M extends ObjectLiteral,
+  E extends ObjectLiteral,
+> extends GRPCReadableCrudModule<M> {
+  constructor(protected mappedCfg: GrpcMappedReadableCrudConfig<M, E>) {
+    super(mappedCfg);
+  }
+
+  getRepo(): Type<IReadableRepo<any>> {
+    return this.cfg.Repo || MappedReadableRepoMixin(this.mappedCfg.Entity, this.cfg.Model)();
+  }
+
+  build(): DynamicModule {
+    const { Entity, providers = [], imports = [] } = this.mappedCfg;
+    const Repo = this.getRepo();
+
+    const Service = this.getService(Repo);
+    const Controller = this.getController(Service);
+
+    return this.getModule(Repo, Service, Controller, providers, [
+      TypeOrmModule.forFeature([Entity]),
+      ...imports,
+    ]);
   }
 }
