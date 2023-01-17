@@ -24,6 +24,7 @@ import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory'
 import { endsWith } from 'lodash';
 import { getOrCreateModelByName } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
 import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
+import { Type as TType } from 'class-transformer';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -120,6 +121,9 @@ export class GqlCrudModule<
       let FieldType: any;
       if (f === 'id' || endsWith(f.toString(), 'Id')) FieldType = GraphQLUUID;
       else FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
+      if (FieldType === Date) {
+        TType(() => Date)(Model.prototype, f as string);
+      }
       FilterableField(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
     }
     renameFunc(Model, name);
