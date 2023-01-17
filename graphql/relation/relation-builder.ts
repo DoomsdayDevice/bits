@@ -3,14 +3,14 @@ import { Info, Parent, ResolveField } from '@nestjs/graphql';
 import { ICrudService } from '@bits/services/interface.service';
 import { GraphQLResolveInfo } from 'graphql/type';
 import { lowercaseFirstLetter } from '@core/utils';
-import { getRepository, In, ObjectLiteral } from 'typeorm';
+import { In, ObjectLiteral } from 'typeorm';
 import DataLoader from 'dataloader';
 import { lowerFirst } from 'lodash';
 import { ensureOrder } from '@bits/db/conversion.utils';
 import { ResolverRelation } from '@bits/graphql/relation/relation.interface';
+import { IBaseResolver } from '@bits/graphql/gql-crud/gql-crud.interface';
 import { getRelations } from './relation.decorator';
 import { crudServiceReflector } from '../../services/crud.constants';
-import { IBaseResolver, IBaseServiceRead } from '@bits/graphql/gql-crud/gql-crud.interface';
 
 const servicesToInjectIntoResolvers: { dto: any; resolver: any; svcName: string }[] = [];
 
