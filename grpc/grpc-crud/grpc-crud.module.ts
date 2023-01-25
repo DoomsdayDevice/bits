@@ -69,6 +69,7 @@ export class GRPCCrudModuleBuilder {
 
 abstract class GRPCCrudModule {
   getModule(
+    name: string,
     Repo: any,
     Service: any,
     Controller: any,
@@ -83,6 +84,7 @@ abstract class GRPCCrudModule {
       exports: exports || [Repo, Service],
     })
     class GrpcCrudModule {}
+    renameFunc(GrpcCrudModule, `GrpcCrud${name}Module`);
 
     return GrpcCrudModule as any;
   }
@@ -131,6 +133,7 @@ export class GRPCWritableCrudModule<T extends ObjectLiteral> extends GRPCCrudMod
     if (!this.cfg.Service) exports.push(FinalService);
 
     return this.getModule(
+      Model.name,
       Repo,
       FinalService,
       FinalController,
@@ -175,7 +178,7 @@ export class GRPCReadableCrudModule<T extends ObjectLiteral> extends GRPCCrudMod
     const Service = this.getService(Repo as any);
     const Controller = this.getController(Service);
 
-    return this.getModule(Repo, Service, Controller, providers, [
+    return this.getModule(this.cfg.Model.name, Repo, Service, Controller, providers, [
       TypeOrmModule.forFeature([Model]),
       ...imports,
     ]);
@@ -203,7 +206,7 @@ export class GRPCMappedWritableCrudModule<
     const Service = this.getService(Repo);
     const Controller = this.getController(Service);
 
-    return this.getModule(Repo, Service, Controller, providers, [
+    return this.getModule(this.mappedCfg.Model.name, Repo, Service, Controller, providers, [
       TypeOrmModule.forFeature([Entity]),
       ...imports,
     ]);
@@ -229,7 +232,7 @@ export class GRPCMappedReadableCrudModule<
     const Service = this.getService(Repo);
     const Controller = this.getController(Service);
 
-    return this.getModule(Repo, Service, Controller, providers, [
+    return this.getModule(this.cfg.Model.name, Repo, Service, Controller, providers, [
       TypeOrmModule.forFeature([Entity]),
       ...imports,
     ]);
