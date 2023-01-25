@@ -92,11 +92,20 @@ export function transformAndValidate<T extends Record<string, any>>(
   return inst;
 }
 
+function isPlainObject(obj: any) {
+  const prototype = Object.getPrototypeOf(obj);
+  return prototype === null || prototype.constructor === Object;
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function validateConfig<Cfg extends Record<string, any>>(
   CfgCls: Type<Cfg>,
   config: Cfg,
 ): Cfg {
+  // filter instances of cfg classes
+  // const validatedConfig = isPlainObject(config)
+  //   ? plainToClass(CfgCls, config, { enableImplicitConversion: true })
+  //   : config;
   const validatedConfig = plainToClass(CfgCls, config, { enableImplicitConversion: true });
   const errors = validateSync(validatedConfig, { skipMissingProperties: false });
 
