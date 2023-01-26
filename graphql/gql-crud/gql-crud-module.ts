@@ -1,4 +1,4 @@
-import { Global, Module, Type } from '@nestjs/common';
+import { ClassProvider, Global, Module, Type } from '@nestjs/common';
 
 import { getDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
@@ -57,22 +57,26 @@ export class GqlCrudModule<
 
   private relations?: RelConf[];
 
-  constructor({
-    Model,
-    modelName,
-    pagination = PagingStrategy.OFFSET,
-    grpcServiceName,
-    ModelResolver,
-    Service,
-    imports,
-    type = 'typeorm',
-    readOnly = false,
-    modelIsInResources,
-    AbilityFactory,
-    RequirePrivileges,
-    getResourceNameFromModel,
-    relations,
-  }: GqlWritableCrudConfig<T, N>) {
+  private cfg!: GqlWritableCrudConfig<T, N>;
+
+  constructor(cfg: GqlWritableCrudConfig<T, N>) {
+    const {
+      Model,
+      modelName,
+      pagination = PagingStrategy.OFFSET,
+      grpcServiceName,
+      ModelResolver,
+      Service,
+      imports,
+      type = 'typeorm',
+      readOnly = false,
+      modelIsInResources,
+      AbilityFactory,
+      RequirePrivileges,
+      getResourceNameFromModel,
+      relations,
+    } = cfg;
+    this.cfg = cfg;
     if (relations) this.relations = relations;
     this.Model = Model || this.buildModelFromGrpcName(modelName);
     this.modelName = modelName || this.Model.name;
@@ -94,7 +98,7 @@ export class GqlCrudModule<
     if (!ModelResolver) {
       if (readOnly) this.Resolver = this.buildReadResolver();
       else this.Resolver = this.buildWriteResolver();
-    } else this.Resolver = ModelResolver;
+    } else this.Resolver = (ModelResolver as ClassProvider).useClass || ModelResolver;
   }
 
   buildModelFromGrpcName(name?: string): Type {
@@ -191,7 +195,9 @@ export class GqlCrudModule<
       providers: [
         { provide: this.Service.name, useClass: this.Service },
         this.Service,
-        this.Resolver,
+        (this.cfg.ModelResolver as ClassProvider)?.provide
+          ? this.cfg.ModelResolver!
+          : this.Resolver,
       ],
       imports: [...this.imports],
       exports: [this.Service, { provide: this.Service.name, useClass: this.Service }],

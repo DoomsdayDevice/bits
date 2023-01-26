@@ -1,4 +1,4 @@
-import { CustomDecorator, Type } from '@nestjs/common';
+import { ClassProvider, CustomDecorator, Type } from '@nestjs/common';
 import { AnyAbility } from '@casl/ability';
 import { Privilege } from '@bits/auth/privilege.type';
 import { ObjectLiteral } from 'typeorm';
@@ -43,7 +43,7 @@ export interface GqlWritableCrudConfig<T extends ModelResource, N extends string
   imports?: ModuleImportElem[];
   grpcServiceName?: string;
   pagination?: PagingStrategy;
-  ModelResolver?: any;
+  ModelResolver?: Type | ClassProvider;
   /** using grpc or simply typeorm */
   type: 'grpc' | 'typeorm';
   readOnly?: boolean;
