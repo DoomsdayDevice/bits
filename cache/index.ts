@@ -32,36 +32,25 @@ export const myCacheManager = {
 
 const { enabled, host, port, password } = cfg.redis;
 
-export const syncClient = Redis.createClient({
+export const redisClient = Redis.createClient({
   url: `redis://${host}:${port}`,
   password,
   // retry_strategy: enabled ? undefined : () => null,
 });
 
 export let clientAdapter: RedisAdapter;
-syncClient.on('error', (error: any) => {
+redisClient.on('error', (error: any) => {
   // eslint-disable-next-line no-console
   if (enabled) console.error(error);
 });
 
 if (enabled) {
-  syncClient.connect().then(async () => {
-    await syncClient.flushAll();
-    clientAdapter = useAdapter(syncClient as any);
+  redisClient.connect().then(async () => {
+    // await redisClient.flushAll();
+    clientAdapter = useAdapter(redisClient as any);
     // eslint-disable-next-line no-console
   });
 }
-
-export const redisClient = {
-  get: promisify(syncClient.get).bind(syncClient),
-  set: promisify(syncClient.set).bind(syncClient),
-  hGet: promisify(syncClient.hGet).bind(syncClient),
-  hGetAll: promisify(syncClient.hGetAll).bind(syncClient),
-  hIncrBy: promisify(syncClient.hIncrBy).bind(syncClient),
-  hSet: promisify(syncClient.hSet).bind(syncClient),
-  expire: promisify(syncClient.expire).bind(syncClient),
-  flushAll: promisify(syncClient.flushAll).bind(syncClient),
-};
 
 interface CacheMethodOpts extends CacheOptions {
   TransformModel?: Type<any>;
