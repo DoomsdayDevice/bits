@@ -11,12 +11,3 @@ export const CurrentUser = createParamDecorator((data: unknown, context: Executi
   const c = ctx.getContext();
   return c.req?.user || c.extra?.user;
 });
-
-export const UserIp = createParamDecorator((data: unknown, context: ExecutionContext) => {
-  const ctx = GqlExecutionContext.create(context);
-  let { ip } = ctx.getContext().req;
-  if (ip.substr(0, 7) === '::ffff:') {
-    ip = ip.substr(7);
-  }
-  return ip;
-});
