@@ -60,6 +60,5 @@ export function CacheMethod(opts: CacheMethodOpts = {}): MethodDecorator {
   if (opts && !opts?.client) opts.client = clientAdapter;
   if (!opts.ttlSeconds) opts.ttlSeconds = 60 * 5;
   opts.strategy = new CustomCacheStrategy(opts.TransformModel);
-  return (() => () => () => {}) as any;
-  // return Cacheable(opts) as MethodDecorator;
+  return Cacheable(opts) as MethodDecorator;
 }
