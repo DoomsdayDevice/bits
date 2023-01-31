@@ -1,9 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
-export const UserIp = createParamDecorator((data: unknown, context: ExecutionContext) => {
-  const ctx = GqlExecutionContext.create(context);
-  const { ip, headers } = ctx.getContext().req;
+export const getIpFromReq = (req: any) => {
+  const { ip, headers } = req;
   const forwardIp = headers['x-forwarded-for'];
   const realIp = headers['x-real-ip'];
 
@@ -15,4 +14,9 @@ export const UserIp = createParamDecorator((data: unknown, context: ExecutionCon
   } else finalIp = ip;
 
   return finalIp;
+};
+
+export const UserIp = createParamDecorator((data: unknown, context: ExecutionContext) => {
+  const ctx = GqlExecutionContext.create(context);
+  return getIpFromReq(ctx.getContext().req);
 });
