@@ -111,9 +111,10 @@ export class GqlCrudModule<
     // Build specified in config relations
     if (this.relations)
       for (const r of this.relations) {
-        if (r.relatedEntity) GqlRelation(() => r.relatedEntity!)(Model.prototype, r.fieldName);
-        if (r.relatedEntityByName)
-          GqlRelation(() => getOrCreateModelByName(r.relatedEntityByName))(
+        const { relatedEntityByName, relatedEntity } = r;
+        if (relatedEntity) GqlRelation(() => relatedEntity)(Model.prototype, r.fieldName);
+        if (relatedEntityByName)
+          GqlRelation(() => getOrCreateModelByName(relatedEntityByName))(
             Model.prototype,
             r.fieldName,
           );
