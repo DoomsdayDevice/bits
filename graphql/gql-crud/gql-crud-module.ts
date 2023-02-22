@@ -6,7 +6,7 @@ import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
 import { WriteResolverMixin } from '@bits/graphql/gql-crud/gql-crud.writable.resolver';
 import { buildRelationsForModelResolver } from '@bits/graphql/relation/relation-builder';
-import { Field, ObjectType, Resolver } from '@nestjs/graphql';
+import { Resolver } from '@nestjs/graphql';
 import { DynamicModule } from '@nestjs/common/interfaces/modules/dynamic-module.interface';
 import { getGenericCrudService } from '@bits/db/generic-crud.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,7 +22,10 @@ import {
 } from '@bits/graphql/decorators/build-gql-on-grpc-method.decorator';
 import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
 import { endsWith } from 'lodash';
-import { getOrCreateModelByName } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
+import {
+  getOrCreateInputByName,
+  getOrCreateModelByName,
+} from '@bits/graphql/gql-crud/get-or-create-model-by-name';
 import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
 import { Type as TType } from 'class-transformer';
 
@@ -57,9 +60,7 @@ export class GqlCrudModule<
 
   private relations?: RelConf[];
 
-  private cfg!: GqlWritableCrudConfig<T, N>;
-
-  constructor(cfg: GqlWritableCrudConfig<T, N>) {
+  constructor(private cfg: GqlWritableCrudConfig<T, N>) {
     const {
       Model,
       modelName,
@@ -76,9 +77,16 @@ export class GqlCrudModule<
       getResourceNameFromModel,
       relations,
     } = cfg;
-    this.cfg = cfg;
     if (relations) this.relations = relations;
-    this.Model = Model || this.buildModelFromGrpcName(modelName);
+    if (!Model && !modelName) throw new Error('NO MODEL OR MODEL NAME PROVIDED');
+    this.Model = Model || this.buildModelFromGrpcName(modelName!);
+
+    if (!this.cfg.Create && !readOnly && modelName)
+      this.cfg.Create = this.buildModelFromGrpcName(
+        `CreateOne${modelName}Input`,
+        `Create${modelName}Input`,
+        getOrCreateInputByName,
+      );
     this.modelName = modelName || this.Model.name;
     this.pagination = pagination;
     this.type = type;
@@ -101,12 +109,14 @@ export class GqlCrudModule<
     } else this.Resolver = (ModelResolver as ClassProvider).useClass || ModelResolver;
   }
 
-  buildModelFromGrpcName(name?: string): Type {
-    if (!name) throw new Error('NO MODEL NAME PROVIDED');
-
+  buildModelFromGrpcName(
+    name: string,
+    grpcName = name,
+    getModelFn: (n: string) => any = getOrCreateModelByName,
+  ): Type {
     // get fields
 
-    const Model = getOrCreateModelByName(name);
+    const Model = getModelFn(name);
 
     // Build specified in config relations
     if (this.relations)
@@ -114,13 +124,10 @@ export class GqlCrudModule<
         const { relatedEntityByName, relatedEntity } = r;
         if (relatedEntity) GqlRelation(() => relatedEntity)(Model.prototype, r.fieldName);
         if (relatedEntityByName)
-          GqlRelation(() => getOrCreateModelByName(relatedEntityByName))(
-            Model.prototype,
-            r.fieldName,
-          );
+          GqlRelation(() => getModelFn(relatedEntityByName))(Model.prototype, r.fieldName);
       }
 
-    const grpcType = getGrpcTypeByName(name);
+    const grpcType = getGrpcTypeByName(grpcName);
 
     for (const f of getKeys(grpcType.fields)) {
       let FieldType: any;
@@ -155,6 +162,7 @@ export class GqlCrudModule<
       Model: this.Model,
       Service: this.Service,
       modelName: this.modelName,
+      Create: this.cfg.Create,
       RequirePrivileges: this.RequirePrivileges,
       getResourceNameFromModel: this.getResourceNameFromModel,
       modelIsInResources: this.modelIsInResources,

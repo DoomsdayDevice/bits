@@ -25,6 +25,7 @@ import {
   convertGraphqlFilterToService,
 } from '@bits/utils/conversions';
 import { IBaseServiceRead, IFindManyArgs } from './gql-crud.interface';
+import { inspect } from 'util';
 
 export function ReadResolverMixin<T extends ModelResource, N extends string, IUser>({
   Model,
@@ -83,6 +84,10 @@ export function ReadResolverMixin<T extends ModelResource, N extends string, IUs
           take: input.paging.limit,
         });
       }
+      const ans = await this.svc.findManyAndCount({
+        where: convertGraphqlFilterToService(finalFilter),
+      });
+      console.log({ ans: inspect(ans) });
       return this.svc.findManyAndCount({ where: convertGraphqlFilterToService(finalFilter) });
     }
 
