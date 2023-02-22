@@ -34,6 +34,7 @@ export function PartialType<T extends Type>(MsgClass: T): Type<Partial<InstanceT
 export function OmitType<T extends Type, K extends readonly (keyof InstanceType<T>)[]>(
   MsgClass: T,
   keys: K,
+  decorator?: any,
 ): Type<Omit<InstanceType<T>, K[number]>> {
   // take all field metadatas for class
   const fieldMeta = getFieldDataForClass(MsgClass);
@@ -43,6 +44,8 @@ export function OmitType<T extends Type, K extends readonly (keyof InstanceType<
   for (const fm of fieldMeta.filter(fm => !keys.includes(fm.name))) {
     fieldReflector.append(PartialCls, { ...fm });
   }
+
+  if (decorator) decorator(PartialCls);
   return PartialCls as any;
 }
 

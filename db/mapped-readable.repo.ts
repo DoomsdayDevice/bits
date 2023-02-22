@@ -32,8 +32,9 @@ export const MappedReadableRepoMixin = <
         const fromDb: Entity[] = (await this.entityRepo.find(
           filter && convertServiceFindManyInputToTypeorm(filter as any),
         )) as any;
+        const mapped = this.mapper.mapArray<Entity, Model>(fromDb, EntityCls, ModelCls);
 
-        return this.mapper.mapArray<Entity, Model>(fromDb, EntityCls, ModelCls);
+        return mapped;
       }
 
       public findAllWithDeleted(
@@ -56,7 +57,9 @@ export const MappedReadableRepoMixin = <
         const [nodes, totalCount] = (await this.entityRepo.findAndCount(
           convertServiceFindManyInputToTypeorm(input as any),
         )) as any;
-        return { totalCount, nodes };
+
+        const mapped = this.mapper.mapArray<Entity, Model>(nodes, EntityCls, ModelCls);
+        return { totalCount, nodes: mapped };
       }
 
       getPrimaryColumnName(): keyof Model {
