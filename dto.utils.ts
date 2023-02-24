@@ -1,6 +1,7 @@
 import { validateSync, ValidationError } from 'class-validator';
 import { Type } from '@nestjs/common';
 import { plainToClass, plainToInstance } from 'class-transformer';
+import { getKeys } from '@bits/bits.utils';
 
 function valErrorToStr(
   err: ValidationError,
@@ -118,3 +119,37 @@ export function validateConfig<Cfg extends Record<string, any>>(
 export function formatValErrors(errors: ValidationError[]): string {
   return errors.map((e, i) => valErrorToStr(e, i === 0)).join('');
 }
+
+const plainToUnion = <T extends object>(v: T, opts: UnionOpts) => {
+  const realTargetType: Type = opts.discriminator.subTypes.find(
+    subType => subType.name === (v as any)[opts.discriminator.property],
+  )!.value;
+  return plainToInstance(realTargetType, v);
+  // if (!targetType.options.keepDiscriminatorProperty)
+  //   delete subValue[targetType.options.discriminator.property];
+};
+
+export const oneOfToPlain = (value: any) => {
+  let transformed;
+  if (Array.isArray(value)) {
+    const keys = getKeys(value[0]);
+    const whichOne = keys.find(k => value[0][k])!;
+    transformed = value.map(v => v[whichOne]);
+  } else {
+    const keys = getKeys(value);
+    const whichOne = keys.find(k => value[k])!;
+    transformed = value[whichOne];
+  }
+  return transformed;
+};
+
+export const transformToUnion = <T extends object>(valOrVals: T | T[], opts: UnionOpts) => {
+  if (Array.isArray(valOrVals)) {
+    return valOrVals.map(v => plainToUnion(v, opts));
+  }
+  return plainToUnion(valOrVals, opts);
+};
+export type UnionOpts = {
+  discriminator: { property: string; subTypes: { value: Type; name: string }[] };
+  keepDiscriminatorProperty: boolean;
+};

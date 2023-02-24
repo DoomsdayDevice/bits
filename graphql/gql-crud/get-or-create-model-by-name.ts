@@ -1,5 +1,6 @@
 import { endsWith, lowerFirst, memoize } from 'lodash';
 import {
+  ArgsType,
   createUnionType,
   Field,
   Float,
@@ -11,14 +12,19 @@ import {
 import { getKeys, renameFunc } from '@bits/bits.utils';
 import { GraphQLUUID } from 'graphql-scalars';
 import * as CT from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { Type } from '@nestjs/common';
 import * as protobuf from 'protobufjs';
 import { GqlEnum } from '@core/graphql/enums';
+import { OffsetPagination } from '@bits/graphql/paging/offset-paging';
+import { oneOfToPlain, transformToUnion, UnionOpts } from '@bits/dto.utils';
 
 export class GrpcProtoToGqlConverter {
   private skippedTypeNames: string[];
 
   private definedTypes: Type[] = [];
+
+  private oneOfUnionOpts: Record<string, UnionOpts> = {};
 
   constructor(private protoPath: string, private skippedTypes: Type[], private enums: GqlEnum[]) {
     this.skippedTypeNames = skippedTypes.map(t => t.name);
@@ -32,17 +38,41 @@ export class GrpcProtoToGqlConverter {
     name: string,
     grpcName: string,
     FieldDecorator = Field,
+    skipFields: string[] = [],
   ) => {
     const grpcType = this.getGrpcTypeByName(grpcName);
 
-    for (const f of getKeys(grpcType.fields)) {
-      const { type } = grpcType.fields[f];
+    for (const f of getKeys(grpcType.fields).filter(
+      field => !skipFields.includes(field.toString()),
+    )) {
+      const fieldName = f.toString();
+      const { type, repeated } = grpcType.fields[f];
       const FieldType = this.getFieldType(f, type);
-      if (FieldType === Date) {
-        CT.Type(() => Date)(Model.prototype, f as string);
+      let oneOf;
+      try {
+        oneOf = this.getGrpcTypeByName(type).oneofs?.oneOf;
+      } catch {
+        oneOf = null;
       }
-      const T = typeof FieldType === 'string' ? FieldType : () => FieldType;
-      FieldDecorator(T, { name: f.toString() })(Model.prototype, f.toString());
+      if (FieldType === Date) {
+        CT.Type(() => Date)(Model.prototype, fieldName);
+      } else if (oneOf) {
+        // CT.Type(() => FieldType as any)(Model.prototype, fieldName);
+        const opts = this.oneOfUnionOpts[type];
+        if (opts)
+          Transform(
+            ({ value }) => {
+              return transformToUnion(oneOfToPlain(value), opts);
+            },
+            { toClassOnly: true },
+          )(Model.prototype, fieldName);
+      } else if (FieldType instanceof Function) {
+        CT.Type(() => FieldType)(Model.prototype, fieldName);
+      }
+      FieldDecorator(() => (repeated ? [FieldType] : FieldType), { name: fieldName })(
+        Model.prototype,
+        fieldName,
+      );
     }
 
     renameFunc(Model, name);
@@ -112,6 +142,21 @@ export class GrpcProtoToGqlConverter {
       const fieldTypes: Type[] = fieldTypeNames.map(ftn =>
         this.convertAndPopulateGrpcTypeToGql(ftn as any),
       );
+
+      const baseTypeName = `${fieldTypeNames.join('')}`;
+
+      const discriminatorName = '_type';
+      const subTypes = fieldTypes.map(t => ({ value: t, name: t.name }));
+
+      class BaseClass {}
+
+      this.oneOfUnionOpts[grpcType] = {
+        discriminator: {
+          property: discriminatorName,
+          subTypes,
+        },
+        keepDiscriminatorProperty: true,
+      }; // CT.Type(() => BaseClass, );
       return getOrCreateUnionType(grpcType, fieldTypes);
     }
 
@@ -124,6 +169,28 @@ export class GrpcProtoToGqlConverter {
     return Model;
 
     // throw new Error(`Proto type ${grpcType} not specified`);
+  }
+
+  convertInputTypeToGql(name: string) {
+    const Input = getOrCreateInputByName(name);
+
+    const grpcType = this.getGrpcTypeByName(name);
+    const skipFields = ['paging', 'userId'];
+    const keys = getKeys(grpcType.fields);
+    const paging = keys.find(f => f.toString() === 'paging');
+    const withUser = keys.find(f => f.toString() === 'userId');
+    const numOfFields = getKeys(grpcType.fields).filter(
+      field => !skipFields.includes(field.toString()),
+    ).length;
+    if (numOfFields > 0) this.populateGqlModelByGrpcData(Input, name, name, undefined, skipFields);
+
+    @ArgsType()
+    class Args {}
+
+    if (paging) Field(() => OffsetPagination, { nullable: true })(Args.prototype, 'paging');
+    if (numOfFields > 0) Field(() => Input)(Args.prototype, 'input');
+
+    return [Args, withUser, paging];
   }
 }
 
@@ -143,16 +210,14 @@ export const getOrCreateInputByName = memoize(<T extends string>(name: T) => {
   return InputDto;
 });
 
-export const getOrCreateUnionType = memoize((name: string, models: Type[]) => {
-  return createUnionType({
+export const getOrCreateUnionType = memoize((name: string, models: Type[]) =>
+  createUnionType({
     name,
     types: () => models,
-  });
-});
+  }),
+);
 
-export const getProtoRoot = (protoPath: string) => {
-  return protobuf.loadSync(protoPath);
-};
+export const getProtoRoot = (protoPath: string) => protobuf.loadSync(protoPath);
 
 // export const protoRoot = protobuf.loadSync();
 

@@ -18,12 +18,12 @@ import { PagingStrategy } from '../../common/paging-strategy.enum';
 import {
   getOrCreateInputByName,
   getOrCreateModelByName,
-  GrpcProtoToGqlConverter,
 } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
-import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
 import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
-import { CORE_PACKAGE, grpcProtoPaths } from '@core/grpc/clients';
-import { grpcToGqlConverter, skippedTypes } from '@core/grpc/constants';
+import { CORE_PACKAGE } from '@core/grpc/clients';
+import { grpcToGqlConverter } from '@core/grpc/constants';
+import { buildRelationsForModel } from '@bits/graphql/utils';
+import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -117,6 +117,7 @@ export class GqlCrudModule<
     console.log({ name, grpcName });
 
     // Build specified in config relations
+    // if (this.relations) buildRelationsForModel(Model, this.relations);
     if (this.relations)
       for (const r of this.relations) {
         const { relatedEntityByName, relatedEntity } = r;

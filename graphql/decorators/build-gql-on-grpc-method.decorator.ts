@@ -1,11 +1,10 @@
-import { Args, InputType, Mutation, Query } from '@nestjs/graphql';
+import { Args, Mutation, Query } from '@nestjs/graphql';
 import { CurrentUser } from '@bits/auth/current-user.decorator';
-import {
-  getProtoRoot,
-  GrpcProtoToGqlConverter,
-} from '@bits/graphql/gql-crud/get-or-create-model-by-name';
+import { getProtoRoot } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
 import { CORE_PACKAGE, grpcProtoPaths } from '@core/grpc/clients';
-import { grpcToGqlConverter, skippedTypes } from '@core/grpc/constants';
+import { grpcToGqlConverter } from '@core/grpc/constants';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { transformAndValidate } from '@bits/dto.utils';
 
 const PARAM_METADATA_KEY = 'design:paramtypes';
 
@@ -13,7 +12,7 @@ export type ProxyMethodConfig = {
   methodName: string;
   serviceName: string;
   servicePropName: string;
-  isMutation: boolean;
+  isMutation?: boolean;
 };
 
 export const BuildGqlOnGrpcMethodDecorator =
@@ -33,14 +32,29 @@ export const BuildGqlOnGrpcMethodDecorator =
 
     // const input = protoRoot.lookupType(requestType);
     // INPUT
-    @InputType(requestType)
-    class Input {}
-    grpcToGqlConverter.populateGqlModelByGrpcData(Input, requestType, requestType);
+    const [Input, withUser, paging] = grpcToGqlConverter.convertInputTypeToGql(requestType);
 
-    targetResolverCls.prototype[methodName] = async function (input: any, user: any) {
-      const ans = await this[servicePropName][methodName](input);
-      return ans;
-    };
+    // const withUserId = async function (input: any, user: any) {
+    //   return this[servicePropName][methodName](input);
+    // };
+    const ReturnType = grpcToGqlConverter.convertAndPopulateGrpcTypeToGql(responseType);
+
+    if (withUser)
+      targetResolverCls.prototype[methodName] = async function (args: any, user: any) {
+        const ans = await this[servicePropName][methodName]({
+          ...args.input,
+          userId: user.id,
+          paging: paging && args.paging,
+        });
+        return transformAndValidate(ReturnType, ans);
+      };
+    else
+      targetResolverCls.prototype[methodName] = async function (args: any) {
+        const ans = await this[servicePropName][methodName](args.input);
+        return transformAndValidate(ReturnType, ans);
+      };
+
+    // UsePipes(new ValidationPipe({ expectedType: ActivityMessageSent }))
     // const meta = Reflect.getMetadata(metadataKey, target.prototype, 'number');
     Reflect.defineMetadata(
       PARAM_METADATA_KEY,
@@ -50,14 +64,13 @@ export const BuildGqlOnGrpcMethodDecorator =
     );
 
     // RESPONSE
-    const isOneOf = protoRoot.lookupType(responseType);
 
-    const ReturnType = grpcToGqlConverter.convertAndPopulateGrpcTypeToGql(responseType);
-
-    Args('input', { type: () => Input })(targetResolverCls.prototype, methodName, 0);
-    CurrentUser()(targetResolverCls.prototype, methodName, 1);
+    Args({ type: () => Input }, new ValidationPipe())(targetResolverCls.prototype, methodName, 0);
+    if (withUser) CurrentUser()(targetResolverCls.prototype, methodName, 1);
 
     const descriptor = Object.getOwnPropertyDescriptor(targetResolverCls.prototype, methodName);
+
+    // Validate return
     (isMutation ? Mutation : Query)(() => ReturnType)(
       targetResolverCls.prototype,
       methodName,
