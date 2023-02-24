@@ -1,62 +1,66 @@
-import * as protobuf from 'protobufjs';
-import { Args, Field, Float, InputType, Int, Mutation } from '@nestjs/graphql';
+import { Args, InputType, Mutation, Query } from '@nestjs/graphql';
 import { CurrentUser } from '@bits/auth/current-user.decorator';
-import { lowerFirst } from 'lodash';
-
-export const protoRoot = protobuf.loadSync('libs/common/proto/core.proto');
+import {
+  getProtoRoot,
+  GrpcProtoToGqlConverter,
+} from '@bits/graphql/gql-crud/get-or-create-model-by-name';
+import { CORE_PACKAGE, grpcProtoPaths } from '@core/grpc/clients';
+import { grpcToGqlConverter, skippedTypes } from '@core/grpc/constants';
 
 const PARAM_METADATA_KEY = 'design:paramtypes';
 
-export function getServiceFromModelName(modelName: string) {
-  protoRoot.lookupService(`${lowerFirst(modelName)}Service`);
-}
-
-export function getGrpcTypeByName(name: string) {
-  return protoRoot.lookupType(name);
-}
-
-export function convertGrpcTypeToTs(grpcType: string) {
-  if (grpcType === 'string') return String;
-  if (grpcType === 'uint32') return Int;
-  if (grpcType === 'bool') return Boolean;
-  if (grpcType === 'float') return Float;
-  if (grpcType === 'google.protobuf.Timestamp') return Date;
-  return String; // TODO
-}
+export type ProxyMethodConfig = {
+  methodName: string;
+  serviceName: string;
+  servicePropName: string;
+  isMutation: boolean;
+};
 
 export const BuildGqlOnGrpcMethodDecorator =
-  (methodName: string, serviceName: string, servicePropName: string): ClassDecorator =>
-  target => {
+  ({
+    methodName,
+    serviceName,
+    servicePropName,
+    isMutation = false,
+  }: ProxyMethodConfig): ClassDecorator =>
+  targetResolverCls => {
     // Obtain a message type
+    const protoPath = grpcProtoPaths[CORE_PACKAGE];
+    const protoRoot = getProtoRoot(protoPath);
     const service = protoRoot.lookupService(serviceName);
     const method = service.methods[methodName];
     const { requestType, responseType } = method;
 
-    const input = protoRoot.lookupType(requestType);
-
+    // const input = protoRoot.lookupType(requestType);
+    // INPUT
     @InputType(requestType)
     class Input {}
-    for (const f of Object.keys(input.fields)) {
-      // Reflect.defineMetadata(PARAM_METADATA_KEY, String, target.prototype, f);
+    grpcToGqlConverter.populateGqlModelByGrpcData(Input, requestType, requestType);
 
-      const grpcType = input.fields[f].type;
-      const Type = convertGrpcTypeToTs(grpcType);
-      Field(() => Type, { name: f })(Input.prototype, f);
-    }
-    target.prototype[methodName] = async function (input: any, user: any) {
+    targetResolverCls.prototype[methodName] = async function (input: any, user: any) {
       const ans = await this[servicePropName][methodName](input);
       return ans;
     };
     // const meta = Reflect.getMetadata(metadataKey, target.prototype, 'number');
+    Reflect.defineMetadata(
+      PARAM_METADATA_KEY,
+      [Input, null],
+      targetResolverCls.prototype,
+      methodName,
+    );
 
-    let ReturnType: any;
-    if (responseType === 'google.protobuf.BoolValue') ReturnType = Boolean;
-    else throw new Error('Proto type not specified');
-    Reflect.defineMetadata(PARAM_METADATA_KEY, [Input, null], target.prototype, methodName);
+    // RESPONSE
+    const isOneOf = protoRoot.lookupType(responseType);
 
-    const desc = Object.getOwnPropertyDescriptor(target.prototype, methodName);
-    Args('input', { type: () => Input })(target.prototype, methodName, 0);
-    CurrentUser()(target.prototype, methodName, 1);
+    const ReturnType = grpcToGqlConverter.convertAndPopulateGrpcTypeToGql(responseType);
 
-    Mutation(() => ReturnType)(target.prototype, methodName, desc!);
+    Args('input', { type: () => Input })(targetResolverCls.prototype, methodName, 0);
+    CurrentUser()(targetResolverCls.prototype, methodName, 1);
+
+    const descriptor = Object.getOwnPropertyDescriptor(targetResolverCls.prototype, methodName);
+    (isMutation ? Mutation : Query)(() => ReturnType)(
+      targetResolverCls.prototype,
+      methodName,
+      descriptor!,
+    );
   };

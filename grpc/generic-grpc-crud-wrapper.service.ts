@@ -33,7 +33,7 @@ interface Input<To> {
 /**
  * создает и оборачивает gRPC сервис
  */
-export function getDefaultGrpcCrudServiceWrapper<
+export function getOrCreateDefaultGrpcCrudServiceWrapper<
   Service extends IGrpcService<From>,
   From extends object,
   To extends object = From,
@@ -88,7 +88,6 @@ export function getDefaultGrpcCrudServiceWrapper<
 
     async findManyAndCount(input?: IFindManyServiceInput<To>): Promise<IConnection<To>> {
       const many = await this.grpcSvc.findMany(convertServiceInputToGrpc(input as any));
-      console.log({ input, many: inspect(many), svcIn: convertServiceInputToGrpc(input as any) });
       const valid = this.validate(many.nodes);
 
       return { ...many, nodes: valid };

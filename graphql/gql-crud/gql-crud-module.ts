@@ -1,6 +1,6 @@
 import { ClassProvider, Global, Module, Type } from '@nestjs/common';
 
-import { getDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
+import { getOrCreateDefaultGrpcCrudServiceWrapper } from '@bits/grpc/generic-grpc-crud-wrapper.service';
 import { ReadResolverMixin } from '@bits/graphql/gql-crud/gql-crud.readable.resolver';
 import { crudServiceReflector } from '@bits/services/crud.constants';
 import { ModuleImportElem } from '@bits/bits.types';
@@ -12,22 +12,18 @@ import { getGenericCrudService } from '@bits/db/generic-crud.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICrudService } from '@bits/services/interface.service';
 import { IGrpcService } from '../../grpc/common/types';
-import { getKeys, renameFunc } from '@bits/bits.utils';
+import { renameFunc } from '@bits/bits.utils';
 import { GqlWritableCrudConfig, RelConf } from '@bits/graphql/gql-crud/crud-config.interface';
 import { PagingStrategy } from '../../common/paging-strategy.enum';
-import { GraphQLUUID } from 'graphql-scalars';
-import {
-  convertGrpcTypeToTs,
-  getGrpcTypeByName,
-} from '@bits/graphql/decorators/build-gql-on-grpc-method.decorator';
-import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
-import { endsWith } from 'lodash';
 import {
   getOrCreateInputByName,
   getOrCreateModelByName,
+  GrpcProtoToGqlConverter,
 } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
 import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
-import { Type as TType } from 'class-transformer';
+import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory';
+import { CORE_PACKAGE, grpcProtoPaths } from '@core/grpc/clients';
+import { grpcToGqlConverter, skippedTypes } from '@core/grpc/constants';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -117,6 +113,8 @@ export class GqlCrudModule<
     // get fields
 
     const Model = getModelFn(name);
+    grpcToGqlConverter.populateGqlModelByGrpcData(Model, name, grpcName, FilterableField);
+    console.log({ name, grpcName });
 
     // Build specified in config relations
     if (this.relations)
@@ -127,24 +125,11 @@ export class GqlCrudModule<
           GqlRelation(() => getModelFn(relatedEntityByName))(Model.prototype, r.fieldName);
       }
 
-    const grpcType = getGrpcTypeByName(grpcName);
-
-    for (const f of getKeys(grpcType.fields)) {
-      let FieldType: any;
-      if (f === 'id' || endsWith(f.toString(), 'Id')) FieldType = GraphQLUUID;
-      else FieldType = convertGrpcTypeToTs(grpcType.fields[f].type);
-      if (FieldType === Date) {
-        TType(() => Date)(Model.prototype, f as string);
-      }
-      FilterableField(() => FieldType, { name: f.toString() })(Model.prototype, f.toString());
-    }
-    renameFunc(Model, name);
-
     return Model;
   }
 
   buildGrpcService(): Type<ICrudService<T>> {
-    return getDefaultGrpcCrudServiceWrapper<IGrpcService<unknown>, any, T>({
+    return getOrCreateDefaultGrpcCrudServiceWrapper<IGrpcService<unknown>, any, T>({
       packageToken: 'CORE_PACKAGE',
       DTOCls: this.Model,
       serviceName: this.grpcServiceName,
