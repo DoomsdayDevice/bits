@@ -23,7 +23,6 @@ import { FilterableField } from '@bits/graphql/filter/filter-comparison.factory'
 import { CORE_PACKAGE } from '@core/grpc/clients';
 import { grpcToGqlConverter } from '@core/grpc/constants';
 import { buildRelationsForModel } from '@bits/graphql/utils';
-import { GqlRelation } from '@bits/graphql/relation/relation.decorator';
 
 export class GqlCrudModule<
   T extends ModelResource,
@@ -117,14 +116,13 @@ export class GqlCrudModule<
     console.log({ name, grpcName });
 
     // Build specified in config relations
-    // if (this.relations) buildRelationsForModel(Model, this.relations);
-    if (this.relations)
-      for (const r of this.relations) {
-        const { relatedEntityByName, relatedEntity } = r;
-        if (relatedEntity) GqlRelation(() => relatedEntity)(Model.prototype, r.fieldName);
-        if (relatedEntityByName)
-          GqlRelation(() => getModelFn(relatedEntityByName))(Model.prototype, r.fieldName);
-      }
+    if (this.relations) buildRelationsForModel(Model, this.relations);
+    // for (const r of this.relations) {
+    // const { relatedEntityByName, relatedEntity } = r;
+    // if (relatedEntity) GqlRelation(() => relatedEntity)(Model.prototype, r.fieldName);
+    // if (relatedEntityByName)
+    //   GqlRelation(() => getModelFn(relatedEntityByName))(Model.prototype, r.fieldName);
+    // }
 
     return Model;
   }
