@@ -15,10 +15,10 @@ export class FindOneNamedInput {
 @GrpcMessageDef()
 export class OffsetPagination {
   @GrpcFieldDef(() => 'uint32', { nullable: true })
-  limit!: number;
+  limit?: number;
 
   @GrpcFieldDef(() => 'uint32', { nullable: true })
-  offset!: number;
+  offset?: number;
 }
 
 export enum SortDirection {

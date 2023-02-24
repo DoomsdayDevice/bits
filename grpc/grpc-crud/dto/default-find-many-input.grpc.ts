@@ -12,9 +12,18 @@ import {
   Sort,
 } from '@bits/grpc';
 
+type Cfg = {
+  isSimple?: boolean;
+  paging?: boolean;
+  filter?: boolean;
+  sorting?: boolean;
+};
+
 export const getOrCreateFindManyInput = memoize(
-  <M>(ModelCls: Type<M>, isSimple = false): Type<IGrpcFindManyInput<M>> => {
-    const F = getOrCreateDefaultFilter(ModelCls);
+  <M>(
+    ModelCls: Type<M>,
+    { isSimple = false, paging = true, filter = true, sorting = true }: Cfg = {},
+  ): Type<IGrpcFindManyInput<M>> => {
     if (isSimple) {
       @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
       class GenericFindManyInput {}
@@ -22,15 +31,27 @@ export const getOrCreateFindManyInput = memoize(
     }
     @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
     class GenericFindManyInput {
-      @GrpcFieldDef(() => OffsetPagination, { nullable: true })
       paging?: OffsetPagination;
 
-      @GrpcFieldDef(() => F, { nullable: true })
       filter?: IGrpcFilter<M>;
 
-      @GrpcFieldDef(() => getListValueOfCls(Sort), { nullable: true })
       sorting?: IListValue<Sort>;
     }
+
+    if (paging)
+      GrpcFieldDef(() => OffsetPagination, { nullable: true })(
+        GenericFindManyInput.prototype,
+        'paging',
+      );
+    if (filter) {
+      const F = getOrCreateDefaultFilter(ModelCls);
+      GrpcFieldDef(() => F, { nullable: true })(GenericFindManyInput.prototype, 'filter');
+    }
+    if (sorting)
+      GrpcFieldDef(() => getListValueOfCls(Sort), { nullable: true })(
+        GenericFindManyInput.prototype,
+        'sorting',
+      );
     return GenericFindManyInput;
   },
 );

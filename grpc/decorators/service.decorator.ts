@@ -1,7 +1,7 @@
 import { GMethodInput } from '../common/types';
 import { GrpcMethod } from '@nestjs/microservices';
 import { grpcMethods, grpcServices, methodReflector } from '../common/variables';
-import { Type } from '@nestjs/common';
+import { Controller, Type } from '@nestjs/common';
 import { getPrototypeChain } from '@bits/grpc/common/reflectors';
 
 export function GrpcServiceDef(name?: string, stack: boolean = false): ClassDecorator {
@@ -20,6 +20,8 @@ export function GrpcServiceDef(name?: string, stack: boolean = false): ClassDeco
     }
     const exists = grpcServices.find(s => s.name === serviceName);
     if (!exists) grpcServices.push({ name: serviceName });
+
+    Controller()(target);
   };
 }
 
