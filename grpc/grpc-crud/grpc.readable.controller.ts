@@ -23,7 +23,10 @@ export function ReadableGrpcController<M extends ObjectLiteral, B extends AnyCon
   FindOneInputDTO?: Type,
   isSimple = false,
 ): Type<IGrpcReadController<M> & InstanceType<B>> {
-  const FindMany = getOrCreateFindManyInput(ModelCls, { isSimple });
+  const FindMany = getOrCreateFindManyInput(
+    ModelCls,
+    isSimple ? { paging: false, sorting: false, filter: false } : undefined,
+  );
   const FindManyResp = getOrCreateConnection(ModelCls);
   const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 

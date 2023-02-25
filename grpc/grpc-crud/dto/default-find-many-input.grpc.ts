@@ -13,7 +13,6 @@ import {
 } from '@bits/grpc';
 
 type Cfg = {
-  isSimple?: boolean;
   paging?: boolean;
   filter?: boolean;
   sorting?: boolean;
@@ -22,14 +21,8 @@ type Cfg = {
 export const getOrCreateFindManyInput = memoize(
   <M>(
     ModelCls: Type<M>,
-    { isSimple = false, paging = true, filter = true, sorting = true }: Cfg = {},
+    { paging = true, filter = true, sorting = true }: Cfg = {},
   ): Type<IGrpcFindManyInput<M>> => {
-    if (isSimple) {
-      @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
-      class GenericFindManyInput {}
-      return GenericFindManyInput;
-    }
-    @GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })
     class GenericFindManyInput {
       paging?: OffsetPagination;
 
@@ -52,6 +45,7 @@ export const getOrCreateFindManyInput = memoize(
         GenericFindManyInput.prototype,
         'sorting',
       );
+    GrpcMessageDef({ name: `FindMany${ModelCls.name}Input` })(GenericFindManyInput);
     return GenericFindManyInput;
   },
 );
