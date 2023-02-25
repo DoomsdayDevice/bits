@@ -3,7 +3,7 @@ import { CurrentUser } from '@bits/auth/current-user.decorator';
 import { getProtoRoot } from '@bits/graphql/gql-crud/get-or-create-model-by-name';
 import { CORE_PACKAGE, grpcProtoPaths } from '@core/grpc/clients';
 import { grpcToGqlConverter } from '@core/grpc/constants';
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { transformAndValidate } from '@bits/dto.utils';
 
 const PARAM_METADATA_KEY = 'design:paramtypes';

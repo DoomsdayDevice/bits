@@ -40,6 +40,7 @@ export class GrpcProtoToGqlConverter {
     FieldDecorator = Field,
     skipFields: string[] = [],
   ) => {
+    skipFields.push('_type');
     const grpcType = this.getGrpcTypeByName(grpcName);
 
     for (const f of getKeys(grpcType.fields).filter(
