@@ -31,7 +31,7 @@ export class CustomCacheStrategy implements CacheStrategy {
       }
 
       if (context.debug) {
-        console.warn(
+        console.log(
           `type-cacheable Cacheable cache miss on method ${context.originalMethod.name} due to client error: ${err.message}`,
         );
       }
@@ -56,7 +56,7 @@ export class CustomCacheStrategy implements CacheStrategy {
 
       if (context.debug) {
         // eslint-disable-next-line no-console
-        console.warn(
+        console.log(
           `type-cacheable Cacheable set cache failure on method ${context.originalMethod.name} due to client error: ${err.message}`,
         );
       }

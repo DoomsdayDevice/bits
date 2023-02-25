@@ -99,7 +99,6 @@ export class GrpcProtoToGqlConverter {
       // return Enum.name;
     } catch {
       grpcEnum = null;
-      console.warn(`Not found type for ${typeName}`);
     }
 
     if (grpcEnum) {
@@ -129,7 +128,6 @@ export class GrpcProtoToGqlConverter {
     if (grpcType === 'float') return Float;
     if (grpcType === 'google.protobuf.Timestamp') return Date;
     if (grpcType === 'google.protobuf.BoolValue') return Boolean;
-    console.warn(`grpc type ${grpcType} not scalar`);
     return null;
   }
 

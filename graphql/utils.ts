@@ -5,7 +5,6 @@ import { RelConf } from './gql-crud/crud-config.interface';
 
 export const buildRelationsForModel = (ModelOrName: Type | string, relations: RelConf[]) => {
   const Model = typeof ModelOrName === 'string' ? getOrCreateModelByName(ModelOrName) : ModelOrName;
-  console.log({ Model });
   for (const r of relations) {
     const { relatedEntityByName, relatedEntity } = r;
     if (relatedEntity) GqlRelation(() => relatedEntity)(Model.prototype, r.fieldName);

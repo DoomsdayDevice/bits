@@ -113,7 +113,6 @@ export class GqlCrudModule<
 
     const Model = getModelFn(name);
     grpcToGqlConverter.populateGqlModelByGrpcData(Model, name, grpcName, FilterableField);
-    console.log({ name, grpcName });
 
     // Build specified in config relations
     if (this.relations) buildRelationsForModel(Model, this.relations);
