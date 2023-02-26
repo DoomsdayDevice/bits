@@ -1,0 +1,32 @@
+{
+  "name": "bits",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "lerna run tsc && lerna publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoomsdayDevice/bits.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DoomsdayDevice/bits/issues"
+  },
+  "homepage": "https://github.com/DoomsdayDevice/bits#readme",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^18.14.1",
+    "lerna": "^6.5.1",
+    "lodash": "^4.17.21",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "prettier": "^2.8.4"
+  }
+}
