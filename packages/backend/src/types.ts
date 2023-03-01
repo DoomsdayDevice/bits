@@ -11,3 +11,17 @@ export type Privilege<ResourceName extends string> = [
   ResourceName | string,
   Action
 ];
+
+export interface ICrudModuleProvider<M> {
+  buildService(): any;
+  getImports(
+    modelRef: Class<M>
+  ): Array<
+    Class<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
+  >;
+  buildModelFromName(
+    name: string,
+    innerName?: string,
+    type?: "input" | "object"
+  ): Class<M>;
+}

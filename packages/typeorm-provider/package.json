@@ -1,11 +1,11 @@
 {
   "name": "@bits/typeorm-provider",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/typeorm-provider#readme",
   "license": "ISC",
-  "main": "lib/typeorm-provider.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -21,9 +21,13 @@
     "url": "git+https://github.com/DoomsdayDevice/bits.git"
   },
   "scripts": {
-    "test": "node ./__tests__/@bits/typeorm-provider.test.js"
+    "test": "node ./__tests__/@bits/typeorm-provider.test.js",
+    "tsc": "tsc"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
+  },
+  "dependencies": {
+    "@nestjs/typeorm": "^9.0.1"
   }
 }

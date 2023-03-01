@@ -1,25 +1,39 @@
-import {FindByIdInput} from "../grpc.dto";
-import {Class, ObjectLiteral} from "@bits/core";
+import {
+  Class,
+  DeleteOneResponse,
+  FindByIdInput,
+  ICreateInput,
+  IGrpcFindManyInput,
+  IGrpcFindManyResponse,
+  IUpdateInput,
+  ObjectLiteral,
+} from "@bits/core";
+import { IFindOptionsWhere, IWritableCrudService } from "@bits/backend";
 
 export interface IGrpcWriteController<M, RM = M> {
-    createOne(newEntity: ICreateInput<M>): Promise<RM>;
-    updateOne(update: IUpdateInput<M>): Promise<M>;
-    deleteOne(find: ): Promise<DeleteOneResponse>;
+  createOne(newEntity: ICreateInput<M>): Promise<RM>;
+  updateOne(update: IUpdateInput<M>): Promise<M>;
+  deleteOne(find: IFindOptionsWhere<M>): Promise<DeleteOneResponse>;
 }
 
-export interface IGrpcReadController<M> {
-    findOne(input: IFindByIdInput): Promise<M>;
-    findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>>;
+export interface IGrpcReadController<M, Enums> {
+  findOne(input: FindByIdInput): Promise<M>;
+  findMany(
+    input: IGrpcFindManyInput<M, Enums>
+  ): Promise<IGrpcFindManyResponse<M>>;
 }
 
-export interface IWritableGrpcControllerOpts<M extends ObjectLiteral, B extends Class, RM = M> {
-    WriteModelCls: Class<M>;
-    ServiceCls: Class<IWritableCrudService<M>>;
-    CreateDTO?: Class;
-    DeleteDTO?: Class;
-    ReadModelCls?: Class<RM>;
-    defineService: boolean;
-    Base: B;
-    separateRead?: boolean;
+export interface IWritableGrpcControllerOpts<
+  M extends ObjectLiteral,
+  B extends Class,
+  RM = M
+> {
+  WriteModelCls: Class<M>;
+  ServiceCls: Class<IWritableCrudService<M>>;
+  CreateDTO?: Class;
+  DeleteDTO?: Class;
+  ReadModelCls?: Class<RM>;
+  defineService: boolean;
+  Base: B;
+  separateRead?: boolean;
 }
-

@@ -1,7 +1,12 @@
 import { ClassProvider, CustomDecorator, Type } from "@nestjs/common";
 import { AnyAbility } from "@casl/ability";
 import { ObjectLiteral, PagingStrategy } from "@bits/core";
-import { ICrudService, ModuleImportElem, Privilege } from "@bits/backend";
+import {
+  ICrudModuleProvider,
+  ICrudService,
+  ModuleImportElem,
+  Privilege,
+} from "@bits/backend";
 
 export interface ICaslAbilityFactory<IUser> {
   createForUser(u: IUser): AnyAbility;
@@ -46,15 +51,6 @@ export type IReadResolverConfig<
 
 export type ModelResource = ObjectLiteral;
 
-export interface CrudModuleProvider {
-  buildService();
-  buildModelFromName(
-    name: string,
-    innerName?: string,
-    type?: "input" | "object"
-  );
-}
-
 export type GqlCrudConfigBase<
   T extends ModelResource,
   N extends string,
@@ -68,7 +64,7 @@ export type GqlCrudConfigBase<
   ModelResolver?: Type | ClassProvider;
   /** using grpc or simply typeorm */
   readOnly?: boolean;
-  provider: CrudModuleProvider;
+  provider: ICrudModuleProvider<T>;
 };
 
 export type GqlWritableCrudConfig<

@@ -1,12 +1,12 @@
-import { Type } from '@nestjs/common';
+import { Type } from "@nestjs/common";
 import {
   fieldReflector,
-  getPrototypeChain,
-  GFieldInput,
   grpcFields,
   grpcMessages,
   messageReflector,
-} from '@bits/grpc';
+} from "../constants/variables";
+import { getPrototypeChain } from "@bits/backend";
+import { GFieldInput } from "@bits/core";
 
 type GrpcMessageOpts = {
   name?: string;
@@ -16,7 +16,7 @@ type GrpcMessageOpts = {
 
 export function GrpcMessageDef(opts?: GrpcMessageOpts): ClassDecorator {
   // get all field defs
-  return target => {
+  return (target) => {
     const messageName = opts?.name || target.name;
 
     if (!opts?.isAbstract) {
@@ -38,11 +38,13 @@ export function GrpcMessageDef(opts?: GrpcMessageOpts): ClassDecorator {
 export function getFieldDataForClass(Cls: Type) {
   const fieldsForMsg: GFieldInput[] = [];
   const chain = getPrototypeChain(Cls as any);
-  chain.forEach(cls => {
+  chain.forEach((cls) => {
     const foundFields = fieldReflector.get<unknown, GFieldInput>(cls as any);
     if (foundFields)
       fieldsForMsg.unshift(
-        ...foundFields.filter(ff => !fieldsForMsg.map(f => f.name).includes(ff.name)),
+        ...foundFields.filter(
+          (ff) => !fieldsForMsg.map((f) => f.name).includes(ff.name)
+        )
       );
   });
   return fieldsForMsg;

@@ -1,24 +1,28 @@
-import { Type } from '@nestjs/common';
-import type { GFieldInput } from '../index';
-import { GrpcFieldOpts, getListValueOfCls } from './index';
-import { fieldReflector } from '../index';
+import { Type } from "@nestjs/common";
+import { fieldReflector } from "../constants/variables";
+import { GFieldInput } from "@bits/core";
+import { getListValueOfCls } from "./list-value";
+import { GrpcFieldOpts } from "../types";
 
 type TypeFn = () => Type | [Type] | string | [string];
 
 export function GrpcFieldDef(): PropertyDecorator;
 export function GrpcFieldDef(typeFn: TypeFn): PropertyDecorator;
 export function GrpcFieldDef(opts: GrpcFieldOpts): PropertyDecorator;
-export function GrpcFieldDef(typeFn: TypeFn, opts: GrpcFieldOpts): PropertyDecorator;
+export function GrpcFieldDef(
+  typeFn: TypeFn,
+  opts: GrpcFieldOpts
+): PropertyDecorator;
 export function GrpcFieldDef(
   typeFnOrOpts?: TypeFn | GrpcFieldOpts,
-  opts?: GrpcFieldOpts,
+  opts?: GrpcFieldOpts
 ): PropertyDecorator {
   // get decorators on prototype and add them to fields
 
   return (target: any, propertyKey: string | symbol) => {
-    if (typeof propertyKey === 'symbol') throw new Error('symbols not allowed');
+    if (typeof propertyKey === "symbol") throw new Error("symbols not allowed");
     if (!(typeFnOrOpts instanceof Function)) {
-      const t = Reflect.getMetadata('design:type', target, propertyKey);
+      const t = Reflect.getMetadata("design:type", target, propertyKey);
       opts = typeFnOrOpts as GrpcFieldOpts;
       typeFnOrOpts = () => t;
     }
@@ -30,14 +34,14 @@ export function GrpcFieldDef(
     const field: GFieldInput = {
       name: opts?.name || propertyKey,
       typeFn: isArr ? () => typeArrayFn()[0] : typeFn,
-      messageName: '',
+      messageName: "",
       nullable: opts?.nullable,
       filterable: opts?.filterable,
     };
     if (isArr) {
       if (field.nullable) {
         field.listValue = getListValueOfCls(field.typeFn());
-      } else field.rule = 'repeated';
+      } else field.rule = "repeated";
     }
     fieldReflector.append(target.constructor, field);
   };

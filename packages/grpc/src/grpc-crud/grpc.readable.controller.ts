@@ -1,41 +1,49 @@
-import { Controller, Inject, Type } from '@nestjs/common';
+import { Controller, Inject, Type } from "@nestjs/common";
 import {
-  FindByIdInput,
-  GrpcMethodDef,
-  GrpcServiceDef,
   IGrpcFindManyInput,
   IGrpcFindManyResponse,
-  IGrpcReadController,
-} from '@bits/grpc';
-import { getOrCreateFindManyInput } from '@bits/grpc/grpc-crud/dto/default-find-many-input.grpc';
-import { IReadableCrudService } from '@bits/services/interface.service';
-import { getOrCreateConnection } from '@bits/grpc/grpc-crud/dto/default-connection.grpc';
-import { ObjectLiteral } from 'typeorm';
-import { convertGrpcFilterToService, convertGrpcOrderByToTypeorm } from '@bits/utils/conversions';
+  ObjectLiteral,
+} from "@bits/core";
+import {
+  convertGrpcFilterToService,
+  IReadableCrudService,
+} from "@bits/backend";
+import { FindByIdInput } from "../grpc.dto";
+import { IGrpcReadController } from "../interfaces/controller";
+import { GrpcMethodDef, GrpcServiceDef } from "../decorators";
+import { getOrCreateConnection, getOrCreateFindManyInput } from "../dtos";
+import { convertGrpcOrderByToTypeorm } from "@bits/db";
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 
-export function ReadableGrpcController<M extends ObjectLiteral, B extends AnyConstructor>(
+export function ReadableGrpcController<
+  M extends ObjectLiteral,
+  B extends AnyConstructor,
+  Enums
+>(
   ModelCls: Type<M>,
   ServiceCls: Type<IReadableCrudService<M>>,
   defineService = true,
   Base: B = class {} as any,
   FindOneInputDTO?: Type,
-  isSimple = false,
-): Type<IGrpcReadController<M> & InstanceType<B>> {
+  isSimple = false
+): Type<IGrpcReadController<M, Enums> & InstanceType<B>> {
   const FindMany = getOrCreateFindManyInput(
     ModelCls,
-    isSimple ? { paging: false, sorting: false, filter: false } : undefined,
+    isSimple ? { paging: false, sorting: false, filter: false } : undefined
   );
   const FindManyResp = getOrCreateConnection(ModelCls);
   const FinalFindOneInput = FindOneInputDTO || FindByIdInput;
 
   @Controller()
-  class ModelController extends Base implements IGrpcReadController<M> {
+  class ModelController extends Base implements IGrpcReadController<M, Enums> {
     @Inject(ServiceCls) private readSvc!: IReadableCrudService<M>;
     // @Inject(Logger) private logger: Logger;
 
-    @GrpcMethodDef({ requestType: () => FinalFindOneInput, responseType: () => ModelCls })
+    @GrpcMethodDef({
+      requestType: () => FinalFindOneInput,
+      responseType: () => ModelCls,
+    })
     async findOne(input: FindByIdInput): Promise<M> {
       return this.readSvc.findOne(input as any);
     }
@@ -44,7 +52,9 @@ export function ReadableGrpcController<M extends ObjectLiteral, B extends AnyCon
       requestType: () => FindMany,
       responseType: () => FindManyResp,
     })
-    async findMany(input: IGrpcFindManyInput<M>): Promise<IGrpcFindManyResponse<M>> {
+    async findMany(
+      input: IGrpcFindManyInput<M, Enums>
+    ): Promise<IGrpcFindManyResponse<M>> {
       const filter = convertGrpcFilterToService(input.filter);
       // const ans = await convertGrpcFilterToUcast(input.filter).getMany();
       const order = input.sorting && convertGrpcOrderByToTypeorm(input.sorting); // TODO this sorting isn't added

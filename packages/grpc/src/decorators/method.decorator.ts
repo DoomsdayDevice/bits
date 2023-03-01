@@ -1,6 +1,6 @@
-import { Type } from '@nestjs/common';
-import { GMessageInput, GMethodInput } from '../common/types';
-import { messageReflector, methodReflector } from '../common/variables';
+import { Type } from "@nestjs/common";
+import { GMethodInput } from "@bits/core";
+import { methodReflector } from "../constants";
 
 type MethodOptions = {
   name?: string;
@@ -8,9 +8,13 @@ type MethodOptions = {
   responseType: () => Type | string;
 };
 
-export function GrpcMethodDef({ name, requestType, responseType }: MethodOptions): MethodDecorator {
+export function GrpcMethodDef({
+  name,
+  requestType,
+  responseType,
+}: MethodOptions): MethodDecorator {
   return (target, propertyKey: string | symbol, descriptor) => {
-    if (typeof propertyKey === 'symbol') throw new Error('symbols not allowed');
+    if (typeof propertyKey === "symbol") throw new Error("symbols not allowed");
 
     const newMeth: GMethodInput = {
       name: name || propertyKey,
@@ -18,7 +22,7 @@ export function GrpcMethodDef({ name, requestType, responseType }: MethodOptions
       responseType,
       propertyKey,
       descriptor,
-      service: '',
+      service: "",
     };
     methodReflector.append(target.constructor as any, newMeth);
   };

@@ -4,3 +4,5 @@ export * from "./utils";
 export * from "./services";
 export * from "./conversions";
 export * from "./cache";
+export * from "./repos";
+export * from "./pipes";

@@ -1,7 +1,7 @@
-import { ICrudService } from "@bits/backend";
+import { ICrudModuleProvider, ICrudService } from "@bits/backend";
 import { Class, hasDefined, IGrpcService, ObjectLiteral } from "@bits/core";
 import { getOrCreateDefaultGrpcCrudServiceWrapper } from "./generic-grpc-crud-wrapper.service";
-import { CrudModuleProvider, RelConf } from "@bits/graphql";
+import { RelConf } from "@bits/graphql";
 import {
   getOrCreateInputByName,
   getOrCreateModelByName,
@@ -19,7 +19,7 @@ type Cfg = CfgBase &
   ({ Model: Class; modelName?: string } | { modelName: string });
 
 export class GrpcProvider<T extends ObjectLiteral>
-  implements CrudModuleProvider
+  implements ICrudModuleProvider<T>
 {
   private grpcServiceName: string;
   private modelName: string;
@@ -32,6 +32,10 @@ export class GrpcProvider<T extends ObjectLiteral>
           : cfg.Model.name
         : cfg.modelName;
     this.grpcServiceName = cfg.grpcServiceName || `${this.modelName}Service`;
+  }
+
+  getImports() {
+    return [];
   }
 
   buildService(): Class<ICrudService<T>> {
