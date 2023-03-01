@@ -9,7 +9,7 @@ import {
   IReadableCrudService,
 } from "@bits/backend";
 import { FindByIdInput } from "../grpc.dto";
-import { IGrpcReadController } from "../interfaces/controller";
+import { IGrpcReadController } from "../types/controller";
 import { GrpcMethodDef, GrpcServiceDef } from "../decorators";
 import { getOrCreateConnection, getOrCreateFindManyInput } from "../dtos";
 import { convertGrpcOrderByToTypeorm } from "@bits/db";

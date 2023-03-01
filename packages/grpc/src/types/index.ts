@@ -1,10 +1,12 @@
+export * from "./controller";
+
 import { Class, ObjectLiteral } from "@bits/core";
 import {
   ICrudModuleProvider,
   IReadableRepo,
   IWritableRepo,
 } from "@bits/backend";
-import { IGrpcWriteController } from "./interfaces/controller";
+import { IGrpcWriteController } from "./controller";
 
 export type GrpcFieldOpts = {
   name?: string;

@@ -8,7 +8,7 @@ import {
 import {
   IGrpcWriteController,
   IWritableGrpcControllerOpts,
-} from "../interfaces/controller";
+} from "../types/controller";
 import {
   getDefaultCreateInput,
   getDefaultDeleteInput,
