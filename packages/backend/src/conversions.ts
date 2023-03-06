@@ -2,7 +2,7 @@ import { isNil, isObject, toUpper } from "lodash";
 import { ILike, In, Like, Not } from "./services/find-operators";
 import { IFindOptionsOrder, IFindOptionsWhere } from "./services/find-options";
 import { IFindManyServiceInput, IServiceWhere } from "./services/types";
-import { IGrpcFindManyInput, Sort } from "@bits/core";
+import { IGrpcFindManyInput, ISort } from "@bits/core";
 
 /** to typeorm/service layer filter */
 export function convertGrpcFilterToService<T>(
@@ -118,7 +118,7 @@ export function convertServiceOrderByToGrpc<T>(order: IFindOptionsOrder<T>) {
 }
 
 export function convertGqlOrderByToTypeorm<T = any>(
-  orderBy: Sort[]
+  orderBy: ISort[]
 ): IFindOptionsOrder<T> {
   const obj: IFindOptionsOrder<T> = {};
   for (const o of orderBy) {

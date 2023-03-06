@@ -1,9 +1,14 @@
 import { Type } from "@nestjs/common";
 import { memoize } from "lodash";
-import { IGrpcFilter, IGrpcFindManyInput, IListValue, Sort } from "@bits/core";
+import {
+  IGrpcFilter,
+  IGrpcFindManyInput,
+  IListValue,
+  renameFunc,
+} from "@bits/core";
 import { getOrCreateDefaultFilter } from "./default-filter.grpc";
 import { getListValueOfCls, GrpcFieldDef, GrpcMessageDef } from "../decorators";
-import { OffsetPagination } from "@bits/graphql";
+import { OffsetPagination, Sort } from "../grpc.dto";
 
 type Cfg = {
   paging?: boolean;

@@ -31,10 +31,12 @@
     "@bits/backend": "^1.0.2",
     "@bits/core": "^1.0.1",
     "@bits/db": "^1.0.2",
-    "@bits/graphql": "^1.0.2",
     "@grpc/grpc-js": "^1.8.11",
     "@nestjs/common": "^9.3.9",
     "ts-toolbelt": "^9.6.0",
     "ts2json": "^1.1.0"
+  },
+  "peerDependencies": {
+    "rxjs": "^7.8.0"
   }
 }

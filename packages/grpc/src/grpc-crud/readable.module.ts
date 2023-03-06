@@ -48,7 +48,7 @@ export class GRPCReadableCrudModule<
       Service,
       Controller,
       providers,
-      [this.cfg, ...imports]
+      [...this.cfg.dataProvider.getImports(this.cfg.Model), ...imports]
     );
   }
 }

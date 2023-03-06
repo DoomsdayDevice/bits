@@ -3,10 +3,8 @@ var ts2json = require("ts2json");
 
 export function parseInterfaces() {
   const p = process.argv[2];
-  console.log({ args: process.argv });
   const fullPath = `${process.cwd()}/${p}`;
 
-  console.log({ p, d: fullPath });
   const file = fs.readFileSync(fullPath);
   const oneOfs = [];
   const str: string = file.toString();
@@ -23,4 +21,4 @@ function patchInterface() {
   // remove previous curly bracket and matching
 }
 
-parseInterfaces();
+// parseInterfaces();

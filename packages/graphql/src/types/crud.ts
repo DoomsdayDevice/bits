@@ -2,9 +2,9 @@ import { ICursorPagination, IGqlFilter } from "./index";
 import {
   DeepPartial,
   IOffsetPagination,
+  ISort,
   ObjectLiteral,
   PagingStrategy,
-  Sort,
 } from "@bits/core";
 
 export interface IUpdateOneInput<T> {
@@ -21,7 +21,7 @@ export type IPaging<P> = P extends PagingStrategy.CURSOR
 export interface IFindManyArgs<T, P extends PagingStrategy> {
   filter?: IGqlFilter<T>;
   paging?: IPaging<P>;
-  sorting?: Sort[];
+  sorting?: ISort[];
 }
 
 export type IBaseServiceRead<T, N extends string> = {
