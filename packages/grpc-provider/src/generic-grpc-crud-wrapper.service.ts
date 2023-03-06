@@ -55,6 +55,8 @@ export function getOrCreateDefaultGrpcCrudServiceWrapper<
   @Injectable()
   class GenericGrpcService implements OnModuleInit, ICrudService<To> {
     public grpcSvc!: Service;
+    _writeRepo: any;
+    _readRepo: any;
 
     private primaryColName: keyof To;
 

@@ -1,7 +1,7 @@
 import {
   Class,
   DeleteOneResponse,
-  FindByIdInput,
+  IFindByIdInput,
   ICreateInput,
   IGrpcFindManyInput,
   IGrpcFindManyResponse,
@@ -17,7 +17,7 @@ export interface IGrpcWriteController<M, RM = M> {
 }
 
 export interface IGrpcReadController<M, Enums> {
-  findOne(input: FindByIdInput): Promise<M>;
+  findOne(input: IFindByIdInput): Promise<M>;
   findMany(
     input: IGrpcFindManyInput<M, Enums>
   ): Promise<IGrpcFindManyResponse<M>>;

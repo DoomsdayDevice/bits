@@ -16,14 +16,14 @@ export function WritableCrudService<
   @Injectable()
   // eslint-disable-next-line no-shadow
   class WritableCrudService extends Base implements IWritableCrudService<E> {
-    @Inject(Repo) private writeRepo!: R;
+    @Inject(Repo) public _writeRepo!: R;
 
     createOne(newEntity: DeepPartial<E>): Promise<E> {
-      return this.writeRepo.create(newEntity);
+      return this._writeRepo.create(newEntity);
     }
 
     deleteOne(id: IFindOptionsWhere<E>): Promise<boolean> {
-      return this.writeRepo.deleteOne(id);
+      return this._writeRepo.deleteOne(id);
     }
 
     updateOne(
@@ -31,7 +31,7 @@ export function WritableCrudService<
       partialEntity: DeepPartial<E>
     ): // ...options: any[]
     Promise<E> {
-      return this.writeRepo.update(idOrConditions, partialEntity);
+      return this._writeRepo.update(idOrConditions, partialEntity);
     }
   }
   return WritableCrudService as any;

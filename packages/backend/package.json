@@ -22,12 +22,13 @@
   },
   "scripts": {
     "test": "node ./__tests__/@bits/backend.test.js",
-    "tsc": "tsc"
+    "tsc": "rm -rf lib && tsc"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
+    "@bits/core": "^1.0.0",
     "@nestjs/common": "^9.3.9",
     "@nestjs/core": "^9.3.9",
     "@type-cacheable/core": "^11.0.1",

@@ -80,7 +80,7 @@ export type IUpdateInput<M> = { update: Partial<M>; updateMask: IFieldMask };
 export type IListValue<T> = {
     values: T[];
 };
-export interface FindByIdInput {
+export interface IFindByIdInput {
     id: string;
 }
 export declare class Sort {

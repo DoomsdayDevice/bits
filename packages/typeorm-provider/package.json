@@ -22,12 +22,15 @@
   },
   "scripts": {
     "test": "node ./__tests__/@bits/typeorm-provider.test.js",
-    "tsc": "tsc"
+    "tsc": "rm -rf lib && tsc"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
+    "@bits/backend": "^1.0.1",
+    "@bits/db": "^1.0.1",
+    "@nestjs/common": "^9.3.9",
     "@nestjs/typeorm": "^9.0.1"
   }
 }

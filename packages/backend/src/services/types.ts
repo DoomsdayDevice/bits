@@ -1,6 +1,6 @@
 import { DeepPartial, ObjectLiteral } from "@bits/core";
 import { IFindManyOptions, IFindOptionsWhere } from "./find-options";
-import { IReadableRepo } from "../repos/repo.interface";
+import { IReadableRepo, IWritableRepo } from "../repos";
 
 export type IServiceWhere<T> = IFindOptionsWhere<T> & {
   AND?: IServiceWhere<T>[];
@@ -20,9 +20,12 @@ export interface IReadableCrudService<Entity extends ObjectLiteral>
     | "findMany"
     | "findManyAndCount"
     | "getPrimaryColumnName"
-  > {}
+  > {
+  _readRepo: IReadableRepo<Entity>;
+}
 
 export interface IWritableCrudService<Entity extends ObjectLiteral> {
+  _writeRepo: IWritableRepo<Entity>;
   createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
 
   deleteOne(id: IFindOptionsWhere<Entity>): Promise<boolean>;

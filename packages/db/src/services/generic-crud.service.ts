@@ -11,11 +11,20 @@ import {
 import { convertServiceFindManyInputToTypeorm } from "../utils/conversion.utils";
 import { IConnection } from "@bits/core";
 
+/**
+ * typeorm-based simple service
+ * @param TClass
+ * @param DTOClass
+ */
 export function getGenericCrudService<T extends ObjectLiteral, DTO = T>(
   TClass: Type<T>,
   DTOClass?: Type<DTO>
-): Type<ICrudService<T>> {
-  class GenericCrudService implements ICrudService<T> {
+): any {
+  class GenericCrudService {
+    // _readRepo = ReadableRepoMixin(TClass)();
+    //
+    // _writeRepo = WritableRepoMixin(TClass)(this._readRepo);
+
     @InjectRepository(TClass) writeRepo!: Repository<T>;
 
     @InjectRepository(TClass) readRepo!: Repository<T>;

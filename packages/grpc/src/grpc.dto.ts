@@ -1,5 +1,5 @@
-import {SortDirection} from "@bits/core";
-import {GrpcFieldDef, GrpcMessageDef} from "./decorators";
+import { SortDirection } from "@bits/core";
+import { GrpcFieldDef, GrpcMessageDef } from "./decorators";
 
 @GrpcMessageDef()
 export class FindByIdInput {
@@ -15,10 +15,10 @@ export class FindOneNamedInput {
 
 @GrpcMessageDef()
 export class OffsetPagination {
-  @GrpcFieldDef(() => 'uint32', { nullable: true })
+  @GrpcFieldDef(() => "uint32", { nullable: true })
   limit?: number;
 
-  @GrpcFieldDef(() => 'uint32', { nullable: true })
+  @GrpcFieldDef(() => "uint32", { nullable: true })
   offset?: number;
 }
 
@@ -27,6 +27,6 @@ export class Sort {
   @GrpcFieldDef()
   field!: string;
 
-  @GrpcFieldDef(() => 'SortDirection')
+  @GrpcFieldDef(() => "SortDirection")
   direction!: SortDirection;
 }
