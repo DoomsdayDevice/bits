@@ -1,6 +1,6 @@
 {
   "name": "@bits/backend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/backend#readme",
@@ -28,7 +28,7 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/core": "^1.0.0",
+    "@bits/core": "^1.0.1",
     "@nestjs/common": "^9.3.9",
     "@nestjs/core": "^9.3.9",
     "@type-cacheable/core": "^11.0.1",
