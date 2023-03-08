@@ -1,2 +1,3 @@
-export * from './grpc'
-export * from './filter.grpc'
+export * from './grpc';
+export * from './graphql';
+export * from './filter.grpc';

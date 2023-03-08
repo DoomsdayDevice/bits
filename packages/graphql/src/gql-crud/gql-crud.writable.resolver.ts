@@ -2,9 +2,14 @@ import { Inject, Type } from "@nestjs/common";
 import { Args, Mutation, Resolver } from "@nestjs/graphql";
 import { GraphQLUUID } from "graphql-scalars";
 import { IWriteResolverConfig } from "../types";
-import { DeepPartial, ObjectLiteral, renameFunc } from "@bits/core";
+import {
+  DeepPartial,
+  IBaseServiceWrite,
+  IUpdateOneInput,
+  ObjectLiteral,
+  renameFunc,
+} from "@bits/core";
 import { Action, ICrudService } from "@bits/backend";
-import { IBaseServiceWrite, IUpdateOneInput } from "../types";
 import {
   getDefaultCreateOneInput,
   getDefaultUpdateOneInput,

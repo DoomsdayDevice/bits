@@ -1,10 +1,14 @@
 import { ArgsType, Field } from "@nestjs/graphql";
 import { OffsetPagination } from "./offset-paging";
-import { Class, PagingStrategy } from "@bits/core";
-import { IFindManyArgs, IPaging } from "../types/crud";
+import {
+  Class,
+  IFindManyArgs,
+  IGqlFilter,
+  IPaging,
+  PagingStrategy,
+} from "@bits/core";
 import { getOrCreateCursorPagingType } from "./get-or-create-cursor-paging";
 import { getDefaultFilter } from "./filter";
-import { IGqlFilter } from "../types";
 import { memoize } from "lodash";
 
 export const getDefaultFindManyArgs = memoize(

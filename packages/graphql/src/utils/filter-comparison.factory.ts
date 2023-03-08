@@ -16,18 +16,15 @@ import { LazyMetadataStorage } from "@nestjs/graphql/dist/schema-builder/storage
 import { IsBoolean, IsOptional } from "class-validator";
 import { Type as TransformerType } from "class-transformer";
 import { GraphQLUUID } from "graphql-scalars";
-import {
-  FilterComparisonOperators,
-  FilterFieldComparison,
-} from "../types/filter-field-comparison";
 import { getOrCreateStringFieldComparison } from "../inputs/string-field-comparison.type";
 import { getOrCreateUUIDFieldComparison } from "../inputs/uuid-field-comparison.type";
 import { ArrayReflector, getPrototypeChain, MapReflector } from "@bits/backend";
+import { FilterableFieldDescriptor } from "../types";
 import {
-  FilterableFieldDescriptor,
-  FilterableFieldOptions,
-} from "../types/filterable-field";
-import { capitalizeFirstLetter } from "@bits/core";
+  capitalizeFirstLetter,
+  FilterComparisonOperators,
+  FilterFieldComparison,
+} from "@bits/core";
 import { SkipIf } from "../decorators";
 import { IsUndefined } from "../validators/is-undefined.validator";
 

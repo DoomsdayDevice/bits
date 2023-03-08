@@ -1,14 +1,18 @@
 import { Inject, Type } from "@nestjs/common";
 import { Context, Info, Parent, ResolveField } from "@nestjs/graphql";
 import { GraphQLResolveInfo } from "graphql/type";
-import { ensureOrder, lowercaseFirstLetter, ObjectLiteral } from "@bits/core";
+import {
+  ensureOrder,
+  IBaseResolver,
+  lowercaseFirstLetter,
+  ObjectLiteral,
+} from "@bits/core";
 import DataLoader from "dataloader";
 import { lowerFirst } from "lodash";
 import { getRelations } from "../decorators/relation.decorator";
 import { ICrudService, In } from "@bits/backend";
 import { crudServiceReflector } from "./gql-reflector";
 import { ResolverRelation } from "./types";
-import { IBaseResolver } from "../types/crud";
 
 const servicesToInjectIntoResolvers: {
   dto: any;

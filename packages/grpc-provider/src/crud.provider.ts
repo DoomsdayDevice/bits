@@ -6,8 +6,8 @@ import {
   getOrCreateModelByName,
   GrpcProtoToGqlConverter,
 } from "./get-or-create-model-by-name";
-import { FilterableField } from "@bits/graphql/lib/decorators/filterable-field.decorator";
 import { buildRelationsForModel } from "./build-relations-from-model";
+import { FilterableField } from "@bits/graphql";
 
 type CfgBase = {
   grpcServiceName?: string;

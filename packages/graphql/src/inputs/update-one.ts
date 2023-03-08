@@ -1,5 +1,4 @@
-import { Class, DeepPartial } from "@bits/core";
-import { IUpdateOneInput } from "../types/crud";
+import { Class, DeepPartial, IUpdateOneInput } from "@bits/core";
 import { Field, InputType, PartialType } from "@nestjs/graphql";
 import { GraphQLUUID } from "graphql-scalars";
 

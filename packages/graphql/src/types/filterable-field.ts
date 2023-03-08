@@ -1,6 +1,6 @@
+import { FilterComparisonOperators } from "@bits/core";
 import { Type } from "@nestjs/common";
 import { FieldOptions, ReturnTypeFunc } from "@nestjs/graphql";
-import { FilterComparisonOperators } from "./index";
 
 export type FilterableFieldOptions = {
   allowedComparisons?: FilterComparisonOperators<unknown>[];

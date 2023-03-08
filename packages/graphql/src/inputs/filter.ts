@@ -1,12 +1,8 @@
 // TODO add getOrCreate with memoize for nested filters
 import { Field, InputType } from "@nestjs/graphql";
-import {
-  createFilterComparisonType,
-  getFilterableFields,
-} from "../utils/filter-comparison.factory";
+import { createFilterComparisonType, getFilterableFields } from "../utils";
 import { ValidateNested } from "class-validator";
-import { IGqlFilter } from "../types";
-import { Class } from "@bits/core";
+import { Class, IGqlFilter } from "@bits/core";
 import { Type } from "class-transformer";
 import { capitalize } from "lodash";
 

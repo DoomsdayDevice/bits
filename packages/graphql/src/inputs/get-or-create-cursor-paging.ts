@@ -1,12 +1,15 @@
 import { Type } from "@nestjs/common";
 import { Field, InputType, Int } from "@nestjs/graphql";
 import { IsPositive, Min, Validate } from "class-validator";
-import { ConnectionCursorType, ICursorPagination } from "../types";
 import { IsUndefined } from "../validators/is-undefined.validator";
 import { CannotUseWithout } from "../validators/cannot-use-without.validator";
-import { ConnectionCursorScalar } from "../scalars/connection-cursor.scalar";
+import { ConnectionCursorScalar } from "../scalars";
 import { CannotUseWith } from "../validators/cannot-use-with.validator";
-import { PagingStrategy } from "@bits/core";
+import {
+  ConnectionCursorType,
+  ICursorPagination,
+  PagingStrategy,
+} from "@bits/core";
 
 /** @internal */
 let graphQLCursorPaging: Type<ICursorPagination> | null = null;

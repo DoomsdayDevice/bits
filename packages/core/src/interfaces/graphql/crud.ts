@@ -1,15 +1,20 @@
-import { ICursorPagination, IGqlFilter } from "./index";
-import {
-  DeepPartial,
-  IOffsetPagination,
-  ISort,
-  ObjectLiteral,
-  PagingStrategy,
-} from "@bits/core";
+import { PagingStrategy } from '../../enums';
+import { DeepPartial, ObjectLiteral } from '../../types';
+import { IOffsetPagination, ISort } from '../grpc';
+import { IGqlFilter } from './filter';
 
 export interface IUpdateOneInput<T> {
   id: string;
   update: DeepPartial<T>;
+}
+
+export type ConnectionCursorType = string;
+
+export interface ICursorPagination {
+  before?: ConnectionCursorType;
+  after?: ConnectionCursorType;
+  first?: number;
+  last?: number;
 }
 
 export type IPaging<P> = P extends PagingStrategy.CURSOR

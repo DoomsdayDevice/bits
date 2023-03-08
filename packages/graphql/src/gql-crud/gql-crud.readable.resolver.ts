@@ -3,16 +3,17 @@ import { Args, Query, Resolver } from "@nestjs/graphql";
 import { MongoQuery } from "@casl/ability";
 import { merge } from "lodash";
 import {
-  IBaseServiceRead,
   ICaslAbilityFactory,
-  IFindManyArgs,
   IReadResolverConfig,
   ModelResource,
 } from "../types";
 import {
   getPlural,
   getSingular,
+  IBaseServiceRead,
   IConnection,
+  ICursorPagination,
+  IFindManyArgs,
   PagingStrategy,
   renameFunc,
   renameKeyNames,
@@ -24,8 +25,7 @@ import {
   convertGqlOrderByToTypeorm,
   convertGraphqlFilterToService,
 } from "@bits/backend/lib/conversions";
-import { ICursorPagination } from "../types";
-import { getDefaultModelConnection } from "../dto/connection";
+import { getDefaultModelConnection } from "../dto";
 import { FindOneInput, getDefaultFindManyArgs } from "../inputs";
 
 export function ReadResolverMixin<

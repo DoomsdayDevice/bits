@@ -6,7 +6,7 @@ import {
   Type,
 } from "@nestjs/common";
 import { GraphQLCompositeType, GraphQLField } from "graphql";
-import { IGqlFilter } from "../types/filter";
+import { IGqlFilter } from "@bits/core";
 
 export declare type ComplexityEstimatorArgs = {
   type: GraphQLCompositeType;

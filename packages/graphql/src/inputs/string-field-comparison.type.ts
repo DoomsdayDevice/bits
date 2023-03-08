@@ -1,8 +1,8 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { IsString } from "class-validator";
 import { Type } from "@nestjs/common";
-import { FilterFieldComparison } from "../types";
 import { IsUndefined } from "../validators/is-undefined.validator";
+import { FilterFieldComparison } from "@bits/core";
 
 /** @internal */
 let stringFieldComparison: Type<FilterFieldComparison<string>>;
