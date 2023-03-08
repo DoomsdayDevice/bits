@@ -12,6 +12,13 @@ export type Privilege<ResourceName extends string> = [
   Action
 ];
 
+export interface RelConf {
+  idFieldName: string;
+  fieldName: string;
+  relatedEntity?: Class;
+  relatedEntityByName?: string;
+}
+
 export interface ICrudModuleProvider<M> {
   buildService(): any;
   getImports(
@@ -22,6 +29,7 @@ export interface ICrudModuleProvider<M> {
   buildModelFromName(
     name: string,
     innerName?: string,
-    type?: "input" | "object"
+    type?: "input" | "object",
+    relations?: RelConf[]
   ): Class<M>;
 }

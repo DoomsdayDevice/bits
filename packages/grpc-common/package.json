@@ -1,9 +1,9 @@
 {
-  "name": "@bits/grpc",
-  "version": "1.0.7",
+  "name": "@bits/grpc-common",
+  "version": "1.0.1",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
-  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/grpc#readme",
+  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/grpc-common#readme",
   "license": "ISC",
   "main": "lib/index.js",
   "directories": {
@@ -14,31 +14,20 @@
     "lib"
   ],
   "publishConfig": {
-    "access": "public"
+    "registry": "https://verdaccio.dudin.net/"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DoomsdayDevice/bits.git"
   },
   "scripts": {
-    "test": "node ./__tests__/@bits/grpc.test.js",
+    "test": "node ./__tests__/@bits/grpc-common.test.js",
     "tsc": "rm -rf lib && tsc"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/backend": "^1.0.4",
-    "@bits/core": "^1.0.2",
-    "@bits/db": "^1.0.4",
-    "@bits/grpc-common": "^1.0.1",
-    "@grpc/grpc-js": "^1.8.11",
-    "@nestjs/common": "^9.3.9",
-    "ts-toolbelt": "^9.6.0",
-    "ts2json": "^1.1.0"
-  },
-  "peerDependencies": {
-    "protobufjs": "~7.2.2",
-    "rxjs": "^7.8.0"
+    "protobufjs": "^7.2.2"
   }
 }

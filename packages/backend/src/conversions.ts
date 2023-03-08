@@ -1,7 +1,14 @@
 import { isNil, isObject, toUpper } from "lodash";
-import { ILike, In, Like, Not } from "./services/find-operators";
-import { IFindOptionsOrder, IFindOptionsWhere } from "./services/find-options";
-import { IFindManyServiceInput, IServiceWhere } from "./services/types";
+import {
+  IFindOptionsOrder,
+  IFindOptionsWhere,
+  IFindManyServiceInput,
+  IServiceWhere,
+  ILike,
+  In,
+  Like,
+  Not,
+} from "./services";
 import { IGrpcFindManyInput, ISort } from "@bits/core";
 
 /** to typeorm/service layer filter */

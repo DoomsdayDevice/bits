@@ -9,7 +9,7 @@ import {
   IFindOptionsWhere,
   IReadableRepo,
 } from "@bits/backend";
-import { convertServiceFindManyInputToTypeorm } from "../utils/conversion.utils";
+import { convertServiceFindManyInputToTypeorm } from "../utils";
 import { IConnection } from "@bits/core";
 
 // TODO remove all any's

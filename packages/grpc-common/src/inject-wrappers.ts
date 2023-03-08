@@ -1,8 +1,8 @@
-import { common, wrappers } from "protobufjs";
+import { common, IWrapper } from "protobufjs";
 import IStringValue = common.IStringValue;
 import IBoolValue = common.IBoolValue;
 
-export function injectWrappers() {
+export function injectGrpcWrappers(wrappers: { [k: string]: IWrapper }) {
   //
   wrappers[".google.protobuf.Timestamp"] = {
     fromObject: function (value: Date) {

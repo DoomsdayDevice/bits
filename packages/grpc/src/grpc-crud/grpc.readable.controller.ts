@@ -65,6 +65,7 @@ export function ReadableGrpcController<
         skip: input.paging?.offset,
         take: input.paging?.limit,
       });
+
       return res;
     }
   }

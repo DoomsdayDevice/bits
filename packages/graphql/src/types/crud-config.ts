@@ -6,6 +6,7 @@ import {
   ICrudService,
   ModuleImportElem,
   Privilege,
+  RelConf,
 } from "@bits/backend";
 
 export interface ICaslAbilityFactory<IUser> {
@@ -19,13 +20,6 @@ export interface IWriteResolverConfig<
 > extends Omit<IReadResolverConfig<T, N, ResourceName>, "pagination"> {
   Create?: Type;
   Update?: Type;
-}
-
-export interface RelConf {
-  idFieldName: string;
-  fieldName: string;
-  relatedEntity?: Type;
-  relatedEntityByName?: string;
 }
 
 type BaseResolverConfig<ResourceName extends string> = {

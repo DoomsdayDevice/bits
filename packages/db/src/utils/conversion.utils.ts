@@ -1,6 +1,10 @@
 import {
   FindOperator,
   FindOptionsWhere,
+  ILike,
+  In,
+  Like,
+  Not,
   ObjectLiteral,
   SelectQueryBuilder,
 } from "typeorm";
@@ -10,7 +14,7 @@ import {
   IFindManyServiceInput,
   IFindOptionsOrder,
 } from "@bits/backend";
-import { IListValue, Sort } from "@bits/core";
+import { getKeys, IListValue, Sort } from "@bits/core";
 
 export function isFindOperator<T>(obj: any): obj is FindOperator<T> {
   return obj._type;
@@ -67,8 +71,6 @@ function getStringFilter(f: FilterFieldComparison<string>, name: string): string
   if (f.in) w = `${fname} IN ('${f.in.join(`','`)}')`;
   return w;
 }
-
-
  */
 
 export function convertServiceFindManyInputToTypeorm<T>(
@@ -76,8 +78,27 @@ export function convertServiceFindManyInputToTypeorm<T>(
 ): IFindManyOptions<T> {
   const result: IFindManyOptions<T> = { ...input } as any;
 
+  // TODO
+  // and
   if (input.where?.OR) result.where = input.where.OR;
+  if (input.where) result.where = convertServiceFilterToTypeorm(input.where);
   return result;
+}
+
+function convertVal(val: any) {
+  if (val._type == "in") return In(val.value);
+  if (val._type == "like") return Like(val.value);
+  if (val._type == "iLike") return ILike(val.value);
+  if (val._type == "not") return Not(convertVal(val.value));
+  return val;
+}
+
+function convertServiceFilterToTypeorm(filter: ObjectLiteral) {
+  const newFilter = {};
+  for (const key of getKeys(filter)) {
+    newFilter[key] = convertVal(filter[key]);
+  }
+  return newFilter;
 }
 
 export function convertGrpcOrderByToTypeorm<T = any>(

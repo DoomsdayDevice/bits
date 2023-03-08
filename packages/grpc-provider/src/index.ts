@@ -5,4 +5,4 @@ export * from "./get-or-create-model-by-name";
 export * from "./generic-grpc-crud-wrapper.service";
 export * from "./generic-grpc-wrapper.service";
 export * from "./utils";
-export * from "./inject-wrappers";
+export * from "@bits/grpc-common";

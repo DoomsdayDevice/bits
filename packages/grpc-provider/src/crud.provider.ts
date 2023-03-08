@@ -1,7 +1,6 @@
-import { ICrudModuleProvider, ICrudService } from "@bits/backend";
+import { ICrudModuleProvider, ICrudService, RelConf } from "@bits/backend";
 import { Class, IGrpcService, ObjectLiteral } from "@bits/core";
 import { getOrCreateDefaultGrpcCrudServiceWrapper } from "./generic-grpc-crud-wrapper.service";
-import { RelConf } from "@bits/graphql";
 import {
   getOrCreateInputByName,
   getOrCreateModelByName,

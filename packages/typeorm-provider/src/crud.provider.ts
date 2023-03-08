@@ -35,8 +35,8 @@ export class TypeormProvider<M extends ObjectLiteral>
       TypeOrmModule.forFeature([modelRef]),
       {
         module: class {},
-        providers: [this.ReadRepo, this.WriteRepo],
-        exports: [this.ReadRepo, this.WriteRepo],
+        // providers: [this.ReadRepo, this.WriteRepo],
+        // exports: [this.ReadRepo, this.WriteRepo],
         imports: [TypeOrmModule.forFeature([modelRef])],
         global: true,
       },

@@ -1,9 +1,8 @@
 import { Inject, Type } from "@nestjs/common";
 import { Args, Mutation, Resolver } from "@nestjs/graphql";
 import { GraphQLUUID } from "graphql-scalars";
-import { ObjectLiteral } from "typeorm";
 import { IWriteResolverConfig } from "../types";
-import { DeepPartial, renameFunc } from "@bits/core";
+import { DeepPartial, ObjectLiteral, renameFunc } from "@bits/core";
 import { Action, ICrudService } from "@bits/backend";
 import { IBaseServiceWrite, IUpdateOneInput } from "../types";
 import {

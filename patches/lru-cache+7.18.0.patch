@@ -1,0 +1,34 @@
+diff --git a/node_modules/lru-cache/index.d.ts b/node_modules/lru-cache/index.d.ts
+index 83bcfa9..c101ab5 100644
+--- a/node_modules/lru-cache/index.d.ts
++++ b/node_modules/lru-cache/index.d.ts
+@@ -658,7 +658,7 @@ declare namespace LRUCache {
+    */
+   interface HasOptions {
+     updateAgeOnHas?: boolean
+-    status: Status<V>
++    status: Status<any>
+   }
+ 
+   /**
+@@ -669,7 +669,7 @@ declare namespace LRUCache {
+     allowStale?: boolean
+     updateAgeOnGet?: boolean
+     noDeleteOnStaleGet?: boolean
+-    status?: Status<V>
++    status?: Status<any>
+   }
+ 
+   /**
+@@ -812,11 +812,6 @@ declare namespace LRUCache {
+      */
+     fetchResolved?: true
+ 
+-    /**
+-     * The results of the fetchMethod promise were stored in the cache
+-     */
+-    fetchUpdated?: true
+-
+     /**
+      * The fetchMethod promise was rejected
+      */

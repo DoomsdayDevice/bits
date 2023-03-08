@@ -1,6 +1,7 @@
-import { GqlRelation, RelConf } from "@bits/graphql";
+import { GqlRelation } from "@bits/graphql";
 import { Class } from "@bits/core";
 import { getOrCreateModelByName } from "./get-or-create-model-by-name";
+import { RelConf } from "@bits/backend";
 
 export const buildRelationsForModel = (
   ModelOrName: Class | string,
@@ -19,5 +20,8 @@ export const buildRelationsForModel = (
         Model.prototype,
         r.fieldName
       );
+    console.log(
+      `BUILDING ${relatedEntity?.name} ${relatedEntity} ${relatedEntityByName}`
+    );
   }
 };

@@ -3,12 +3,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { FindOptionsWhere, ObjectLiteral, Repository } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import {
-  ICrudService,
   IFindManyServiceInput,
   IFindOneOptions,
   IFindOptionsWhere,
 } from "@bits/backend";
-import { convertServiceFindManyInputToTypeorm } from "../utils/conversion.utils";
+import { convertServiceFindManyInputToTypeorm } from "../utils";
 import { IConnection } from "@bits/core";
 
 /**

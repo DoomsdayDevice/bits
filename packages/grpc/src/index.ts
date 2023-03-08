@@ -7,5 +7,5 @@ export * from "./types";
 export * from "./decorators";
 export * from "./dtos";
 export * from "./utils";
-export * from "./inject-wrappers";
 export * from "./grpc.dto";
+export * from "@bits/grpc-common";

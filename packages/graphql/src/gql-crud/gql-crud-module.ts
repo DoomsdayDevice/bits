@@ -3,8 +3,8 @@ import { ClassProvider, Global, Module, Type } from "@nestjs/common";
 import { Resolver } from "@nestjs/graphql";
 import { DynamicModule } from "@nestjs/common/interfaces/modules/dynamic-module.interface";
 import { PagingStrategy, renameFunc } from "@bits/core";
-import { ICrudService, ModuleImportElem } from "@bits/backend";
-import { GqlWritableCrudConfig, ModelResource, RelConf } from "../types";
+import { ICrudService, ModuleImportElem, RelConf } from "@bits/backend";
+import { GqlWritableCrudConfig, ModelResource } from "../types";
 import { WriteResolverMixin } from "./gql-crud.writable.resolver";
 import { ReadResolverMixin } from "./gql-crud.readable.resolver";
 import {
@@ -58,13 +58,19 @@ export class GqlCrudModule<
     this.Model =
       "Model" in cfg
         ? cfg.Model
-        : this.cfg.provider.buildModelFromName(modelName!);
+        : this.cfg.provider.buildModelFromName(
+            modelName!,
+            modelName,
+            "object",
+            relations
+          );
 
     if (!this.cfg.Create && !readOnly && modelName)
       this.cfg.Create = this.cfg.provider.buildModelFromName(
         `CreateOne${modelName}Input`,
         `Create${modelName}Input`,
-        "input"
+        "input",
+        this.relations
       );
     this.modelName = modelName || this.Model.name;
     this.pagination = pagination;

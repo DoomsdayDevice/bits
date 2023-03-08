@@ -1,12 +1,18 @@
 export class FilterOperation {
   // TODO finish this whole thing
-  constructor(public type: any, public value: any) {} // eslint-disable-line
+  protected _type: any;
+  protected _value: any;
+  constructor(public type: any, public value: any) {
+    this._type = type;
+    this._value = value;
+  } // eslint-disable-line
 }
 
 /**
  * расширение FindOperator для ComplexQuery
  * Example: { someField: Like("%some sting%") }
  */
+
 export function Regex<T>(value: T | FilterOperation): FilterOperation {
   return new FilterOperation("regex" as any, value);
 }
