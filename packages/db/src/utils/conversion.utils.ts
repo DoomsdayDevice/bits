@@ -80,8 +80,10 @@ export function convertServiceFindManyInputToTypeorm<T>(
 
   // TODO
   // and
-  if (input.where?.OR) result.where = input.where.OR;
-  if (input.where) result.where = convertServiceFilterToTypeorm(input.where);
+  if (input.where?.OR)
+    result.where = input.where.OR.map((w) => convertServiceFilterToTypeorm(w));
+  else if (input.where)
+    result.where = convertServiceFilterToTypeorm(input.where);
   return result;
 }
 
