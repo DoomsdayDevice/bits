@@ -13,6 +13,7 @@ import { IGrpcReadController } from "../types/controller";
 import { GrpcMethodDef, GrpcServiceDef } from "../decorators";
 import { getOrCreateConnection, getOrCreateFindManyInput } from "../dtos";
 import { convertGrpcOrderByToTypeorm } from "@bits/db";
+import { inspect } from "util";
 
 export type AnyConstructor<A = object> = new (...input: any[]) => A;
 

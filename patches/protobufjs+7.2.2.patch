@@ -1,0 +1,61 @@
+diff --git a/node_modules/protobufjs/index.d.ts b/node_modules/protobufjs/index.d.ts
+index bbe6432..be5914c 100644
+--- a/node_modules/protobufjs/index.d.ts
++++ b/node_modules/protobufjs/index.d.ts
+@@ -283,6 +283,9 @@ export class Field extends FieldBase {
+      * @returns Decorator function
+      */
+     public static d<T extends Message<T>>(fieldId: number, fieldType: (Constructor<T>|string), fieldRule?: ("optional"|"required"|"repeated")): FieldDecorator;
++
++    /** PATCH */
++    static ignored: (string | RegExp)[]
+ }
+
+ /** Base class of all reflected message fields. This is not an actual class but here for the sake of having consistent type definitions. */
+@@ -1307,6 +1310,9 @@ export class Root extends NamespaceBase {
+      * @throws {Error} If synchronous fetching is not supported (i.e. in browsers) or if a file's syntax is invalid
+      */
+     public loadSync(filename: (string|string[]), options?: IParseOptions): Root;
++
++    /** CUSTOM STUFF */
++    public imports: string[]
+ }
+
+ /**
+diff --git a/node_modules/protobufjs/src/field.js b/node_modules/protobufjs/src/field.js
+index 20c1cd2..a06fd4c 100644
+--- a/node_modules/protobufjs/src/field.js
++++ b/node_modules/protobufjs/src/field.js
+@@ -1,6 +1,8 @@
+ "use strict";
+ module.exports = Field;
+
++Field.ignored=[]
++
+ // extends ReflectionObject
+ var ReflectionObject = require("./object");
+ ((Field.prototype = Object.create(ReflectionObject.prototype)).constructor = Field).className = "Field";
+@@ -260,6 +262,9 @@ Field.prototype.toJSON = function toJSON(toJSONOptions) {
+  * @throws {Error} If any reference cannot be resolved
+  */
+ Field.prototype.resolve = function resolve() {
++    const isInIgnored = Field.ignored.some( i => (i.test &&  i.test(this.type) || i === this.type ) )
++    if(isInIgnored)
++        return this;
+
+     if (this.resolved)
+         return this;
+diff --git a/node_modules/protobufjs/src/namespace.js b/node_modules/protobufjs/src/namespace.js
+index 88837a5..6d4e639 100644
+--- a/node_modules/protobufjs/src/namespace.js
++++ b/node_modules/protobufjs/src/namespace.js
+@@ -354,6 +354,9 @@ Namespace.prototype.lookup = function lookup(path, filterTypes, parentAlreadyChe
+                 return found;
+
+     // If there hasn't been a match, try again at the parent
++    if(Field.ignored.some(f => path.join('.').match(f))){
++        return this
++    }
+     if (this.parent === null || parentAlreadyChecked)
+         return null;
+     return this.parent.lookup(path, filterTypes);

@@ -18,6 +18,7 @@ import {
 } from "@bits/backend";
 import { convertServiceInputToGrpc } from "@bits/backend/lib/conversions";
 import { promisify } from "./utils";
+import { inspect } from "util";
 
 export type WrappedGrpcService<
   Svc extends IGrpcService<From>,

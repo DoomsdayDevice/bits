@@ -20,8 +20,5 @@ export const buildRelationsForModel = (
         Model.prototype,
         r.fieldName
       );
-    console.log(
-      `BUILDING ${relatedEntity?.name} ${relatedEntity} ${relatedEntityByName}`
-    );
   }
 };

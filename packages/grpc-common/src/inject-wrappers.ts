@@ -3,7 +3,6 @@ import IStringValue = common.IStringValue;
 import IBoolValue = common.IBoolValue;
 
 export function injectGrpcWrappers(wrappers: { [k: string]: IWrapper }) {
-  //
   wrappers[".google.protobuf.Timestamp"] = {
     fromObject: function (value: Date) {
       return {

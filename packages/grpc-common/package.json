@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
-  "dependencies": {
+  "peerDependencies": {
     "protobufjs": "^7.2.2"
   }
 }

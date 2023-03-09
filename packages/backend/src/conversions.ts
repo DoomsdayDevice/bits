@@ -98,7 +98,7 @@ export function convertServiceFilterToGrpc<T>(where: IServiceWhere<T>) {
           grpcFilter[key] = { in: { values: comparisonField._value } };
         else if (comparisonField._type === "like")
           grpcFilter[key] = { like: comparisonField._value };
-        else if (comparisonField._type === "ilike")
+        else if (comparisonField._type === "iLike")
           grpcFilter[key] = { iLike: comparisonField._value };
         else if (comparisonField._type === "not")
           grpcFilter[key] = { neq: comparisonField._value };
