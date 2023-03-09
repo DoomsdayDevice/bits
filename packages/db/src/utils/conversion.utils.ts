@@ -88,10 +88,10 @@ export function convertServiceFindManyInputToTypeorm<T>(
 }
 
 function convertVal(val: any) {
-  if (val._type == "in") return In(val.value);
-  if (val._type == "like") return Like(val.value);
-  if (val._type == "iLike") return ILike(val.value);
-  if (val._type == "not") return Not(convertVal(val.value));
+  if (val._type == "in") return In(val._value);
+  if (val._type == "like") return Like(val._value);
+  if (val._type == "iLike") return ILike(val._value);
+  if (val._type == "not") return Not(convertVal(val._value));
   return val;
 }
 
