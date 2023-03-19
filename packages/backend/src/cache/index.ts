@@ -47,6 +47,7 @@ export const getCacheStuff = ({ enabled, host, port, password }) => {
     async set(key: string, payload: string) {
       redisCache = await cacheManager.caching(redisStore, {
         url: `redis://${host}:${port}`,
+        socket: { connectTimeout: 50000 },
       });
       await redisCache.reset();
       await redisCache.set(key, payload);
