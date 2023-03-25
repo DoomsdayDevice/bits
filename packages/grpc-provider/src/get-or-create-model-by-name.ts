@@ -207,6 +207,7 @@ export class GrpcProtoToGqlConverter {
  * gives out the model
  */
 export const getOrCreateModelByName = memoize(<T extends string>(name: T) => {
+  console.log(`GETTING OR CREATING ${name}`);
   // if already exists in metadata
   @ObjectType(name)
   class Model {}

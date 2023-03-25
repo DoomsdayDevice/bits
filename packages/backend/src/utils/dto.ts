@@ -1,6 +1,6 @@
 import { validateSync, ValidationError } from "class-validator";
 import { Type } from "@nestjs/common";
-import { plainToClass, plainToInstance } from "class-transformer";
+import { plainToInstance } from "class-transformer";
 import { getKeys } from "@bits/core";
 
 function valErrorToStr(
@@ -112,28 +112,6 @@ export function transformAndValidate<T extends Record<string, any>>(
 function isPlainObject(obj: any) {
   const prototype = Object.getPrototypeOf(obj);
   return prototype === null || prototype.constructor === Object;
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function validateConfig<Cfg extends Record<string, any>>(
-  CfgCls: Type<Cfg>,
-  config: Cfg
-): Cfg {
-  // filter instances of cfg classes
-  // const validatedConfig = isPlainObject(config)
-  //   ? plainToClass(CfgCls, config, { enableImplicitConversion: true })
-  //   : config;
-  const validatedConfig = plainToClass(CfgCls, config, {
-    enableImplicitConversion: true,
-  });
-  const errors = validateSync(validatedConfig, {
-    skipMissingProperties: false,
-  });
-
-  if (errors.length > 0) {
-    throw new Error(formatValErrors(errors));
-  }
-  return validatedConfig;
 }
 
 export function formatValErrors(errors: ValidationError[]): string {
