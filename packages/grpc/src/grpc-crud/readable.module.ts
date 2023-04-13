@@ -1,4 +1,4 @@
-import { GRPCCrudModule } from "./grpc-crud.abstract.module";
+import { GRPCCrudModuleBuilder } from "./grpc-crud.abstract.module";
 import { Class, ObjectLiteral } from "@bits/core";
 import { ReadableRepoMixin } from "@bits/db";
 import { ReadableGrpcController } from "./grpc.readable.controller";
@@ -6,22 +6,22 @@ import { IReadableRepo, ReadableCrudService } from "@bits/backend";
 import { DynamicModule } from "@nestjs/common";
 import { GrpcReadableCrudConfig } from "../types";
 
-export class GRPCReadableCrudModule<
+export class GRPCReadableCrudModuleBuilder<
   T extends ObjectLiteral
-> extends GRPCCrudModule {
-  constructor(protected cfg: GrpcReadableCrudConfig<any>) {
+> extends GRPCCrudModuleBuilder {
+  protected constructor(protected cfg: GrpcReadableCrudConfig<any>) {
     super();
   }
 
-  getRepo() {
+  protected buildRepo() {
     return this.cfg.Repo || ReadableRepoMixin(this.cfg.Model)();
   }
 
-  getService(Repo: Class<IReadableRepo<T>>) {
+  protected buildService(Repo: Class<IReadableRepo<T>>) {
     return this.cfg.Service || ReadableCrudService(this.cfg.Model, Repo);
   }
 
-  getController(Service: Class<any>) {
+  protected buildController(Service: Class<any>) {
     return (
       this.cfg.Controller ||
       ReadableGrpcController(
@@ -35,20 +35,23 @@ export class GRPCReadableCrudModule<
     );
   }
 
-  build<M extends ObjectLiteral>(): DynamicModule {
-    const { Model, imports = [], providers = [] } = this.cfg;
+  static build<M extends ObjectLiteral>(
+    cfg: GrpcReadableCrudConfig<any>
+  ): DynamicModule {
+    const builder = new GRPCReadableCrudModuleBuilder(cfg);
+    const { Model, imports = [], providers = [] } = builder.cfg;
 
-    const Repo = this.getRepo();
-    const Service = this.getService(Repo as any);
-    const Controller = this.getController(Service);
+    const Repo = builder.buildRepo();
+    const Service = builder.buildService(Repo as any);
+    const Controller = builder.buildController(Service);
 
-    return this.getModule(
-      this.cfg.Model.name,
+    return builder.buildModule(
+      builder.cfg.Model.name,
       Repo,
       Service,
       Controller,
       providers,
-      [...this.cfg.dataProvider.getImports(this.cfg.Model), ...imports]
+      [...builder.cfg.dataProvider.getImports(builder.cfg.Model), ...imports]
     );
   }
 }

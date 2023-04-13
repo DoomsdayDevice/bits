@@ -26,10 +26,8 @@ export class GRPCCrudModuleBuilder {
       exports: [token],
     };
   }
-}
 
-export abstract class GRPCCrudModule {
-  getModule(
+  protected buildModule(
     name: string,
     Repo: any,
     Service: any,

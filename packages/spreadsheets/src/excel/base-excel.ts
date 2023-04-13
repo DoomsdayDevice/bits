@@ -1,6 +1,13 @@
-import { Worksheet, Row, Cell, Column, Workbook, CellValue, Border, Borders } from 'exceljs';
-import * as utils from 'src/core/utils';
-import { numToLetter } from 'src/core/utils';
+import {
+  Worksheet,
+  Row,
+  Cell,
+  Column,
+  Workbook,
+  CellValue,
+  Border,
+  Borders,
+} from "exceljs";
 import {
   IExcelCellOptions,
   IExcelCellStyle,
@@ -11,20 +18,20 @@ import {
   ExcelCellItem,
   IExcelHeader,
   ExcelHeaderRow,
-} from './excel.interface';
+} from "./excel.interface";
 
 export class BaseExcel {
-  colLight = 'FFADD6B4';
+  colLight = "FFADD6B4";
 
-  colDark = 'FF77ADA4';
+  colDark = "FF77ADA4";
 
-  colDarker = 'FF669C93';
+  colDarker = "FF669C93";
 
-  colAccent = 'FFD6C4';
+  colAccent = "FFD6C4";
 
-  colAccent2 = 'FF99CCC9';
+  colAccent2 = "FF99CCC9";
 
-  borderStyle: Border = { style: 'thin', color: { argb: 'FF000000' } };
+  borderStyle: Border = { style: "thin", color: { argb: "FF000000" } };
 
   bordersStyle: Partial<Borders> = {
     top: this.borderStyle,
@@ -62,8 +69,8 @@ export class BaseExcel {
   }
 
   checkExcelCellValue(cell: ExcelCellItem, value: string): boolean {
-    if (typeof cell === 'object' && cell !== null) {
-      if ('value' in cell) {
+    if (typeof cell === "object" && cell !== null) {
+      if ("value" in cell) {
         return cell.value === value;
       }
     } else {
@@ -78,7 +85,7 @@ export class BaseExcel {
    * @param val
    */
   isPartialCell(val: ExcelCellItem): val is ExcelCell {
-    return typeof val === 'object' && val !== null && 'value' in val;
+    return typeof val === "object" && val !== null && "value" in val;
   }
 
   /**
@@ -94,7 +101,7 @@ export class BaseExcel {
     data: ExcelMatrixTable,
     colNum: number,
     rowNum: number,
-    options: IExcelFormattingOptions = {},
+    options: IExcelFormattingOptions = {}
   ): void {
     for (let r = 0; r < data.length; r++) {
       const currRow = sheet.getRow(r + rowNum);
@@ -129,7 +136,7 @@ export class BaseExcel {
     headers: IExcelHeader[],
     colNum: number,
     rowNum: number,
-    options: IExcelFormattingOptions = {},
+    options: IExcelFormattingOptions = {}
   ): void {
     for (let r = 0; r < data.length; r++) {
       const currRowNum = rowNum + r;
@@ -150,23 +157,34 @@ export class BaseExcel {
         // Если в данных есть такое свойство
         const currCell = currRow.getCell(currColNum);
         this.formattingCell(currCell, options.cell);
-        if (currKey && currDataRow[currKey] !== null && currDataRow[currKey] !== undefined) {
+        if (
+          currKey &&
+          currDataRow[currKey] !== null &&
+          currDataRow[currKey] !== undefined
+        ) {
           const currProp = currDataRow[currKey];
           // Если надо - мерджим ячейки
           if (currMergedCount) {
             const currColLetter = utils.numToLetter(currColNum);
-            const endColLetter = utils.numToLetter(currColNum + currMergedCount);
-            worksheet.mergeCells(`${currColLetter}${currRowNum}`, `${endColLetter}${currRowNum}`);
+            const endColLetter = utils.numToLetter(
+              currColNum + currMergedCount
+            );
+            worksheet.mergeCells(
+              `${currColLetter}${currRowNum}`,
+              `${endColLetter}${currRowNum}`
+            );
           }
 
-          if (typeof currProp === 'string' || typeof currProp === 'number') {
-            if (currHeader.isUrl && typeof currProp === 'string') {
+          if (typeof currProp === "string" || typeof currProp === "number") {
+            if (currHeader.isUrl && typeof currProp === "string") {
               currCell.value = { text: currProp, hyperlink: currProp };
-              currCell.style = { font: { underline: true, color: { argb: 'FF0645AD' } } };
+              currCell.style = {
+                font: { underline: true, color: { argb: "FF0645AD" } },
+              };
             } else {
               currCell.value = currProp;
             }
-          } else if (currProp && 'value' in currProp) {
+          } else if (currProp && "value" in currProp) {
             currCell.value = currProp.value;
             this.formattingCell(currCell, currProp);
           }
@@ -182,17 +200,21 @@ export class BaseExcel {
    * @param {number} maxDecimalCount - максимальное количество знаков после запятой
    * @param {string} additionalSymbols - добавляемые в конец символы (рублей, процентов и т.д.)
    */
-  dynamicNumFmtStyle(number: number, maxDecimalCount: number, additionalSymbols = ''): string {
+  dynamicNumFmtStyle(
+    number: number,
+    maxDecimalCount: number,
+    additionalSymbols = ""
+  ): string {
     const realDecimalCount = utils.decimalCount(number);
-    let formatPrt1 = '#';
-    let formatPrt2 = '0';
+    let formatPrt1 = "#";
+    let formatPrt2 = "0";
 
     if (maxDecimalCount > 0 && realDecimalCount > 0) {
-      formatPrt1 += ',';
-      formatPrt2 += '.';
+      formatPrt1 += ",";
+      formatPrt2 += ".";
       for (let i = 0; i < maxDecimalCount && i < realDecimalCount; i++) {
-        formatPrt1 += '#';
-        formatPrt2 += '0';
+        formatPrt1 += "#";
+        formatPrt2 += "0";
       }
     }
 
@@ -213,7 +235,7 @@ export class BaseExcel {
     headers: IExcelHeader[],
     startColNum: number,
     startRowNum: number,
-    options: IExcelFormattingOptions = {},
+    options: IExcelFormattingOptions = {}
   ): void {
     if (options.setColumns !== false) worksheet.columns = headers as Column[];
     const headerRow = worksheet.getRow(startRowNum);
@@ -228,8 +250,13 @@ export class BaseExcel {
       // Если надо, мержим ячейки
       if (currHeader.colSize && currHeader.colSize > 1) {
         const currColLetter = utils.numToLetter(currColNum);
-        const endColLetter = utils.numToLetter(currColNum + currHeader.colSize - 1);
-        worksheet.mergeCells(`${currColLetter}${startRowNum}`, `${endColLetter}${startRowNum}`);
+        const endColLetter = utils.numToLetter(
+          currColNum + currHeader.colSize - 1
+        );
+        worksheet.mergeCells(
+          `${currColLetter}${startRowNum}`,
+          `${endColLetter}${startRowNum}`
+        );
         mergedCount += currHeader.colSize - 1;
       }
 
@@ -246,10 +273,23 @@ export class BaseExcel {
     startColNum: number,
     startRowNum: number,
     headerOptions: IExcelFormattingOptions = {},
-    bodyOptions: IExcelFormattingOptions = {},
+    bodyOptions: IExcelFormattingOptions = {}
   ): void {
-    this.addSimpleHeader(worksheet, headers, startColNum, startRowNum, headerOptions);
-    this.addMatrixByHeaders(worksheet, data, headers, startColNum, startRowNum + 1, bodyOptions);
+    this.addSimpleHeader(
+      worksheet,
+      headers,
+      startColNum,
+      startRowNum,
+      headerOptions
+    );
+    this.addMatrixByHeaders(
+      worksheet,
+      data,
+      headers,
+      startColNum,
+      startRowNum + 1,
+      bodyOptions
+    );
   }
 
   async addImageOnSheet(
@@ -259,12 +299,12 @@ export class BaseExcel {
     options: {
       tl: { col: number; row: number };
       ext: { width: number; height: number };
-    },
+    }
   ): Promise<void> {
     const image = await utils.getBase64FromFile(url);
     const logoImage = wb.addImage({
       base64: image,
-      extension: 'png',
+      extension: "png",
     });
 
     ws.addImage(logoImage, options);
@@ -279,7 +319,12 @@ export class BaseExcel {
     cell.value = val;
   }
 
-  printArray(row: number, colStart: number, arr: any[], cellOptions: IExcelCellOptions = {}): void {
+  printArray(
+    row: number,
+    colStart: number,
+    arr: any[],
+    cellOptions: IExcelCellOptions = {}
+  ): void {
     let col = colStart;
     for (const val of arr) {
       this.printCell(row, col, val);
@@ -301,7 +346,11 @@ export class BaseExcel {
     }
   }
 
-  printMatrixHorizontal(rowStart: number, colStart: number, matrix: CellValue[][]): void {
+  printMatrixHorizontal(
+    rowStart: number,
+    colStart: number,
+    matrix: CellValue[][]
+  ): void {
     for (const arr of matrix) {
       this.printArray(rowStart++, colStart, arr);
     }
@@ -315,14 +364,14 @@ export class BaseExcel {
   addArrayToRow(rowNum: number, arr: CellValue[]): void {
     const row = this.ws.getRow(rowNum);
     const values = row.values as CellValue[];
-    const newValues = Object.values(arr).map(elem => elem || '');
+    const newValues = Object.values(arr).map((elem) => elem || "");
     row.values = [...values, ...newValues];
   }
 
   setDataValidationOfCell(row: number, col: number, formula: string): void {
     const cell = this.ws.getCell(row, col);
     cell.dataValidation = {
-      type: 'list',
+      type: "list",
       allowBlank: true,
       showErrorMessage: true,
       formulae: [formula],
@@ -338,15 +387,16 @@ export class BaseExcel {
 
   // eslint-disable-next-line no-dupe-class-members
   borderizeCell(param1: Cell | number, param2?: number): void {
-    const cell: Cell = typeof param1 === 'number' ? this.ws.getCell(param1, param2) : param1;
+    const cell: Cell =
+      typeof param1 === "number" ? this.ws.getCell(param1, param2) : param1;
     cell.border = this.bordersStyle;
   }
 
   colorCell(row: number, col: number, color: string): void {
     const cell = this.ws.getCell(row, col);
     cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
+      type: "pattern",
+      pattern: "solid",
       fgColor: { argb: color },
     };
     this.borderizeCell(cell);
@@ -354,11 +404,11 @@ export class BaseExcel {
 
   colorRow(rowNum: number, color: string): void {
     const selectedRow = this.ws.getRow(rowNum);
-    selectedRow.eachCell(c => {
+    selectedRow.eachCell((c) => {
       if (!c.fill) {
         c.fill = {
-          type: 'pattern',
-          pattern: 'solid',
+          type: "pattern",
+          pattern: "solid",
           fgColor: { argb: color },
         };
       }
@@ -366,7 +416,13 @@ export class BaseExcel {
     });
   }
 
-  colorRect(r1: number, c1: number, r2: number, c2: number, color: string): void {
+  colorRect(
+    r1: number,
+    c1: number,
+    r2: number,
+    c2: number,
+    color: string
+  ): void {
     for (let r = r1; r < r2 + 1; r++) {
       for (let c = c1; c < c2 + 1; c++) {
         this.colorCell(r, c, color);
@@ -380,15 +436,24 @@ export class BaseExcel {
     bold?: boolean,
     fontSize?: number,
     color?: string,
-    underline?: boolean,
+    underline?: boolean
   ): void {
     const cell = this.ws.getCell(row, col);
-    cell.font = { bold, size: fontSize, underline, color: color ? { argb: color } : undefined };
+    cell.font = {
+      bold,
+      size: fontSize,
+      underline,
+      color: color ? { argb: color } : undefined,
+    };
   }
 
-  setFontOfRow(rowNum: number, bold = false, fontSize: number | null = null): void {
+  setFontOfRow(
+    rowNum: number,
+    bold = false,
+    fontSize: number | null = null
+  ): void {
     const selectedRow = this.ws.getRow(rowNum);
-    selectedRow.eachCell(c => {
+    selectedRow.eachCell((c) => {
       if (bold) c.font = { bold };
       if (fontSize) c.font = { size: fontSize };
     });
@@ -398,8 +463,8 @@ export class BaseExcel {
     const row = this.ws.getRow(rowNum);
     row.alignment = {
       wrapText: true,
-      vertical: 'middle',
-      horizontal: 'center',
+      vertical: "middle",
+      horizontal: "center",
     };
   }
 
@@ -425,7 +490,7 @@ export class BaseExcel {
 
   formatMultipleRows(
     rowStart: number,
-    arrayOfFormatFuncs: (((rowNum: number) => void) | null)[],
+    arrayOfFormatFuncs: (((rowNum: number) => void) | null)[]
   ): void {
     for (let i = 0; i < arrayOfFormatFuncs.length; i++) {
       const fn = arrayOfFormatFuncs[i];
@@ -451,31 +516,31 @@ export class BaseExcel {
   }
 
   formatColAsPercents(colNum: number): void {
-    this.ws.getColumn(colNum).numFmt = '0%';
+    this.ws.getColumn(colNum).numFmt = "0%";
   }
 
   formatRowAsPercents(rowNum: number): void {
-    this.ws.getRow(rowNum).numFmt = '0%';
+    this.ws.getRow(rowNum).numFmt = "0%";
   }
 
   formatColAsPercentsDec(colNum: number): void {
-    this.ws.getColumn(colNum).numFmt = '0.00%';
+    this.ws.getColumn(colNum).numFmt = "0.00%";
   }
 
   formatRowAsPercentsDec(rowNum: number): void {
-    this.ws.getRow(rowNum).numFmt = '0.00%';
+    this.ws.getRow(rowNum).numFmt = "0.00%";
   }
 
   formatRowAsNums(rowNum: number): void {
-    this.ws.getRow(rowNum).numFmt = '#,##0';
+    this.ws.getRow(rowNum).numFmt = "#,##0";
   }
 
   formatColAsNums(colNum: number): void {
-    this.ws.getColumn(colNum).numFmt = '#,##0';
+    this.ws.getColumn(colNum).numFmt = "#,##0";
   }
 
   formatColAsNumsDec(colNum: number): void {
-    this.ws.getColumn(colNum).numFmt = '#,##0.00';
+    this.ws.getColumn(colNum).numFmt = "#,##0.00";
   }
 
   hideColumn(colNum: number): void {
@@ -483,13 +548,18 @@ export class BaseExcel {
     col.hidden = true;
   }
 
-  colorizeColumn(columnNum: number, rowStart: number, rowEnd: number, color: string): void {
+  colorizeColumn(
+    columnNum: number,
+    rowStart: number,
+    rowEnd: number,
+    color: string
+  ): void {
     for (let row = rowStart; row < rowEnd; row++) {
       const cell = this.ws.getCell(row, columnNum);
       if (!cell.fill) {
         cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
+          type: "pattern",
+          pattern: "solid",
           // bgColor: { argb: color },
           fgColor: { argb: color },
         };

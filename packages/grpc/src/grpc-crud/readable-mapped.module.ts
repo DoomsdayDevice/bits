@@ -1,19 +1,19 @@
 import { GrpcMappedReadableCrudConfig } from "../types";
 import { Class, ObjectLiteral } from "@bits/core";
 import { IReadableRepo } from "@bits/backend";
-import { GRPCReadableCrudModule } from "./readable.module";
+import { GRPCReadableCrudModuleBuilder } from "./readable.module";
 import { MappedReadableRepoMixin } from "@bits/db";
 import { DynamicModule } from "@nestjs/common";
 
 export class GRPCMappedReadableCrudModule<
   M extends ObjectLiteral,
   E extends ObjectLiteral
-> extends GRPCReadableCrudModule<M> {
+> extends GRPCReadableCrudModuleBuilder<M> {
   constructor(protected mappedCfg: GrpcMappedReadableCrudConfig<M, E>) {
     super(mappedCfg);
   }
 
-  getRepo(): Class<IReadableRepo<any>> {
+  buildRepo(): Class<IReadableRepo<any>> {
     return (
       this.cfg.Repo ||
       MappedReadableRepoMixin(this.mappedCfg.Entity, this.cfg.Model)()
@@ -22,12 +22,12 @@ export class GRPCMappedReadableCrudModule<
 
   build(): DynamicModule {
     const { Entity, providers = [], imports = [] } = this.mappedCfg;
-    const Repo = this.getRepo();
+    const Repo = this.buildRepo();
 
-    const Service = this.getService(Repo);
-    const Controller = this.getController(Service);
+    const Service = this.buildService(Repo);
+    const Controller = this.buildController(Service);
 
-    return this.getModule(
+    return this.buildModule(
       this.cfg.Model.name,
       Repo,
       Service,

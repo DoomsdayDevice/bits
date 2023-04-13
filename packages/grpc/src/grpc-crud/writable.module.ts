@@ -4,13 +4,13 @@ import { GrpcWritableCrudConfig } from "../types";
 import { ReadableCrudService, WritableCrudService } from "@bits/backend";
 import { ReadableGrpcController } from "./grpc.readable.controller";
 import { WritableGrpcController } from "./grpc.writable.controller";
-import { GRPCCrudModule } from "./grpc-crud.abstract.module";
+import { GRPCCrudModuleBuilder } from "./grpc-crud.abstract.module";
 import { DynamicModule } from "@nestjs/common";
 
 export class GRPCWritableCrudModule<
   T extends ObjectLiteral
-> extends GRPCCrudModule {
-  constructor(protected cfg: GrpcWritableCrudConfig<T>) {
+> extends GRPCCrudModuleBuilder {
+  protected constructor(protected cfg: GrpcWritableCrudConfig<T>) {
     super();
   }
 
@@ -47,24 +47,27 @@ export class GRPCWritableCrudModule<
     );
   }
 
-  build<M extends ObjectLiteral>(): DynamicModule {
-    const { Model, imports = [], providers = [] } = this.cfg;
-    const Repo = this.getRepo();
-    const FinalService = this.getService(Repo);
+  static build<M extends ObjectLiteral>(
+    cfg: GrpcWritableCrudConfig<M>
+  ): DynamicModule {
+    const newModule = new GRPCWritableCrudModule(cfg);
+    const { Model, imports = [], providers = [] } = newModule.cfg;
+    const Repo = newModule.getRepo();
+    const FinalService = newModule.getService(Repo);
 
-    const FinalController = this.getController(FinalService);
+    const FinalController = newModule.getController(FinalService);
 
     const exports: Class[] = [];
-    if (!this.cfg.Repo) exports.push(Repo);
-    if (!this.cfg.Service) exports.push(FinalService);
+    if (!newModule.cfg.Repo) exports.push(Repo);
+    if (!newModule.cfg.Service) exports.push(FinalService);
 
-    return this.getModule(
+    return newModule.buildModule(
       Model.name,
       Repo,
       FinalService,
       FinalController,
       providers,
-      [...this.cfg.dataProvider.getImports(Model), ...imports],
+      [...newModule.cfg.dataProvider.getImports(Model), ...imports],
       exports
     );
   }

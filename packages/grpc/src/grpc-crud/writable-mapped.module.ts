@@ -28,7 +28,7 @@ export class GRPCMappedWritableCrudModule<
     const Service = this.getService(Repo);
     const Controller = this.getController(Service);
 
-    return this.getModule(
+    return this.buildModule(
       this.mappedCfg.Model.name,
       Repo,
       Service,
