@@ -4,19 +4,15 @@ import {
   NotFoundException,
   Type,
 } from "@nestjs/common";
-import {
-  Repository,
-  DeepPartial,
-  DeleteResult,
-  FindOptionsWhere,
-  ObjectLiteral,
-} from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { SaveOptions } from "typeorm/repository/SaveOptions";
 import { FindOneOptions } from "typeorm/find-options/FindOneOptions";
-import { IWritableRepo } from "@bits/backend";
+import { DeleteResult, IFindOptionsWhere, IWritableRepo } from "@bits/backend";
 import { renameFunc } from "@bits/core";
+import { ObjectLiteral } from "@bits/core";
+import { Repository } from "typeorm";
+import { DeepPartial } from "@bits/core";
 
 export const WritableRepoMixin = <Entity extends ObjectLiteral>(
   ModelRef: Type<Entity>
@@ -25,27 +21,30 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
     BaseCls: Type<B> = class {} as any
   ): Type<IWritableRepo<Entity> & B> => {
     @Injectable()
-    class WritableRepo extends (BaseCls as any) {
+    class WritableRepo
+      extends (BaseCls as any)
+      implements IWritableRepo<Entity>
+    {
       @InjectRepository(ModelRef)
       public readonly writeRepo!: Repository<Entity>;
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
-        const obj = this.writeRepo.create(newEntity);
+        const obj = this.writeRepo.create(newEntity as any);
 
-        return this.writeRepo.save(obj);
+        return this.writeRepo.save(obj) as any;
       }
 
       public async update(
-        idOrConditions: string | FindOptionsWhere<Entity>,
+        idOrConditions: string | IFindOptionsWhere<Entity>,
         partialEntity: QueryDeepPartialEntity<Entity>
         // ...options: any[]
-      ): Promise<boolean> {
+      ): Promise<Entity> {
         try {
           const result = await this.writeRepo.update(
             idOrConditions,
             partialEntity
           );
-          if (result.affected) return true;
+          if (result.affected) return result as any; // TODO
           else throw Error("not updated");
         } catch (err) {
           throw new BadRequestException(err);
@@ -57,7 +56,7 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
         options?: SaveOptions
       ): Promise<T | T[]> {
         try {
-          return this.writeRepo.save<T>(entityOrEntities as any, options);
+          return this.writeRepo.save(entityOrEntities as any, options);
         } catch (err) {
           throw new BadRequestException(err);
         }
@@ -81,7 +80,7 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
 
       // fast query
       public async hardDelete(
-        criteria: string | number | FindOptionsWhere<Entity>
+        criteria: string | number | IFindOptionsWhere<Entity>
         /* ...options: any[] */
       ): Promise<DeleteResult> {
         try {
