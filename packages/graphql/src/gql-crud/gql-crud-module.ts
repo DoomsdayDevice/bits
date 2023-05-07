@@ -144,7 +144,7 @@ export class GqlCrudModule<
           ? this.cfg.ModelResolver!
           : this.Resolver,
       ],
-      imports: [...this.imports],
+      imports: [...this.imports, ...this.cfg.provider.getImports(this.Model)],
       exports: [
         this.Service,
         { provide: this.Service.name, useClass: this.Service },

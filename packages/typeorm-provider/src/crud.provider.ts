@@ -1,4 +1,4 @@
-import { Class, ObjectLiteral } from "@bits/core";
+import { Class, ObjectLiteral, renameFunc } from "@bits/core";
 import {
   ICrudModuleProvider,
   ICrudService,
@@ -9,7 +9,12 @@ import {
 } from "@bits/backend";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ReadableRepoMixin, WritableRepoMixin } from "@bits/db";
-import { DynamicModule, ForwardReference } from "@nestjs/common";
+import {
+  DynamicModule,
+  ForwardReference,
+  Global,
+  Module,
+} from "@nestjs/common";
 
 type Cfg<M extends ObjectLiteral> = {
   Model: Class<M>;
@@ -31,16 +36,17 @@ export class TypeormProvider<M extends ObjectLiteral>
   ): Array<
     Class<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
   > {
-    return [
-      TypeOrmModule.forFeature([modelRef]),
-      {
-        module: class {},
-        // providers: [this.ReadRepo, this.WriteRepo],
-        // exports: [this.ReadRepo, this.WriteRepo],
-        imports: [TypeOrmModule.forFeature([modelRef])],
-        global: true,
-      },
-    ];
+    @Module({
+      providers: [this.ReadRepo, this.WriteRepo],
+      exports: [this.ReadRepo, this.WriteRepo],
+      imports: [TypeOrmModule.forFeature([modelRef])],
+    })
+    @Global()
+    class ProviderModule {}
+
+    renameFunc(ProviderModule, `${modelRef.name}ProviderModule`);
+
+    return [TypeOrmModule.forFeature([modelRef]), ProviderModule];
   }
 
   buildService(): Class<ICrudService<M>> {

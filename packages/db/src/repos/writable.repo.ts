@@ -16,16 +16,17 @@ import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity
 import { SaveOptions } from "typeorm/repository/SaveOptions";
 import { FindOneOptions } from "typeorm/find-options/FindOneOptions";
 import { IWritableRepo } from "@bits/backend";
+import { renameFunc } from "@bits/core";
 
 export const WritableRepoMixin = <Entity extends ObjectLiteral>(
-  EntityCls: Type<Entity>
+  ModelRef: Type<Entity>
 ) => {
   return <B extends {}>(
     BaseCls: Type<B> = class {} as any
   ): Type<IWritableRepo<Entity> & B> => {
     @Injectable()
     class WritableRepo extends (BaseCls as any) {
-      @InjectRepository(EntityCls)
+      @InjectRepository(ModelRef)
       public readonly writeRepo!: Repository<Entity>;
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
@@ -93,6 +94,7 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
         }
       }
     }
+    renameFunc(WritableRepo, `Writable${ModelRef.name}Repo`);
     return WritableRepo as any;
   };
 };

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Type } from "@nestjs/common";
 import { IFindManyServiceInput, IReadableCrudService } from "./types";
-import { IConnection, ObjectLiteral } from "@bits/core";
+import { IConnection, ObjectLiteral, renameFunc } from "@bits/core";
 import { IFindOneOptions, IFindOptionsWhere } from "./find-options";
 import { IReadableRepo } from "../repos";
 
@@ -8,7 +8,7 @@ export const ReadableCrudService = <
   M extends ObjectLiteral,
   R extends IReadableRepo<M>
 >(
-  Model: Type<M>,
+  ModelRef: Type<M>,
   Repo: Type<R>
 ): Type<IReadableCrudService<M>> => {
   @Injectable()
@@ -42,5 +42,6 @@ export const ReadableCrudService = <
     }
   }
 
+  renameFunc(ReadableCrudService, `Readable${ModelRef.name}CrudService`);
   return ReadableCrudService;
 };

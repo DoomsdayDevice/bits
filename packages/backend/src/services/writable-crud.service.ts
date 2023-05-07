@@ -1,7 +1,7 @@
 import { Inject, Injectable, Type } from "@nestjs/common";
 import { IWritableRepo } from "../repos/repo.interface";
 import { IWritableCrudService } from "./types";
-import { DeepPartial, ObjectLiteral } from "@bits/core";
+import { DeepPartial, ObjectLiteral, renameFunc } from "@bits/core";
 import { IFindOptionsWhere } from "./find-options";
 
 export function WritableCrudService<
@@ -9,7 +9,7 @@ export function WritableCrudService<
   B extends Type,
   R extends IWritableRepo<E>
 >(
-  ModelCls: Type<E>,
+  ModelRef: Type<E>,
   Repo: Type<R>,
   Base: B
 ): Type<IWritableCrudService<E> & InstanceType<B>> {
@@ -34,5 +34,6 @@ export function WritableCrudService<
       return this._writeRepo.update(idOrConditions, partialEntity);
     }
   }
+  renameFunc(WritableCrudService, `Writable${ModelRef.name}CrudService`);
   return WritableCrudService as any;
 }

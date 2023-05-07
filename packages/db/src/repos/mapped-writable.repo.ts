@@ -16,13 +16,14 @@ import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity
 import { SaveOptions } from "typeorm/repository/SaveOptions";
 import { FindOneOptions } from "typeorm/find-options/FindOneOptions";
 import { IWritableRepo } from "@bits/backend";
+import { renameFunc } from "@bits/core";
 
 export const MappedWritableRepoMixin = <
   Entity extends ObjectLiteral,
   Model extends ObjectLiteral
 >(
   EntityCls: Type<Entity>,
-  ModelCls: Type<Model>
+  ModelRef: Type<Model>
 ) => {
   return <B extends {}>(
     BaseCls: Type<B> = class {} as any
@@ -97,6 +98,7 @@ export const MappedWritableRepoMixin = <
         }
       }
     }
+    renameFunc(MappedWritableRepo, `MappedWritable${ModelRef.name}Repo`);
     return MappedWritableRepo as any;
   };
 };

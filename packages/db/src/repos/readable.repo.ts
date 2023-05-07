@@ -9,45 +9,43 @@ import {
   IFindOptionsWhere,
 } from "@bits/backend";
 import { convertServiceFindManyInputToTypeorm } from "../utils/conversion.utils";
-import { IConnection } from "@bits/core";
+import { IConnection, renameFunc } from "@bits/core";
 
 export const ReadableRepoMixin = <
-  Entity extends ObjectLiteral,
+  Model extends ObjectLiteral,
   Base extends Type<object>
 >(
-  EntityCls: Type<Entity>
+  ModelRef: Type<Model>
 ) => {
   return (
     BaseCls: Base = class {} as Base
-  ): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
+  ): Type<IReadableRepo<Model> & InstanceType<Base>> => {
     @Injectable()
-    class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
-      @InjectRepository(EntityCls)
-      public readonly readRepo!: Repository<Entity>;
+    class ReadableRepo extends BaseCls implements IReadableRepo<Model> {
+      @InjectRepository(ModelRef)
+      public readonly readRepo!: Repository<Model>;
 
-      public count(filter?: IFindManyServiceInput<Entity>): Promise<number> {
+      public count(filter?: IFindManyServiceInput<Model>): Promise<number> {
         return this.readRepo.count(
           filter && (convertServiceFindManyInputToTypeorm(filter) as any)
         );
       }
 
-      public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
+      public create(newEntity: DeepPartial<Model>): Promise<Model> {
         const obj = this.readRepo.create(newEntity);
 
         return this.readRepo.save(obj);
       }
 
-      public findMany(
-        filter?: IFindManyServiceInput<Entity>
-      ): Promise<Entity[]> {
+      public findMany(filter?: IFindManyServiceInput<Model>): Promise<Model[]> {
         return this.readRepo.find(
           filter && (convertServiceFindManyInputToTypeorm(filter) as any)
         );
       }
 
       public findManyWithDeleted(
-        filter: IFindManyServiceInput<Entity> = { withDeleted: true }
-      ): Promise<Entity[]> {
+        filter: IFindManyServiceInput<Model> = { withDeleted: true }
+      ): Promise<Model[]> {
         filter.withDeleted = true;
         return this.readRepo.find(
           convertServiceFindManyInputToTypeorm(filter) as any
@@ -55,9 +53,9 @@ export const ReadableRepoMixin = <
       }
 
       public async findOne(
-        id: IFindOneOptions<Entity> | IFindOptionsWhere<Entity>,
-        options: IFindOneOptions<Entity> = {}
-      ): Promise<Entity> {
+        id: IFindOneOptions<Model> | IFindOptionsWhere<Model>,
+        options: IFindOneOptions<Model> = {}
+      ): Promise<Model> {
         options.where = id as any;
         const record = await this.readRepo.findOneOrFail(options as any);
         return record;
@@ -70,9 +68,9 @@ export const ReadableRepoMixin = <
         take,
         skip,
         order,
-      }: IFindManyServiceInput<Entity>): Promise<Entity[]> {
+      }: IFindManyServiceInput<Model>): Promise<Model[]> {
         const complexQuery = new NestedQuery(
-          EntityCls,
+          ModelRef,
           this.readRepo.metadata.discriminatorValue as any,
           this.readRepo
         );
@@ -88,8 +86,8 @@ export const ReadableRepoMixin = <
       }
 
       public async findManyAndCount(
-        input: IFindManyServiceInput<Entity>
-      ): Promise<IConnection<Entity>> {
+        input: IFindManyServiceInput<Model>
+      ): Promise<IConnection<Model>> {
         const [nodes, totalCount] = await this.readRepo.findAndCount(
           convertServiceFindManyInputToTypeorm(input) as any
         );
@@ -110,10 +108,11 @@ export const ReadableRepoMixin = <
         // return { totalCount, nodes };
       }
 
-      getPrimaryColumnName(): keyof Entity {
+      getPrimaryColumnName(): keyof Model {
         return "id" as any;
       }
     }
+    renameFunc(ReadableRepo, `Readable${ModelRef.name}Repo`);
     return ReadableRepo as any;
   };
 };

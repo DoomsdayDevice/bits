@@ -10,7 +10,7 @@ import {
   IReadableRepo,
 } from "@bits/backend";
 import { convertServiceFindManyInputToTypeorm } from "../utils";
-import { IConnection } from "@bits/core";
+import { IConnection, renameFunc } from "@bits/core";
 
 // TODO remove all any's
 export const MappedReadableRepoMixin = <
@@ -19,7 +19,7 @@ export const MappedReadableRepoMixin = <
   Base extends Type<object>
 >(
   EntityCls: Type<Entity>,
-  ModelCls: Type<Model>
+  ModelRef: Type<Model>
 ) => {
   return (
     BaseCls: Base = class {} as Base
@@ -46,7 +46,7 @@ export const MappedReadableRepoMixin = <
         const mapped = this.mapper.mapArray<Entity, Model>(
           fromDb,
           EntityCls,
-          ModelCls
+          ModelRef
         );
 
         return mapped;
@@ -69,7 +69,7 @@ export const MappedReadableRepoMixin = <
         const record: Entity = await this.entityRepo.findOneOrFail(
           options as any
         );
-        return this.mapper.map(record, EntityCls, ModelCls);
+        return this.mapper.map(record, EntityCls, ModelRef);
       }
 
       public async findManyAndCount(
@@ -82,7 +82,7 @@ export const MappedReadableRepoMixin = <
         const mapped = this.mapper.mapArray<Entity, Model>(
           nodes,
           EntityCls,
-          ModelCls
+          ModelRef
         );
         return { totalCount, nodes: mapped };
       }
@@ -91,6 +91,7 @@ export const MappedReadableRepoMixin = <
         return "id" as any;
       }
     }
+    renameFunc(ReadableRepo, `MappedReadable${ModelRef.name}Repo`);
     return ReadableRepo as any;
   };
 };
