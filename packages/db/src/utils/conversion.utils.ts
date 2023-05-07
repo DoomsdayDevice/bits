@@ -14,7 +14,7 @@ import {
   IFindManyServiceInput,
   IFindOptionsOrder,
 } from "@bits/backend";
-import { getKeys, IListValue, Sort } from "@bits/core";
+import { getKeys, IListValue, ISort } from "@bits/core";
 
 export function isFindOperator<T>(obj: any): obj is FindOperator<T> {
   return obj._type;
@@ -104,7 +104,7 @@ function convertServiceFilterToTypeorm(filter: ObjectLiteral) {
 }
 
 export function convertGrpcOrderByToTypeorm<T = any>(
-  sorting: IListValue<Sort>
+  sorting: IListValue<ISort>
 ): IFindOptionsOrder<T> {
   const obj: IFindOptionsOrder<T> = {};
   for (const o of sorting.values) {
