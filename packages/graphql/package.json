@@ -1,6 +1,6 @@
 {
   "name": "@bits/graphql",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/graphql#readme",
@@ -28,7 +28,7 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/backend": "^1.0.9",
+    "@bits/backend": "^1.0.10",
     "@bits/core": "^1.0.3",
     "@casl/ability": "^6.3.3",
     "@types/lodash": "^4.14.191",
