@@ -16,18 +16,18 @@ export const ReadableCrudService = <
   class ReadableCrudService implements IReadableCrudService<M> {
     @Inject(Repo) _readRepo!: R;
 
-    count(filter?: IFindManyServiceInput<M>): Promise<number> {
-      return this._readRepo.count(filter);
+    count(input?: IFindManyServiceInput<M>): Promise<number> {
+      return this._readRepo.count(input);
     }
 
-    findMany(filter: IFindManyServiceInput<M> = {}): Promise<M[]> {
-      return this._readRepo.findMany(filter);
+    findMany(input: IFindManyServiceInput<M> = {}): Promise<M[]> {
+      return this._readRepo.findMany(input);
     }
 
     findManyAndCount(
-      filter: IFindManyServiceInput<M> = {}
+      input: IFindManyServiceInput<M> = {}
     ): Promise<IConnection<M>> {
-      return this._readRepo.findManyAndCount(filter);
+      return this._readRepo.findManyAndCount(input);
     }
 
     findOne(

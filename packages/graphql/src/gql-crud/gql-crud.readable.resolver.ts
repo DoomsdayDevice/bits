@@ -95,8 +95,10 @@ export function ReadResolverMixin<
           take: input.paging.limit,
         });
       }
+
       return this.svc.findManyAndCount({
         where: convertGraphqlFilterToService(finalFilter),
+        order: convertGqlOrderByToTypeorm(input.sorting || []),
       });
     }
 

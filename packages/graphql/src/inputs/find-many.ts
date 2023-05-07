@@ -1,4 +1,4 @@
-import { ArgsType, Field } from "@nestjs/graphql";
+import { ArgsType, Field, registerEnumType } from "@nestjs/graphql";
 import { OffsetPagination } from "./offset-paging";
 import {
   Class,
@@ -6,10 +6,12 @@ import {
   IGqlFilter,
   IPaging,
   PagingStrategy,
+  SortDirection,
 } from "@bits/core";
 import { getOrCreateCursorPagingType } from "./get-or-create-cursor-paging";
 import { getDefaultFilter } from "./filter";
 import { memoize } from "lodash";
+import { Sort } from "./sort";
 
 export const getDefaultFindManyArgs = memoize(
   <T, P extends PagingStrategy>(
@@ -25,7 +27,12 @@ export const getDefaultFindManyArgs = memoize(
       filter?: IGqlFilter<T>;
 
       paging?: IPaging<P>;
+
+      @Field(() => [Sort], { nullable: true })
+      sorting?: Sort[];
     }
+
+    registerEnumType(SortDirection, { name: "SortDirection" });
 
     if (paginationStrategy === PagingStrategy.CURSOR) {
       const PagingType = getOrCreateCursorPagingType();
