@@ -33,7 +33,7 @@
   "peerDependencies": {
     "@bits/graphql": "^1.0.0",
     "@bits/grpc-common": "^1.0.0",
-    "graphql": "^15.0.0",
+    "graphql": "^16.6.0",
     "protobufjs": "^7.2.2"
   }
 }
