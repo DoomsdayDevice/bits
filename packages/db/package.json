@@ -37,5 +37,6 @@
   },
   "peerDependencies": {
     "typeorm": "^0.3.12"
-  }
+  },
+  "gitHead": "eace095121e0f8c02aba3131dd7ec09cd0bf3f82"
 }
