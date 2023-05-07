@@ -79,6 +79,7 @@ export function convertServiceFindManyInputToTypeorm<T>(
   const result: IFindManyOptions<T> = { ...input } as any;
 
   // TODO
+
   // and
   if (input.where?.OR)
     result.where = input.where.OR.map((w) => convertServiceFilterToTypeorm(w));
