@@ -1,7 +1,7 @@
 import { Class, ObjectLiteral } from "@bits/core";
 import { GrpcMappedWritableCrudConfig, IWRRepo } from "../types";
 import { GRPCWritableCrudModule } from "./writable.module";
-import { MappedReadableRepoMixin, MappedWritableRepoMixin } from "@bits/db";
+import { ReadableRepoMixin, WritableRepoMixin } from "@bits/db";
 import { DynamicModule } from "@nestjs/common";
 
 export class GRPCMappedWritableCrudModule<
@@ -15,10 +15,10 @@ export class GRPCMappedWritableCrudModule<
   getMappedRepo(): Class<IWRRepo<M>> {
     const { Entity, Model } = this.mappedCfg;
     return (this.cfg.Repo ||
-      MappedWritableRepoMixin(
+      WritableRepoMixin(
         Entity,
         Model
-      )(MappedReadableRepoMixin(Entity, Model)())) as any;
+      )(ReadableRepoMixin(Entity, Model)())) as any;
   }
 
   build(): DynamicModule {

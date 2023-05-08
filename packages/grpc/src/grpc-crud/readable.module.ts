@@ -1,6 +1,6 @@
 import { GRPCCrudModuleBuilder } from "./grpc-crud.abstract.module";
 import { Class, ObjectLiteral } from "@bits/core";
-import { ReadableRepoMixin } from "@bits/db";
+import { SimpleReadableRepoMixin } from "@bits/db";
 import { ReadableGrpcController } from "./grpc.readable.controller";
 import { IReadableRepo, ReadableCrudService } from "@bits/backend";
 import { DynamicModule } from "@nestjs/common";
@@ -14,7 +14,7 @@ export class GRPCReadableCrudModuleBuilder<
   }
 
   protected buildRepo() {
-    return this.cfg.Repo || ReadableRepoMixin(this.cfg.Model)();
+    return this.cfg.Repo || SimpleReadableRepoMixin(this.cfg.Model)();
   }
 
   protected buildService(Repo: Class<IReadableRepo<T>>) {

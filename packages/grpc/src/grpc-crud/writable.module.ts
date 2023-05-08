@@ -1,4 +1,4 @@
-import { ReadableRepoMixin, WritableRepoMixin } from "@bits/db";
+import { SimpleReadableRepoMixin, SimpleWritableRepoMixin } from "@bits/db";
 import { Class, ObjectLiteral } from "@bits/core";
 import { GrpcWritableCrudConfig } from "../types";
 import { ReadableCrudService, WritableCrudService } from "@bits/backend";
@@ -17,7 +17,9 @@ export class GRPCWritableCrudModule<
   getRepo() {
     return (
       this.cfg.Repo ||
-      WritableRepoMixin(this.cfg.Model)(ReadableRepoMixin(this.cfg.Model)())
+      SimpleWritableRepoMixin(this.cfg.Model)(
+        SimpleReadableRepoMixin(this.cfg.Model)()
+      )
     );
   }
 

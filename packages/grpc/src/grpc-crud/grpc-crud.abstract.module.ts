@@ -1,6 +1,6 @@
 import { DynamicModule, Module, Type } from "@nestjs/common";
 import { ObjectLiteral, renameFunc } from "@bits/core";
-import { ReadableRepoMixin, WritableRepoMixin } from "@bits/db";
+import { SimpleReadableRepoMixin, SimpleWritableRepoMixin } from "@bits/db";
 import { getRepositoryToken } from "@bits/db/lib/decorators";
 import { ICrudModuleProvider } from "@bits/backend";
 
@@ -11,8 +11,8 @@ export class GRPCCrudModuleBuilder {
     write: boolean = true
   ): DynamicModule {
     const Repo = write
-      ? WritableRepoMixin(Model)(ReadableRepoMixin(Model)())
-      : ReadableRepoMixin(Model)();
+      ? SimpleWritableRepoMixin(Model)(SimpleReadableRepoMixin(Model)())
+      : SimpleReadableRepoMixin(Model)();
 
     renameFunc(Repo, `${Model.name}Repo`);
 

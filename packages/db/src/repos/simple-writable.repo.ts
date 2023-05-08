@@ -4,56 +4,68 @@ import {
   NotFoundException,
   Type,
 } from "@nestjs/common";
-import {
-  Repository,
-  DeepPartial,
-  DeleteResult,
-  FindOptionsWhere,
-  ObjectLiteral,
-} from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { SaveOptions } from "typeorm/repository/SaveOptions";
 import { FindOneOptions } from "typeorm/find-options/FindOneOptions";
-import { IWritableRepo } from "@bits/backend";
+import {
+  DeleteResult,
+  IFindOptionsWhere,
+  IWritableRepo,
+  MethodNotImplementedError,
+} from "@bits/backend";
 import { renameFunc } from "@bits/core";
+import { ObjectLiteral } from "@bits/core";
+import { Repository } from "typeorm";
+import { DeepPartial } from "@bits/core";
 
-export const WritableRepoMixin = <
-  Entity extends ObjectLiteral,
-  Model extends ObjectLiteral
->(
-  EntityCls: Type<Entity>,
-  ModelRef: Type<Model>
+export const SimpleWritableRepoMixin = <Entity extends ObjectLiteral>(
+  ModelRef: Type<Entity>
 ) => {
   return <B extends {}>(
     BaseCls: Type<B> = class {} as any
   ): Type<IWritableRepo<Entity> & B> => {
     @Injectable()
-    class MappedWritableRepo extends (BaseCls as any) {
-      @InjectRepository(EntityCls)
+    class WritableRepo
+      extends (BaseCls as any)
+      implements IWritableRepo<Entity>
+    {
+      @InjectRepository(ModelRef)
       public readonly writeRepo!: Repository<Entity>;
 
       public create(newEntity: DeepPartial<Entity>): Promise<Entity> {
-        const obj = this.writeRepo.create(newEntity);
+        const obj = this.writeRepo.create(newEntity as any);
 
-        return this.writeRepo.save(obj);
+        return this.writeRepo.save(obj) as any;
       }
 
-      public async update(
-        idOrConditions: string | FindOptionsWhere<Entity>,
+      public async updateOne(
+        idOrConditions: string | IFindOptionsWhere<Entity>,
         partialEntity: QueryDeepPartialEntity<Entity>
         // ...options: any[]
-      ): Promise<boolean> {
+      ): Promise<Entity> {
         try {
           const result = await this.writeRepo.update(
             idOrConditions,
             partialEntity
           );
-          if (result.affected) return true;
+          const updated = await this.writeRepo.findOneByOrFail(
+            typeof idOrConditions === "string"
+              ? ({ id: idOrConditions } as any)
+              : idOrConditions
+          );
+          if (result.affected) return updated;
           else throw Error("not updated");
         } catch (err) {
           throw new BadRequestException(err);
         }
+      }
+
+      public updateMany(
+        idOrConditions: string | IFindOptionsWhere<Entity>,
+        partialEntity: DeepPartial<Entity>
+      ): Promise<Entity[]> {
+        throw new MethodNotImplementedError("updateMany");
       }
 
       public save<T extends DeepPartial<Entity>>(
@@ -61,7 +73,7 @@ export const WritableRepoMixin = <
         options?: SaveOptions
       ): Promise<T | T[]> {
         try {
-          return this.writeRepo.save<T>(entityOrEntities as any, options);
+          return this.writeRepo.save(entityOrEntities as any, options);
         } catch (err) {
           throw new BadRequestException(err);
         }
@@ -85,7 +97,7 @@ export const WritableRepoMixin = <
 
       // fast query
       public async hardDelete(
-        criteria: string | number | FindOptionsWhere<Entity>
+        criteria: string | number | IFindOptionsWhere<Entity>
         /* ...options: any[] */
       ): Promise<DeleteResult> {
         try {
@@ -98,7 +110,7 @@ export const WritableRepoMixin = <
         }
       }
     }
-    renameFunc(MappedWritableRepo, `MappedWritable${ModelRef.name}Repo`);
-    return MappedWritableRepo as any;
+    renameFunc(WritableRepo, `Writable${ModelRef.name}Repo`);
+    return WritableRepo as any;
   };
 };

@@ -2,7 +2,7 @@ import { GrpcMappedReadableCrudConfig } from "../types";
 import { Class, ObjectLiteral } from "@bits/core";
 import { IReadableRepo } from "@bits/backend";
 import { GRPCReadableCrudModuleBuilder } from "./readable.module";
-import { MappedReadableRepoMixin } from "@bits/db";
+import { ReadableRepoMixin } from "@bits/db";
 import { DynamicModule } from "@nestjs/common";
 
 export class GRPCMappedReadableCrudModule<
@@ -16,7 +16,7 @@ export class GRPCMappedReadableCrudModule<
   buildRepo(): Class<IReadableRepo<any>> {
     return (
       this.cfg.Repo ||
-      MappedReadableRepoMixin(this.mappedCfg.Entity, this.cfg.Model)()
+      ReadableRepoMixin(this.mappedCfg.Entity, this.cfg.Model)()
     );
   }
 
