@@ -65,7 +65,7 @@ export class GqlCrudModule<
             relations
           );
 
-    if (!this.cfg.Create && !readOnly && modelName)
+    if (!this.cfg.Create && !readOnly && !("Model" in cfg) && modelName)
       this.cfg.Create = this.cfg.provider.buildModelFromName(
         `CreateOne${modelName}Input`,
         `Create${modelName}Input`,

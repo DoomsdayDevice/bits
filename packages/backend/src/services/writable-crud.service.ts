@@ -26,12 +26,12 @@ export function WritableCrudService<
       return this._writeRepo.deleteOne(id);
     }
 
-    updateOne(
+    async updateOne(
       idOrConditions: string | IFindOptionsWhere<E>,
       partialEntity: DeepPartial<E>
     ): // ...options: any[]
     Promise<E> {
-      return this._writeRepo.update(idOrConditions, partialEntity);
+      return this._writeRepo.updateOne(idOrConditions, partialEntity);
     }
   }
   renameFunc(WritableCrudService, `Writable${ModelRef.name}CrudService`);

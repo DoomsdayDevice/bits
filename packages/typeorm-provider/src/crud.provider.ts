@@ -8,7 +8,7 @@ import {
   WritableCrudService,
 } from "@bits/backend";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ReadableRepoMixin, WritableRepoMixin } from "@bits/db";
+import { SimpleReadableRepoMixin, SimpleWritableRepoMixin } from "@bits/db";
 import {
   DynamicModule,
   ForwardReference,
@@ -27,8 +27,8 @@ export class TypeormProvider<M extends ObjectLiteral>
   WriteRepo: Class<IWritableRepo<M>>;
 
   constructor(private cfg: Cfg<M>) {
-    this.ReadRepo = ReadableRepoMixin(this.cfg.Model)();
-    this.WriteRepo = WritableRepoMixin(this.cfg.Model)();
+    this.ReadRepo = SimpleReadableRepoMixin(this.cfg.Model)();
+    this.WriteRepo = SimpleWritableRepoMixin(this.cfg.Model)();
   }
 
   getImports(
@@ -62,6 +62,6 @@ export class TypeormProvider<M extends ObjectLiteral>
     innerName?: string,
     type?: "input" | "object"
   ): Class<M> {
-    throw new Error("not implemented for typeorm");
+    throw new Error("build model from name not implemented for typeorm");
   }
 }

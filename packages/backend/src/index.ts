@@ -6,3 +6,4 @@ export * from "./conversions";
 export * from "./cache";
 export * from "./repos";
 export * from "./pipes";
+export * from "./errors";

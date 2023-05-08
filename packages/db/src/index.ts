@@ -5,3 +5,4 @@ export * from "./decorators";
 export * from "./services";
 export * from "./query";
 export * from "./naming-strategy";
+export * from "./mapper";

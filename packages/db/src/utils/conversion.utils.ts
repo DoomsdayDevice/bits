@@ -1,4 +1,5 @@
 import {
+  FindManyOptions,
   FindOperator,
   FindOptionsWhere,
   ILike,
@@ -7,11 +8,13 @@ import {
   Not,
   ObjectLiteral,
   SelectQueryBuilder,
+  FindOneOptions,
 } from "typeorm";
 import { isObject } from "lodash";
 import {
   IFindManyOptions,
   IFindManyServiceInput,
+  IFindOneOptions,
   IFindOptionsOrder,
 } from "@bits/backend";
 import { getKeys, IListValue, ISort } from "@bits/core";
@@ -75,8 +78,8 @@ function getStringFilter(f: FilterFieldComparison<string>, name: string): string
 
 export function convertServiceFindManyInputToTypeorm<T>(
   input: IFindManyServiceInput<T>
-): IFindManyOptions<T> {
-  const result: IFindManyOptions<T> = { ...input } as any;
+): FindManyOptions<T> {
+  const result: FindManyOptions<T> = { ...input } as any;
 
   // TODO
 
@@ -85,6 +88,15 @@ export function convertServiceFindManyInputToTypeorm<T>(
     result.where = input.where.OR.map((w) => convertServiceFilterToTypeorm(w));
   else if (input.where)
     result.where = convertServiceFilterToTypeorm(input.where);
+  return result;
+}
+
+export function convertServiceFindOneInputToTypeorm<T>(
+  input: IFindOneOptions<T>
+): FindManyOptions<T> {
+  const result: FindOneOptions<T> = { ...input } as any;
+
+  if (input.where) result.where = convertServiceFilterToTypeorm(input.where);
   return result;
 }
 

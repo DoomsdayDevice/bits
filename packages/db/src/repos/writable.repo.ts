@@ -8,13 +8,18 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { SaveOptions } from "typeorm/repository/SaveOptions";
 import { FindOneOptions } from "typeorm/find-options/FindOneOptions";
-import { DeleteResult, IFindOptionsWhere, IWritableRepo } from "@bits/backend";
+import {
+  DeleteResult,
+  IFindOptionsWhere,
+  IWritableRepo,
+  MethodNotImplementedError,
+} from "@bits/backend";
 import { renameFunc } from "@bits/core";
 import { ObjectLiteral } from "@bits/core";
 import { Repository } from "typeorm";
 import { DeepPartial } from "@bits/core";
 
-export const WritableRepoMixin = <Entity extends ObjectLiteral>(
+export const SimpleWritableRepoMixin = <Entity extends ObjectLiteral>(
   ModelRef: Type<Entity>
 ) => {
   return <B extends {}>(
@@ -34,7 +39,7 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
         return this.writeRepo.save(obj) as any;
       }
 
-      public async update(
+      public async updateOne(
         idOrConditions: string | IFindOptionsWhere<Entity>,
         partialEntity: QueryDeepPartialEntity<Entity>
         // ...options: any[]
@@ -44,11 +49,23 @@ export const WritableRepoMixin = <Entity extends ObjectLiteral>(
             idOrConditions,
             partialEntity
           );
-          if (result.affected) return result as any; // TODO
+          const updated = await this.writeRepo.findOneByOrFail(
+            typeof idOrConditions === "string"
+              ? ({ id: idOrConditions } as any)
+              : idOrConditions
+          );
+          if (result.affected) return updated;
           else throw Error("not updated");
         } catch (err) {
           throw new BadRequestException(err);
         }
+      }
+
+      public updateMany(
+        idOrConditions: string | IFindOptionsWhere<Entity>,
+        partialEntity: DeepPartial<Entity>
+      ): Promise<Entity[]> {
+        throw new MethodNotImplementedError("updateMany");
       }
 
       public save<T extends DeepPartial<Entity>>(

@@ -32,11 +32,14 @@ export interface IReadableRepo<Entity extends ObjectLiteral> {
 
 export interface IWritableRepo<Entity extends ObjectLiteral> {
   create(newEntity: DeepPartial<Entity>): Promise<Entity>;
-  update(
+  updateOne(
     idOrConditions: string | IFindOptionsWhere<Entity>,
     partialEntity: DeepPartial<Entity>
-    // ...options: any[]
   ): Promise<Entity>;
+  updateMany(
+    idOrConditions: string | IFindOptionsWhere<Entity>,
+    partialEntity: DeepPartial<Entity>
+  ): Promise<Entity[]>;
   save<T extends DeepPartial<Entity>>(
     entityOrEntities: T | T[],
     options?: SaveOptions
