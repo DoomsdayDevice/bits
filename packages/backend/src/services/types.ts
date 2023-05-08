@@ -20,12 +20,9 @@ export interface IReadableCrudService<Entity extends ObjectLiteral>
     | "findMany"
     | "findManyAndCount"
     | "getPrimaryColumnName"
-  > {
-  _readRepo: IReadableRepo<Entity>;
-}
+  > {}
 
 export interface IWritableCrudService<Entity extends ObjectLiteral> {
-  _writeRepo: IWritableRepo<Entity>;
   createOne(newEntity: DeepPartial<Entity>): Promise<Entity>;
 
   deleteOne(id: IFindOptionsWhere<Entity>): Promise<boolean>;

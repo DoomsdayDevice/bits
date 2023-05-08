@@ -20,9 +20,9 @@ const servicesToInjectIntoResolvers: {
   svcName: string;
 }[] = [];
 
-export type IDataloaderItem = {
+export type IDataloaderItem<T extends ObjectLiteral = any> = {
   createLoader: () => DataLoader<any, any>;
-  svc: ICrudService<any>;
+  svc: ICrudService<T>;
   name: string;
   RelDTO: any;
 };
@@ -78,16 +78,20 @@ function buildRel<T>(
   });
 }
 
-export const createLoader = (
+export const createLoader = <T extends ObjectLiteral = any>(
   Resolver: any,
   loaderName: string
 ): DataLoader<string, string | null> => {
   return new DataLoader(
     async (ids: readonly string[]) => {
-      const { svc } = dataloaders.find((l) => loaderName === l.name)!;
-      const prop = svc.getPrimaryColumnName() as any;
-      const many = await svc.findMany({ where: { [prop]: In(ids as any) } });
-      return ensureOrder({ docs: many, keys: ids, prop });
+      const { svc } = dataloaders.find(
+        (l) => loaderName === l.name
+      )! as IDataloaderItem<T>;
+      const prop = svc.getPrimaryColumnName();
+      const many = await svc.findMany({
+        where: { [prop]: In(ids as any) },
+      } as any);
+      return ensureOrder({ docs: many, keys: ids, prop: prop as string });
     }
     // { cache: false },
   );
