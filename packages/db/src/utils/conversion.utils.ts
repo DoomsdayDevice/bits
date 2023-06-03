@@ -16,6 +16,7 @@ import {
   IFindManyServiceInput,
   IFindOneOptions,
   IFindOptionsOrder,
+  IFindOptionsWhere,
 } from "@bits/backend";
 import { getKeys, IListValue, ISort } from "@bits/core";
 
@@ -76,7 +77,7 @@ function getStringFilter(f: FilterFieldComparison<string>, name: string): string
 }
  */
 
-export function convertServiceFindManyInputToTypeorm<T>(
+export function convertServiceFindManyInputToTypeorm<T extends ObjectLiteral>(
   input: IFindManyServiceInput<T>
 ): FindManyOptions<T> {
   const result: FindManyOptions<T> = { ...input } as any;
@@ -85,9 +86,11 @@ export function convertServiceFindManyInputToTypeorm<T>(
 
   // and
   if (input.where?.OR)
-    result.where = input.where.OR.map((w) => convertServiceFilterToTypeorm(w));
+    result.where = input.where.OR.map((w) =>
+      convertServiceFilterToTypeorm<T>(w)
+    );
   else if (input.where)
-    result.where = convertServiceFilterToTypeorm(input.where);
+    result.where = convertServiceFilterToTypeorm<T>(input.where);
   return result;
 }
 
@@ -108,9 +111,11 @@ function convertVal(val: any) {
   return val;
 }
 
-function convertServiceFilterToTypeorm(filter: ObjectLiteral) {
-  const newFilter = {};
-  for (const key of getKeys(filter)) {
+export function convertServiceFilterToTypeorm<T extends ObjectLiteral>(
+  filter: IFindOptionsWhere<T>
+): FindOptionsWhere<T> {
+  const newFilter = {} as FindOptionsWhere<T>;
+  for (const key of getKeys(filter) as (keyof T)[]) {
     newFilter[key] = convertVal(filter[key]);
   }
   return newFilter;

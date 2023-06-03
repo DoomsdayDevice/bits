@@ -1,5 +1,5 @@
 import { Inject, Injectable, Type } from "@nestjs/common";
-import { IWritableRepo } from "../repos/repo.interface";
+import { IWritableRepo } from "../repos";
 import { IWritableCrudService } from "./types";
 import { DeepPartial, ObjectLiteral, renameFunc } from "@bits/core";
 import { IFindOptionsWhere } from "./find-options";

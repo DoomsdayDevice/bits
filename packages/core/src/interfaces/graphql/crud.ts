@@ -1,5 +1,5 @@
 import { PagingStrategy } from '../../enums';
-import { DeepPartial, ObjectLiteral } from '../../types';
+import { DeepPartial, IConnection, ObjectLiteral, Promisify, UUID } from '../../types';
 import { IOffsetPagination, ISort } from '../grpc';
 import { IGqlFilter } from './filter';
 
@@ -43,12 +43,20 @@ export type IBaseServiceWrite<T, N extends string> = {
   [P in `updateOne${Capitalize<N>}`]: T;
 };
 
-export type IBaseResolver<T extends ObjectLiteral, N extends string> = {
-  [P in `${Uncapitalize<N>}`]: T;
+export type IBaseReadResolver<T extends ObjectLiteral, N extends string> = Promisify<
+  {
+    [P in `${Uncapitalize<N>}`]: (input: { id: UUID }) => T | Promise<T>;
+  } & {
+    [P in `${Uncapitalize<N>}s`]: (
+      input: IFindManyArgs<T, PagingStrategy.OFFSET>,
+    ) => IConnection<T>;
+  }
+>;
+
+export type IBaseResolver<T extends ObjectLiteral, N extends string> = IBaseReadResolver<T, N> & {
+  [P in `createOne${Capitalize<N>}`]: T;
 } & {
-  [P in `${Uncapitalize<N>}s`]: T[];
-} & { [P in `createOne${Capitalize<N>}`]: T } & {
   [P in `deleteOne${Capitalize<N>}`]: boolean;
 } & {
   [P in `updateOne${Capitalize<N>}`]: T;
-}; // & { service: ICrudService<T> };
+};

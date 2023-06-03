@@ -70,7 +70,8 @@ export function ReadResolverMixin<
       input: IFindManyArgs<T, PagingStrategy>,
       @CurrentUser() user: IUser
     ): Promise<IConnection<T>> {
-      const finalFilter = this.getFilterForResource(Model, user, input.filter);
+      const finalFilter =
+        this.getFilterForResource(Model, user, input.filter) || {};
 
       const isCursor = (p: any): p is ICursorPagination =>
         p && Boolean(p.before || p.after);
@@ -79,7 +80,7 @@ export function ReadResolverMixin<
 
       if (isCursor(input.paging)) {
         const withPaging = applyCursorPagingToInput({
-          where: convertGraphqlFilterToService(finalFilter),
+          where: convertGraphqlFilterToService(finalFilter as any),
         });
         return this.svc.findManyAndCount({
           where: withPaging.where,
@@ -89,7 +90,7 @@ export function ReadResolverMixin<
       }
       if (isOffset(input.paging)) {
         return this.svc.findManyAndCount({
-          where: convertGraphqlFilterToService(finalFilter),
+          where: convertGraphqlFilterToService(finalFilter as any), //TODO
           order: convertGqlOrderByToTypeorm(input.sorting || []),
           skip: input.paging.offset,
           take: input.paging.limit,
@@ -97,7 +98,7 @@ export function ReadResolverMixin<
       }
 
       return this.svc.findManyAndCount({
-        where: convertGraphqlFilterToService(finalFilter),
+        where: convertGraphqlFilterToService(finalFilter as any),
         order: convertGqlOrderByToTypeorm(input.sorting || []),
       });
     }

@@ -6,3 +6,6 @@ export * from "./find-one";
 export * from "./find-many";
 export * from "./offset-paging";
 export * from "./get-or-create-cursor-paging";
+export * from "./uuid-field-comparison.type";
+export * from "./string-field-comparison.type";
+export * from "./filter";

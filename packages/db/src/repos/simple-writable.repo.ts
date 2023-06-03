@@ -14,22 +14,18 @@ import {
   IWritableRepo,
   MethodNotImplementedError,
 } from "@bits/backend";
-import { renameFunc } from "@bits/core";
+import { Class, renameFunc } from "@bits/core";
 import { ObjectLiteral } from "@bits/core";
 import { Repository } from "typeorm";
 import { DeepPartial } from "@bits/core";
 
-export const SimpleWritableRepoMixin = <Entity extends ObjectLiteral>(
-  ModelRef: Type<Entity>
-) => {
-  return <B extends {}>(
-    BaseCls: Type<B> = class {} as any
-  ): Type<IWritableRepo<Entity> & B> => {
+export const SimpleWritableRepoMixin =
+  <Entity extends ObjectLiteral>(ModelRef: Type<Entity>) =>
+  <B extends Class>(
+    BaseCls: B = class {} as B
+  ): Type<IWritableRepo<Entity> & InstanceType<B>> => {
     @Injectable()
-    class WritableRepo
-      extends (BaseCls as any)
-      implements IWritableRepo<Entity>
-    {
+    class WritableRepo extends BaseCls implements IWritableRepo<Entity> {
       @InjectRepository(ModelRef)
       public readonly writeRepo!: Repository<Entity>;
 
@@ -113,4 +109,3 @@ export const SimpleWritableRepoMixin = <Entity extends ObjectLiteral>(
     renameFunc(WritableRepo, `Writable${ModelRef.name}Repo`);
     return WritableRepo as any;
   };
-};

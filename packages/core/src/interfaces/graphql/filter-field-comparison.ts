@@ -1,7 +1,7 @@
 /**
  * Field comparisons with a type of `boolean`.
  */
-import { IGqlFilter } from "./filter";
+import { IGqlFilter } from './filter';
 
 export type BooleanFieldComparisons =
   | {
@@ -232,10 +232,9 @@ type BuiltInTypes =
  * * all other types use [[CommonFieldComparisonType]]
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-type FilterFieldComparisonType<
-  FieldType,
-  IsKeys extends true | false
-> = FieldType extends string | String
+type FilterFieldComparisonType<FieldType, IsKeys extends true | false> = FieldType extends
+  | string
+  | String
   ? StringFieldComparisons // eslint-disable-next-line @typescript-eslint/ban-types
   : FieldType extends boolean | Boolean
   ? BooleanFieldComparisons
@@ -246,9 +245,7 @@ type FilterFieldComparisonType<
   : FieldType extends Array<infer U>
   ? CommonFieldComparisonType<U> | IGqlFilter<U> // eslint-disable-next-line @typescript-eslint/ban-types
   : IsKeys extends true
-  ? CommonFieldComparisonType<FieldType> &
-      StringFieldComparisons &
-      IGqlFilter<FieldType>
+  ? CommonFieldComparisonType<FieldType> & StringFieldComparisons & IGqlFilter<FieldType>
   : CommonFieldComparisonType<FieldType> | IGqlFilter<FieldType>;
 
 /**
@@ -259,15 +256,11 @@ type FilterFieldComparisonType<
  * * all other types use [[CommonFieldComparisonType]]
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type FilterFieldComparison<FieldType> = FilterFieldComparisonType<
-  FieldType,
-  false
->;
+export type FilterFieldComparison<FieldType> = FilterFieldComparisonType<FieldType, false>;
 
 /**
  * Type for all comparison operators for a field type.
  *
  * @typeparam FieldType - The TS type of the field.
  */
-export type FilterComparisonOperators<FieldType> =
-  keyof FilterFieldComparisonType<FieldType, true>;
+export type FilterComparisonOperators<FieldType> = keyof FilterFieldComparisonType<FieldType, true>;

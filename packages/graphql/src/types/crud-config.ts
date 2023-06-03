@@ -24,8 +24,10 @@ export interface IWriteResolverConfig<
 
 type BaseResolverConfig<ResourceName extends string> = {
   relations?: RelConf[];
+  /** необходима для авторизации (мердж фильтра) ... */
   modelIsInResources: (Model: Type) => boolean;
   getResourceNameFromModel: (Model: Type) => string;
+  /** if authentication is implemented */
   AbilityFactory?: Type<ICaslAbilityFactory<any>>;
   RequirePrivileges?: (
     ...p: Privilege<ResourceName>[]

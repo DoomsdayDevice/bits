@@ -9,7 +9,7 @@ import {
   Like,
   Not,
 } from "./services";
-import { IGrpcFindManyInput, ISort } from "@bits/core";
+import { IGqlFilter, IGrpcFindManyInput, ISort } from "@bits/core";
 
 /** to typeorm/service layer filter */
 export function convertGrpcFilterToService<T>(
@@ -37,7 +37,7 @@ export function convertGrpcFilterToService<T>(
 }
 
 export function convertGraphqlFilterToService<T>(
-  filter: any
+  filter: IGqlFilter<T>
 ): IServiceWhere<T> {
   const newFilter: any = {};
   for (const key of Object.keys(filter)) {

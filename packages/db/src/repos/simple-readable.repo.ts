@@ -1,4 +1,4 @@
-import { Injectable, Type } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { DeepPartial, ObjectLiteral, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { NestedQuery } from "../query";
@@ -11,21 +11,17 @@ import {
 import {
   convertServiceFindManyInputToTypeorm,
   convertServiceFindOneInputToTypeorm,
-} from "../utils/conversion.utils";
+} from "../utils";
 import { Class, IConnection, renameFunc } from "@bits/core";
 
-export const SimpleReadableRepoMixin = <
-  Entity extends ObjectLiteral,
-  Base extends Class
->(
-  EntityRef: Type<Entity>
-) => {
-  return (
+export const SimpleReadableRepoMixin =
+  <Entity extends ObjectLiteral>(EntityRef: Class<Entity>) =>
+  <Base extends Class>(
     BaseCls: Base = class {} as Base
-  ): Type<IReadableRepo<Entity> & InstanceType<Base>> => {
+  ): Class<IReadableRepo<Entity>> => {
     @Injectable()
     class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
-      @InjectRepository(EntityRef)
+      @InjectRepository(EntityRef as any) // TODO
       public readonly readRepo!: Repository<Entity>;
 
       public count(filter?: IFindManyServiceInput<Entity>): Promise<number> {
@@ -62,10 +58,9 @@ export const SimpleReadableRepoMixin = <
         options: IFindOneOptions<Entity> = {}
       ): Promise<Entity> {
         options.where = id as any;
-        const record = await this.readRepo.findOneOrFail(
+        return this.readRepo.findOneOrFail(
           convertServiceFindOneInputToTypeorm(options)
         );
-        return record;
       }
 
       /** adds nested filter */
@@ -119,7 +114,7 @@ export const SimpleReadableRepoMixin = <
         return "id" as any;
       }
     }
+
     renameFunc(ReadableRepo, `Readable${EntityRef.name}Repo`);
     return ReadableRepo as any;
   };
-};
