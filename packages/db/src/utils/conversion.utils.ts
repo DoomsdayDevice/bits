@@ -18,7 +18,7 @@ import {
   IFindOptionsOrder,
   IFindOptionsWhere,
 } from "@bits/backend";
-import { getKeys, IListValue, ISort } from "@bits/core";
+import { getKeys, IListValue, isDefined, ISort } from "@bits/core";
 
 export function isFindOperator<T>(obj: any): obj is FindOperator<T> {
   return obj._type;
@@ -104,6 +104,7 @@ export function convertServiceFindOneInputToTypeorm<T>(
 }
 
 function convertVal(val: any) {
+  if (!isDefined(val)) return val;
   if (val._type == "in") return In(val._value);
   if (val._type == "like") return Like(val._value);
   if (val._type == "iLike") return ILike(val._value);

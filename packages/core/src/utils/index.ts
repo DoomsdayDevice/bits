@@ -17,6 +17,9 @@ export function createEnumFromArr<T extends string>(o: readonly T[]): { [K in T]
   }, Object.create(null));
 }
 
+export const isDefined = <T>(v: T): v is Exclude<T, undefined | null> =>
+  v !== null && v !== undefined;
+
 export function hasDefined<O extends ObjectLiteral, PN extends string>(obj: O, prop: PN) {
   return prop in obj && !isUndefined(obj[prop]);
 }

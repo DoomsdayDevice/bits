@@ -1,3 +1,5 @@
+import { F } from 'ts-toolbelt';
+
 export interface ObjectLiteral {
   [key: string]: any;
 }
