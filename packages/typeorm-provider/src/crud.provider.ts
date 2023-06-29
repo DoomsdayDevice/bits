@@ -39,14 +39,17 @@ export class TypeormProvider<M extends ObjectLiteral>
     @Module({
       providers: [this.ReadRepo, this.WriteRepo],
       exports: [this.ReadRepo, this.WriteRepo],
-      imports: [TypeOrmModule.forFeature([modelRef])],
+      imports: [TypeOrmModule.forFeature([modelRef, this.cfg.Model])],
     })
     @Global()
     class ProviderModule {}
 
     renameFunc(ProviderModule, `${modelRef.name}ProviderModule`);
 
-    return [TypeOrmModule.forFeature([modelRef]), ProviderModule];
+    return [
+      TypeOrmModule.forFeature([modelRef, this.cfg.Model]),
+      ProviderModule,
+    ];
   }
 
   buildService(): Class<ICrudService<M>> {

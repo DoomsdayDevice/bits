@@ -21,7 +21,7 @@ export const SimpleReadableRepoMixin =
   ): Class<IReadableRepo<Entity>> => {
     @Injectable()
     class ReadableRepo extends BaseCls implements IReadableRepo<Entity> {
-      @InjectRepository(EntityRef as any) // TODO
+      @InjectRepository(EntityRef)
       public readonly readRepo!: Repository<Entity>;
 
       public count(filter?: IFindManyServiceInput<Entity>): Promise<number> {
