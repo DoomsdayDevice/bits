@@ -45,7 +45,7 @@ export type IBaseServiceWrite<T, N extends string> = {
 
 export type IBaseReadResolver<T extends ObjectLiteral, N extends string> = Promisify<
   {
-    [P in `${Uncapitalize<N>}`]: (input: { id: UUID }) => T | Promise<T>;
+    [P in `${Uncapitalize<N>}`]: (input: { id: string }) => T | Promise<T>;
   } & {
     [P in `${Uncapitalize<N>}s`]: (
       input: IFindManyArgs<T, PagingStrategy.OFFSET>,
