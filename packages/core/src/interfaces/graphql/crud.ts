@@ -1,5 +1,5 @@
 import { PagingStrategy } from '../../enums';
-import { DeepPartial, IConnection, ObjectLiteral, Promisify, UUID } from '../../types';
+import { DeepPartial, IConnection, ObjectLiteral, Promisify } from '../../types';
 import { IOffsetPagination, ISort } from '../grpc';
 import { IGqlFilter } from './filter';
 

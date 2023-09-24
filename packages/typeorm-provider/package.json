@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "node ./__tests__/@bits/typeorm-provider.test.js",
-    "tsc": "rm -rf lib && tsc"
+    "build": "rm -rf lib && tsc"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
