@@ -10,7 +10,7 @@ import {
 import {
   getPlural,
   getSingular,
-  IBaseServiceRead,
+  IBaseReadResolver,
   IConnection,
   ICursorPagination,
   IFindManyArgs,
@@ -42,7 +42,7 @@ export function ReadResolverMixin<
   AbilityFactory,
   RequirePrivileges,
   getResourceNameFromModel,
-}: IReadResolverConfig<T, N, ResourceName>): Type<IBaseServiceRead<T, N>> {
+}: IReadResolverConfig<T, N, ResourceName>): Type<IBaseReadResolver<T, N>> {
   const plural = getPlural(modelName);
   const singular = getSingular(modelName);
 
