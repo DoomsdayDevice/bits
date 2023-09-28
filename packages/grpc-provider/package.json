@@ -1,6 +1,6 @@
 {
   "name": "@bits/grpc-provider",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/grpc-provider#readme",
@@ -28,7 +28,7 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/backend": "^1.0.18"
+    "@bits/backend": "^1.0.19"
   },
   "peerDependencies": {
     "@bits/graphql": "^1.0.0",
