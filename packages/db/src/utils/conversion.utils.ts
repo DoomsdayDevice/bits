@@ -13,6 +13,7 @@ import {
   LessThanOrEqual,
   MoreThan,
   MoreThanOrEqual,
+  And,
 } from "typeorm";
 import { isObject } from "lodash";
 import {
@@ -89,11 +90,27 @@ export function convertServiceFindManyInputToTypeorm<T extends ObjectLiteral>(
   // TODO
 
   // and
-  if (input.where?.OR)
+  if (input.where?.OR) {
     result.where = input.where.OR.map((w) =>
       convertServiceFilterToTypeorm<T>(w)
     );
-  else if (input.where)
+  } else if (input.where?.AND) {
+    result.where = input.where.AND.reduce((prev, next) => {
+      const newOne = convertServiceFilterToTypeorm<T>(next);
+      for (const key of Object.keys(newOne)) {
+        if (prev[key] !== undefined) {
+          if (prev[key]._type === "and") {
+            prev[key] = And([...prev[key]._value, next[key]] as any);
+          } else {
+            prev[key] = And([prev[key], next[key]] as any);
+          }
+        } else {
+          prev[key] = next[key];
+        }
+      }
+      return prev;
+    }, {});
+  } else if (input.where)
     result.where = convertServiceFilterToTypeorm<T>(input.where);
   return result;
 }
@@ -117,6 +134,7 @@ function convertVal(val: any) {
   if (val._type == "lt") return LessThan(val._value);
   if (val._type == "lte") return LessThanOrEqual(val._value);
   if (val._type == "not") return Not(convertVal(val._value));
+  if (val._type == "and") return And(convertVal(val._value));
   return val;
 }
 
