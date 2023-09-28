@@ -47,7 +47,7 @@ export function convertGraphqlFilterToService<T>(
   for (const key of Object.keys(filter)) {
     const value = filter[key];
     if (key === "OR" || key === "AND") {
-      newFilter[key] = value.map((f: any) => convertGrpcFilterToService(f));
+      newFilter[key] = value.map((f: any) => convertGraphqlFilterToService(f));
     } else if (value.eq !== undefined) newFilter[key] = value.eq;
     else if (value.neq !== undefined) newFilter[key] = Not(value.neq);
     else if (value.in) newFilter[key] = In(value.in.values);
