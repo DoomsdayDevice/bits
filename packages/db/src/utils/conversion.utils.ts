@@ -100,12 +100,12 @@ export function convertServiceFindManyInputToTypeorm<T extends ObjectLiteral>(
       for (const key of Object.keys(newOne)) {
         if (prev[key] !== undefined) {
           if (prev[key]._type === "and") {
-            prev[key] = And(...prev[key]._value, next[key] as any);
+            prev[key] = And(...prev[key]._value, newOne[key] as any);
           } else {
-            prev[key] = And(prev[key], next[key] as any);
+            prev[key] = And(prev[key], newOne[key] as any);
           }
         } else {
-          prev[key] = next[key];
+          prev[key] = newOne[key];
         }
       }
       return prev;
