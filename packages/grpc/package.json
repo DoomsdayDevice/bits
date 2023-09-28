@@ -1,6 +1,6 @@
 {
   "name": "@bits/grpc",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/grpc#readme",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@bits/backend": "^1.0.18",
     "@bits/core": "^1.0.6",
-    "@bits/db": "^1.0.27",
+    "@bits/db": "^1.0.28",
     "@bits/grpc-common": "^1.0.4",
     "@grpc/grpc-js": "^1.8.12",
     "@nestjs/common": "^9.3.9",
