@@ -40,3 +40,19 @@ export function Like<T>(value: T[]): FilterOperation {
 export function ILike<T>(value: T[]): FilterOperation {
   return new FilterOperation("iLike", value);
 }
+
+export function GreaterThan<T>(value: T[]): FilterOperation {
+  return new FilterOperation("gt", value);
+}
+
+export function GreaterThanOrEqual<T>(value: T[]): FilterOperation {
+  return new FilterOperation("gte", value);
+}
+
+export function LessThan<T>(value: T[]): FilterOperation {
+  return new FilterOperation("lt", value);
+}
+
+export function LessThanOrEqual<T>(value: T[]): FilterOperation {
+  return new FilterOperation("lte", value);
+}

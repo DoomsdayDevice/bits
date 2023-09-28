@@ -8,6 +8,10 @@ import {
   In,
   Like,
   Not,
+  GreaterThan,
+  GreaterThanOrEqual,
+  LessThan,
+  LessThanOrEqual,
 } from "./services";
 import { IGqlFilter, IGrpcFindManyInput, ISort } from "@bits/core";
 
@@ -49,6 +53,10 @@ export function convertGraphqlFilterToService<T>(
     else if (value.in) newFilter[key] = In(value.in.values);
     else if (value.like) newFilter[key] = Like(value.like);
     else if (value.iLike) newFilter[key] = ILike(value.iLike);
+    else if (value.gt) newFilter[key] = GreaterThan(value.gt);
+    else if (value.gte) newFilter[key] = GreaterThanOrEqual(value.gte);
+    else if (value.lt) newFilter[key] = LessThan(value.lt);
+    else if (value.lte) newFilter[key] = LessThanOrEqual(value.lte);
     else if (value.elemMatch)
       newFilter[key] = convertGraphqlFilterToService(value.elemMatch);
     else {
@@ -100,6 +108,14 @@ export function convertServiceFilterToGrpc<T>(where: IServiceWhere<T>) {
           grpcFilter[key] = { like: comparisonField._value };
         else if (comparisonField._type === "iLike")
           grpcFilter[key] = { iLike: comparisonField._value };
+        else if (comparisonField._type === "gt")
+          grpcFilter[key] = { gt: comparisonField._value };
+        else if (comparisonField._type === "gte")
+          grpcFilter[key] = { gte: comparisonField._value };
+        else if (comparisonField._type === "lt")
+          grpcFilter[key] = { lt: comparisonField._value };
+        else if (comparisonField._type === "lte")
+          grpcFilter[key] = { lte: comparisonField._value };
         else if (comparisonField._type === "not")
           grpcFilter[key] = { neq: comparisonField._value };
       } else if (isObject(comparisonField)) {

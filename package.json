@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "lerna run build",
     "publish": "lerna run build && lerna publish",
     "postinstall": "patch-package",
     "link": "scripts/link.sh",

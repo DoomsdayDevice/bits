@@ -9,6 +9,10 @@ import {
   ObjectLiteral,
   SelectQueryBuilder,
   FindOneOptions,
+  LessThan,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
 } from "typeorm";
 import { isObject } from "lodash";
 import {
@@ -108,6 +112,10 @@ function convertVal(val: any) {
   if (val._type == "in") return In(val._value);
   if (val._type == "like") return Like(val._value);
   if (val._type == "iLike") return ILike(val._value);
+  if (val._type == "gt") return MoreThan(val._value);
+  if (val._type == "gte") return MoreThanOrEqual(val._value);
+  if (val._type == "lt") return LessThan(val._value);
+  if (val._type == "lte") return LessThanOrEqual(val._value);
   if (val._type == "not") return Not(convertVal(val._value));
   return val;
 }
