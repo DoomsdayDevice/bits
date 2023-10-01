@@ -43,7 +43,7 @@ export type IBaseServiceWrite<T, N extends string> = {
   [P in `updateOne${Capitalize<N>}`]: T;
 };
 
-export type IBaseReadResolver<T extends ObjectLiteral, N extends string> = Promisify<
+export type IBaseQueryResolver<T extends ObjectLiteral, N extends string> = Promisify<
   {
     [P in `${Uncapitalize<N>}`]: (input: { id: string }) => T | Promise<T>;
   } & {
@@ -53,10 +53,16 @@ export type IBaseReadResolver<T extends ObjectLiteral, N extends string> = Promi
   }
 >;
 
-export type IBaseResolver<T extends ObjectLiteral, N extends string> = IBaseReadResolver<T, N> & {
+export type IBaseMutationResolver<T extends ObjectLiteral, N extends string> = {
   [P in `createOne${Capitalize<N>}`]: T;
 } & {
   [P in `deleteOne${Capitalize<N>}`]: boolean;
 } & {
   [P in `updateOne${Capitalize<N>}`]: T;
 };
+
+export type IBaseCombinedResolver<T extends ObjectLiteral, N extends string> = IBaseQueryResolver<
+  T,
+  N
+> &
+  IBaseMutationResolver<T, N>;

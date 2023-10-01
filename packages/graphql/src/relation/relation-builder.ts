@@ -3,7 +3,7 @@ import { Context, Info, Parent, ResolveField } from "@nestjs/graphql";
 import { GraphQLResolveInfo } from "graphql/type";
 import {
   ensureOrder,
-  IBaseResolver,
+  IBaseCombinedResolver,
   lowercaseFirstLetter,
   ObjectLiteral,
 } from "@bits/core";
@@ -101,7 +101,7 @@ export const createLoader = <T extends ObjectLiteral = any>(
 export function buildRelationsForModelResolver<
   T extends ObjectLiteral,
   N extends string
->(DTOCls: Type<T>, CrudResolver: Type<IBaseResolver<T, N>>) {
+>(DTOCls: Type<T>, CrudResolver: Type<IBaseCombinedResolver<T, N>>) {
   const { one, many } = getRelations(DTOCls);
 
   const svcName = (r: string) => `${r}Service`;
