@@ -35,14 +35,12 @@ export type GEnumInput = {
 };
 
 /** for clients */
-export interface IGrpcService<Enums, WriteModel = any, ReadModel = WriteModel> {
-  findOne(opts: { id: string }): Promise<WriteModel>;
-  findMany(
-    input: IGrpcFindManyInput<WriteModel, Enums>,
-  ): Promise<IGrpcFindManyResponse<WriteModel>>;
+export interface IGrpcService<Enums, CreateInput = any, Model = CreateInput> {
+  findOne(opts: { id: string }): Promise<Model>;
+  findMany(input: IGrpcFindManyInput<Model, Enums>): Promise<IGrpcFindManyResponse<Model>>;
   deleteOne(input: any): Promise<IStatusMsg>;
-  updateOne(input: IUpdateInput<WriteModel>): Promise<WriteModel>;
-  createOne(input: any): Promise<WriteModel>;
+  updateOne(input: IUpdateInput<CreateInput>): Promise<Model>;
+  createOne(input: CreateInput): Promise<Model>;
 }
 export interface IGrpcFindManyResponse<M> {
   totalCount: number;
@@ -70,7 +68,7 @@ export interface DeleteOneInput {
   id: string;
 }
 
-export type ICreateInput<M> = Omit<M, 'createdAt' | 'id'>;
+export type ICreateInput<M> = Omit<M, 'createdAt' | 'id' | 'updatedAt'>;
 
 export type IFieldMask = {
   paths: string[];
