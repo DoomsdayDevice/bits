@@ -47,7 +47,7 @@ export type IBaseQueryResolver<T extends ObjectLiteral, N extends string> = Prom
   {
     [P in `${Uncapitalize<N>}`]: (input: { id: string }) => T | Promise<T>;
   } & {
-    [P in `${Uncapitalize<N>}s`]: (
+    [P in `${Uncapitalize<N> extends `${infer U}y` ? `${U}ies` : `${Uncapitalize<N>}s`}`]: (
       input: IFindManyArgs<T, PagingStrategy.OFFSET>,
     ) => IConnection<T>;
   }
