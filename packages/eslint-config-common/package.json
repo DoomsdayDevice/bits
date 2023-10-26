@@ -1,11 +1,11 @@
 {
-  "name": "@bits/eslint",
-  "version": "1.0.1",
+  "name": "@bits/eslint-config-common",
+  "version": "1.0.0",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
-  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/eslint#readme",
+  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/eslint-config-common#readme",
   "license": "ISC",
-  "main": "lib/eslint.js",
+  "main": "lib/eslint-config-common.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -21,7 +21,7 @@
     "url": "git+https://github.com/DoomsdayDevice/bits.git"
   },
   "scripts": {
-    "test": "node ./__tests__/@bits/eslint.test.js"
+    "test": "node ./__tests__/@bits/eslint-config-common.test.js"
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
