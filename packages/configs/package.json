@@ -1,6 +1,6 @@
 {
   "name": "@bits/configs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/configs#readme",
@@ -11,7 +11,8 @@
     "test": "__tests__"
   },
   "files": [
-    "prettier", "tsconfig"
+    "prettier",
+    "tsconfig"
   ],
   "publishConfig": {
     "registry": "https://verdaccio.dudin.net/"
