@@ -25,13 +25,5 @@
   },
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
-  },
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-simple-import-sort": "^10.0.0"
   }
 }
