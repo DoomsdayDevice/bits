@@ -10,7 +10,7 @@
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "index.js", "recommended.js"
   ],
   "publishConfig": {
     "registry": "https://verdaccio.dudin.net/"
