@@ -46,11 +46,9 @@ export const configFactory = () => {
     port: +url.port,
     bucketName: process.env.S3_BUCKET_NAME! || "test",
   };
-  console.dir({ cfg }, { depth: null });
 
   return cfg;
 };
-configFactory();
 
 export const S3Config: any = {
   inject: [S3Cfg],
