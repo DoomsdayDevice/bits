@@ -1,0 +1,35 @@
+{
+  "name": "@bits/s3",
+  "version": "1.0.0",
+  "description": "> TODO: description",
+  "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
+  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/s3#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "https://verdaccio.dudin.net/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoomsdayDevice/bits.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/@bits/s3.test.js",
+    "build": "rm -rf lib && tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/DoomsdayDevice/bits/issues"
+  },
+  "dependencies": {
+    "@bits/nestjs-config": "^1.0.0",
+    "minio": "^7.1.3",
+    "nestjs-minio": "^2.5.4"
+  }
+}
