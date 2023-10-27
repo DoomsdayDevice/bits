@@ -6,7 +6,7 @@ import {
   IsString,
   IsUrl,
 } from "class-validator";
-import { validateConfig } from "@bits/backend/lib/config";
+import assert from "assert";
 
 export class S3Cfg {
   @IsUrl({ require_tld: false })
@@ -30,30 +30,27 @@ export class S3Cfg {
 
   @IsString()
   bucketName!: string;
-
-  dirs!: Record<string, string>;
 }
 
 type Opts = { https: boolean };
 
-export const configFactory = ({ https = false }: Opts) => {
+export const configFactory = () => {
+  assert(process.env.S3_URL);
+  const url = new URL(process.env.S3_URL);
   const cfg: S3Cfg = {
-    url: "",
-    endPoint: process.env.S3_ENDPOINT!,
-    accessKey: process.env.S3_ACCESS_KEY!,
-    secretKey: process.env.S3_SECRET_KEY!,
+    url: url.toString(),
+    endPoint: url.hostname,
+    accessKey: url.username,
+    secretKey: url.password,
     useSSL: true,
-    port: process.env.S3_PORT ? +process.env.S3_PORT : undefined,
+    port: +url.port,
     bucketName: process.env.S3_BUCKET_NAME! || "test",
-    dirs: { profilePictures: "images/profile-pictures" },
   };
-  cfg.url = `http${https ? "s" : ""}://${cfg.endPoint}${
-    cfg.port ? `:${cfg.port}` : ""
-  }/${cfg.bucketName}`;
+  console.dir({ cfg }, { depth: null });
 
-  validateConfig(S3Cfg, cfg);
   return cfg;
 };
+configFactory();
 
 export const S3Config: any = {
   inject: [S3Cfg],
