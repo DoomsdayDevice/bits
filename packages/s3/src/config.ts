@@ -34,7 +34,9 @@ export class S3Cfg {
   dirs!: Record<string, string>;
 }
 
-export const configFactory = () => {
+type Opts = { https: boolean };
+
+export const configFactory = ({ https = false }: Opts) => {
   const cfg: S3Cfg = {
     url: "",
     endPoint: process.env.S3_ENDPOINT!,
@@ -45,9 +47,9 @@ export const configFactory = () => {
     bucketName: process.env.S3_BUCKET_NAME! || "test",
     dirs: { profilePictures: "images/profile-pictures" },
   };
-  cfg.url = `https://${cfg.endPoint}${cfg.port ? `:${cfg.port}` : ""}/${
-    cfg.bucketName
-  }`;
+  cfg.url = `http${https ? "s" : ""}://${cfg.endPoint}${
+    cfg.port ? `:${cfg.port}` : ""
+  }/${cfg.bucketName}`;
 
   validateConfig(S3Cfg, cfg);
   return cfg;
