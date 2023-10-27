@@ -8,3 +8,4 @@ export * from "./repos";
 export * from "./pipes";
 export * from "./errors";
 export * from "./config";
+export * from "./decorators";
