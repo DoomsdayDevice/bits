@@ -9,7 +9,7 @@ import {
 import { validateConfig } from "@bits/backend/lib/config";
 
 export class S3Cfg {
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   url!: string;
 
   @IsString()
