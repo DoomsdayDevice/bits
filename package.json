@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@nestjs/platform-express": "^9.4.0",
+    "parse-duration": "^1.1.0",
     "patch-package": "^6.5.1",
     "prettier": "^2.8.4"
   }

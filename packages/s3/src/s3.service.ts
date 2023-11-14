@@ -4,7 +4,9 @@ import * as Minio from 'minio';
 import { ItemBucketMetadata } from 'minio';
 import { Readable } from 'stream';
 import { MetaDataOptions } from './types';
-import {ResultCallback} from "minio/dist/main/internal/type";
+import parse from 'parse-duration'
+import {toNumber} from "lodash";
+import assert from "assert";
 
 @Injectable()
 export class S3Service {
@@ -23,13 +25,20 @@ export class S3Service {
     return this.minioClient.putObject(bucketName, objectName, stream, metaData);
   }
 
-  async presignedUrl(
-      httpMethod: string,
+  /**
+   *
+   * @param bucketName
+   * @param objectName
+   * @param expiry example: '1d', '1w'
+   */
+  async getPresignedUrl(
       bucketName: string,
       objectName: string,
-      callback: ResultCallback<string>
+      expiry: string,
   ) {
-    return this.minioClient.presignedUrl(httpMethod, bucketName, objectName, callback)
+    const parsed = parse(expiry, 's');
+    assert(parsed);
+    return this.minioClient.presignedUrl('GET', bucketName, objectName, parsed)
   }
 
   /* Формирование метадаты из опций для отправки в хранилище */
