@@ -5,7 +5,6 @@ import { ItemBucketMetadata } from 'minio';
 import { Readable } from 'stream';
 import { MetaDataOptions } from './types';
 import parse from 'parse-duration'
-import {toNumber} from "lodash";
 import assert from "assert";
 
 @Injectable()
