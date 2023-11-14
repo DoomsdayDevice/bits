@@ -43,7 +43,7 @@ export const configFactory = () => {
     endPoint: url.hostname,
     accessKey: url.username,
     secretKey: url.password,
-    useSSL: useSSL == undefined ? true : Boolean(useSSL),
+    useSSL:  useSSL == undefined ? true : (useSSL === 'true'),
     port: +url.port,
     bucketName: process.env.S3_BUCKET_NAME! || "test",
   };
