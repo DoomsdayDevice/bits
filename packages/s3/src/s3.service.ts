@@ -4,6 +4,7 @@ import * as Minio from 'minio';
 import { ItemBucketMetadata } from 'minio';
 import { Readable } from 'stream';
 import { MetaDataOptions } from './types';
+import {ResultCallback} from "minio/dist/main/internal/type";
 
 @Injectable()
 export class S3Service {
@@ -20,6 +21,15 @@ export class S3Service {
     metaData?: ItemBucketMetadata,
   ) {
     return this.minioClient.putObject(bucketName, objectName, stream, metaData);
+  }
+
+  async presignedUrl(
+      httpMethod: string,
+      bucketName: string,
+      objectName: string,
+      callback: ResultCallback<string>
+  ) {
+    return this.minioClient.presignedUrl(httpMethod, bucketName, objectName, callback)
   }
 
   /* Формирование метадаты из опций для отправки в хранилище */
