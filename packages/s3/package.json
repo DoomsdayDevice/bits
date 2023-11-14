@@ -33,5 +33,5 @@
     "nestjs-minio": "^2.5.4",
     "parse-duration": "^1.1.0"
   },
-  "gitHead": "3cb3b3a1a0cf17143d47e8ba2606608259a55eb5"
+  "gitHead": "c0a555af66e76b2d125a52b8fef8c138f46d2db6"
 }

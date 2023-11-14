@@ -37,12 +37,13 @@ type Opts = { https: boolean };
 export const configFactory = () => {
   assert(process.env.S3_URL);
   const url = new URL(process.env.S3_URL);
+  const useSSL = process.env.S3_USE_SSL;
   const cfg: S3Cfg = {
     url: url.toString(),
     endPoint: url.hostname,
     accessKey: url.username,
     secretKey: url.password,
-    useSSL: true,
+    useSSL: useSSL == undefined ? true : Boolean(useSSL),
     port: +url.port,
     bucketName: process.env.S3_BUCKET_NAME! || "test",
   };
