@@ -1,4 +1,5 @@
-> *work in progress*
+## *Work in progress!*
 
 Some conventions  
 `classRef` variable refers to class object
+
