@@ -50,11 +50,11 @@ export class CustomNamingStrategy
   ): string {
     const tableName = this.getTableName(tableOrName).replace(".", "_");
     let key = `${tableName}_${[...columnNames].sort().join("_")}`;
-    if (where) {
-      key += `_${where}`;
-    }
+    // if (where) {
+    //   key += `_${where}`;
+    // }
 
-    return `IDX_${tableName}_${RandomGenerator.sha1(key).substr(0, 26)}`;
+    return `IDX_${key}_${RandomGenerator.sha1(key).substr(0, 4)}`;
   }
 
   primaryKeyName(tableOrName: Table | string, columnNames: string[]): string {
@@ -94,6 +94,6 @@ export class CustomNamingStrategy
   }
 
   columnName(propertyName: string, customName: string | undefined): string {
-    return customName || snakeCase(propertyName);
+    return snakeCase(customName || propertyName);
   }
 }
