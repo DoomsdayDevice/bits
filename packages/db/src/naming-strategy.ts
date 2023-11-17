@@ -49,12 +49,9 @@ export class CustomNamingStrategy
     where?: string
   ): string {
     const tableName = this.getTableName(tableOrName).replace(".", "_");
-    let key = `${tableName}_${[...columnNames].sort().join("_")}`;
-    // if (where) {
-    //   key += `_${where}`;
-    // }
+    const key = `${tableName}_${[...columnNames].sort().join("_")}`;
 
-    return `IDX_${key}_${RandomGenerator.sha1(key).substr(0, 4)}`;
+    return `IDX_${key}_${RandomGenerator.sha1(`${key}_${where}`).substr(0, 5)}`;
   }
 
   primaryKeyName(tableOrName: Table | string, columnNames: string[]): string {
