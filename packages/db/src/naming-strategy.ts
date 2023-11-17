@@ -1,6 +1,7 @@
 import { DefaultNamingStrategy, Table, NamingStrategyInterface } from "typeorm";
 import { RandomGenerator } from "typeorm/util/RandomGenerator";
 import { snakeCase } from "lodash";
+import StringUtils_1 from "typeorm/util/StringUtils";
 
 /**
  * https://github.com/typeorm/typeorm/blob/master/src/naming-strategy/DefaultNamingStrategy.ts
@@ -71,6 +72,9 @@ export class CustomNamingStrategy
     }
 
     return `REL_${key}`;
+  }
+  joinColumnName(relationName: string, referencedColumnName: string): string {
+    return snakeCase(relationName + "_" + referencedColumnName);
   }
 
   defaultConstraintName(
