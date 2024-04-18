@@ -42,7 +42,7 @@ export const SimpleWritableRepoMixin =
       ): Promise<Entity> {
         try {
           const result = await this.writeRepo.update(
-            idOrConditions,
+            idOrConditions as any, //TODO typing broke ???
             partialEntity
           );
           const updated = await this.writeRepo.findOneByOrFail(
@@ -97,7 +97,7 @@ export const SimpleWritableRepoMixin =
         /* ...options: any[] */
       ): Promise<DeleteResult> {
         try {
-          return this.writeRepo.delete(criteria);
+          return this.writeRepo.delete(criteria as any); // TODO typing broke
         } catch (err) {
           throw new NotFoundException(
             "The record was not found",

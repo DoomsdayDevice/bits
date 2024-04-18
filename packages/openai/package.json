@@ -1,0 +1,30 @@
+{
+  "name": "@bits/openai",
+  "version": "1.0.0",
+  "description": "> TODO: description",
+  "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
+  "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/openai#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoomsdayDevice/bits.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/openai.test.js",
+    "build": "rm -rf lib && tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/DoomsdayDevice/bits/issues"
+  },
+  "dependencies": {
+    "openai": "^4.37.1"
+  }
+}

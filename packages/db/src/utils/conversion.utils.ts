@@ -37,7 +37,8 @@ export function applyFilterToQueryBuilder<T extends ObjectLiteral>(
     if (isObject(key)) applyFilterToQueryBuilder(where[key]!, qb);
     else {
       if (isFindOperator(where[key])) {
-        if (where[key]._type === "in") {
+        if ((where[key] as any)._type === "in") {
+          // TODO rm any
           if (key === "ids") qb.whereInIds(where[key]);
           else qb.andWhere({ [key]: where[key] });
         }
