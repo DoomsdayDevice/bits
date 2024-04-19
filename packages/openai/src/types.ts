@@ -20,3 +20,11 @@ export interface OpenAIModuleAsyncOptions
     ...args: any[]
   ) => Promise<OpenAIModuleOptions> | OpenAIModuleOptions;
 }
+
+export type OpenAIVoice =
+  | "alloy"
+  | "echo"
+  | "fable"
+  | "onyx"
+  | "nova"
+  | "shimmer";

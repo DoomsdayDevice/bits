@@ -1,18 +1,22 @@
 import { OPENAI_OPTIONS_TOKEN } from "./constants";
-import type { OpenAIModel } from "./types";
+import type { OpenAIModel, OpenAIVoice } from "./types";
 import { OpenAIModuleOptions } from "./types";
 
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import OpenAI from "openai";
 import type { APIPromise, Uploadable } from "openai/core";
-import type { ChatCompletionChunk } from "openai/resources";
+import type {
+  ChatCompletionChunk,
+  ChatCompletionMessageParam,
+} from "openai/resources";
 import type { Stream } from "openai/streaming";
 import { ChatRole } from "./enums";
 
 @Injectable()
 export class OpenAiService {
   private readonly client: OpenAI;
-  private model: OpenAIModel = "gpt-4-turbo-preview";
+  private defaultModel: OpenAIModel = "gpt-4-turbo-preview";
+  private defaultVoice: OpenAIVoice = "nova";
 
   constructor(
     @Inject(OPENAI_OPTIONS_TOKEN) private readonly options: OpenAIModuleOptions
@@ -22,20 +26,26 @@ export class OpenAiService {
     });
   }
 
-  async ask(systemPrompt: string, prompt: string): Promise<string> {
+  async ask(
+    prompt: string,
+    options?: { systemPrompt?: string; model?: OpenAIModel }
+  ): Promise<string> {
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: ChatRole.USER,
+        content: prompt,
+      },
+    ];
+    if (options?.systemPrompt) {
+      messages.unshift({
+        role: ChatRole.SYSTEM,
+        content: options.systemPrompt,
+      });
+    }
     try {
       const completion = await this.client.chat.completions.create({
-        model: this.model,
-        messages: [
-          {
-            role: ChatRole.SYSTEM,
-            content: systemPrompt,
-          },
-          {
-            role: ChatRole.USER,
-            content: prompt,
-          },
-        ],
+        model: options?.model || this.defaultModel,
+        messages,
         temperature: 1,
       });
       return completion.choices[0].message.content ?? "";
@@ -47,7 +57,7 @@ export class OpenAiService {
 
   /**
    * @param systemPrompt
-   * @param image BASE64
+   * @param images BASE64[]
    */
   async askWithImages(systemPrompt: string, images: string[]): Promise<string> {
     try {
@@ -81,7 +91,7 @@ export class OpenAiService {
   askStream(content: string): APIPromise<Stream<ChatCompletionChunk>> {
     try {
       return this.client.chat.completions.create({
-        model: this.model,
+        model: this.defaultModel,
         messages: [
           {
             role: ChatRole.USER,
@@ -109,7 +119,7 @@ export class OpenAiService {
 
   async textToSpeech(input: string): Promise<Buffer> {
     const mp3 = (await this.client.audio.speech.create({
-      voice: "nova",
+      voice: this.defaultVoice,
       input,
       model: "tts-1",
     })) as any; // TODO why never??
@@ -119,13 +129,16 @@ export class OpenAiService {
     return buffer;
   }
 
-  async createImage(prompt: string): Promise<string> {
+  async createImage(
+    prompt: string,
+    options: { resolution } = { resolution: "1024x1024" }
+  ): Promise<string> {
     console.log("creating image");
     const response = await this.client.images.generate({
       model: "dall-e-3",
       prompt,
       n: 1,
-      size: "1024x1024",
+      size: options.resolution,
     });
     console.log("created image");
     if (!response.data[0].url) {
@@ -137,7 +150,8 @@ export class OpenAiService {
   async editImage(
     image: Uploadable,
     mask: Uploadable,
-    prompt: string
+    prompt: string,
+    options: { resolution } = { resolution: "1024x1024" }
   ): Promise<string> {
     const response = await this.client.images.edit({
       model: "dall-e-2",
@@ -145,7 +159,7 @@ export class OpenAiService {
       mask,
       prompt,
       n: 1,
-      size: "1024x1024",
+      size: options.resolution,
     });
     if (!response.data[0].url) {
       throw new Error("Something went wrong");
