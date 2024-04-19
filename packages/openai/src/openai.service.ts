@@ -28,9 +28,14 @@ export class OpenAiService {
 
   async ask(
     prompt: string,
-    options?: { systemPrompt?: string; model?: OpenAIModel }
+    options?: {
+      systemPrompt?: string;
+      model?: OpenAIModel;
+      messages?: ChatCompletionMessageParam[];
+    }
   ): Promise<string> {
     const messages: ChatCompletionMessageParam[] = [
+      ...(options?.messages || []),
       {
         role: ChatRole.USER,
         content: prompt,
