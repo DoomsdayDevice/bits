@@ -1,5 +1,5 @@
 import { OPENAI_OPTIONS_TOKEN } from "./constants";
-import type { OpenAIModel, OpenAIVoice } from "./types";
+import type { AskOptions, OpenAIModel, OpenAIVoice } from "./types";
 import { OpenAIModuleOptions } from "./types";
 
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
@@ -26,32 +26,33 @@ export class OpenAiService {
     });
   }
 
-  async ask(
-    prompt: string,
-    options?: {
-      systemPrompt?: string;
-      model?: OpenAIModel;
-      messages?: ChatCompletionMessageParam[];
-    }
-  ): Promise<string> {
+  async ask(prompt: string, options: AskOptions = {}): Promise<string> {
+    const opts = {
+      messages: [],
+      temperature: 1,
+      ...options,
+    };
+
     const messages: ChatCompletionMessageParam[] = [
-      ...(options?.messages || []),
+      ...opts.messages,
       {
         role: ChatRole.USER,
         content: prompt,
       },
     ];
-    if (options?.systemPrompt) {
+    if (opts.systemPrompt) {
       messages.unshift({
         role: ChatRole.SYSTEM,
-        content: options.systemPrompt,
+        content: opts.systemPrompt,
       });
     }
     try {
       const completion = await this.client.chat.completions.create({
-        model: options?.model || this.defaultModel,
+        model: opts.model || this.defaultModel,
         messages,
-        temperature: 1,
+        temperature: opts.temperature,
+        frequency_penalty: opts.frequencyPenalty,
+        presence_penalty: opts.presencePenalty,
       });
       return completion.choices[0].message.content ?? "";
     } catch (e) {
