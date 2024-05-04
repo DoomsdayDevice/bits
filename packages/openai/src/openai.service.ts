@@ -123,9 +123,12 @@ export class OpenAiService {
     return response.text;
   }
 
-  async textToSpeech(input: string): Promise<Buffer> {
+  public async textToSpeech(
+    input: string,
+    { voice }: { voice?: OpenAIVoice } = {}
+  ): Promise<Buffer> {
     const mp3 = (await this.client.audio.speech.create({
-      voice: this.defaultVoice,
+      voice: voice || this.defaultVoice,
       input,
       model: "tts-1",
     })) as any; // TODO why never??
