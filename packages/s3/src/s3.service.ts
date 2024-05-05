@@ -27,6 +27,19 @@ export class S3Service {
   ) {
     return this.minioClient.putObject(bucketName, objectName, stream, metaData);
   }
+  async putPublicObject(
+    bucketName: string,
+    objectName: string,
+    stream: Readable | Buffer | string,
+    metaData?: ItemBucketMetadata
+  ) {
+    return this.minioClient.putObject(
+      bucketName,
+      `public/${objectName}`,
+      stream,
+      metaData
+    );
+  }
 
   /**
    *
@@ -46,7 +59,7 @@ export class S3Service {
 
   async getStaticUrl(bucketName: string, objectName: string) {
     return `${this.cfg.protocol}//${
-      this.cfg.endPoint + this.cfg.port ? `:${this.cfg.port}` : ""
+      this.cfg.endPoint + (this.cfg.port ? `:${this.cfg.port}` : "")
     }/${bucketName}/public/${objectName}`;
   }
 
