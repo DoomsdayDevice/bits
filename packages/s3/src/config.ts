@@ -30,6 +30,9 @@ export class S3Cfg {
 
   @IsString()
   bucketName!: string;
+
+  @IsString()
+  protocol!: string;
 }
 
 type Opts = { https: boolean };
@@ -38,12 +41,14 @@ export const configFactory = () => {
   assert(process.env.S3_URL);
   const url = new URL(process.env.S3_URL);
   const useSSL = process.env.S3_USE_SSL;
+  const protocol = url.protocol;
   const cfg: S3Cfg = {
     url: url.toString(),
+    protocol,
     endPoint: url.hostname,
     accessKey: url.username,
     secretKey: url.password,
-    useSSL:  useSSL == undefined ? true : (useSSL === 'true'),
+    useSSL: useSSL == undefined ? true : useSSL === "true",
     port: +url.port,
     bucketName: process.env.S3_BUCKET_NAME! || "test",
   };
