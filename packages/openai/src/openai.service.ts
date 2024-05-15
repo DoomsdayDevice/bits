@@ -62,17 +62,20 @@ export class OpenAiService {
   }
 
   /**
-   * @param systemPrompt
    * @param images BASE64[]
+   * @param opts
    */
-  async askWithImages(systemPrompt: string, images: string[]): Promise<string> {
+  async askWithImages(
+    images: string[],
+    opts: AskOptions = {}
+  ): Promise<string> {
     try {
       const completion = await this.client.chat.completions.create({
-        model: "gpt-4-vision-preview",
+        model: opts.model || "gpt-4-vision-preview",
         messages: [
           {
             role: ChatRole.SYSTEM,
-            content: systemPrompt,
+            content: opts.systemPrompt || "",
           },
           {
             role: ChatRole.USER,
