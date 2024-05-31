@@ -1,0 +1,13 @@
+diff --git a/node_modules/nestjs-telegraf/dist/utils/create-bot-factory.util.js b/node_modules/nestjs-telegraf/dist/utils/create-bot-factory.util.js
+index 542f1d4..9058741 100644
+--- a/node_modules/nestjs-telegraf/dist/utils/create-bot-factory.util.js
++++ b/node_modules/nestjs-telegraf/dist/utils/create-bot-factory.util.js
+@@ -7,7 +7,7 @@ async function createBotFactory(options) {
+     const bot = new telegraf_1.Telegraf(options.token, options.options);
+     bot.use(...((_a = options.middlewares) !== null && _a !== void 0 ? _a : []));
+     if (options.launchOptions !== false) {
+-        bot.launch(options.launchOptions);
++        bot.launch(options.launchOptions).catch(console.log);
+     }
+     return bot;
+ }

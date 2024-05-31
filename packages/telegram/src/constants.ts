@@ -1,0 +1,1 @@
+export const TG_OPTIONS_TOKEN = 'TG_OPTIONS_TOKEN';
