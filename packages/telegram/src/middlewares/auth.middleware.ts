@@ -1,13 +1,12 @@
-import type { UserService } from '../../user/user.service';
 import { UserLanguage } from '../enums';
 import type { TgContext } from '../interfaces';
 
 import type { Middleware } from 'telegraf';
 
 export const authMiddleware: (
-  userService: UserService,
+  userService: any,
 ) => Middleware<TgContext> = (userService) => async (ctx, next) => {
-  let user = ctx.message?.from || (ctx.callbackQuery.message as any).from;
+  let user = ctx.message?.from || (ctx?.callbackQuery?.message as any).from;
   if (user.is_bot) {
     user = (ctx.update as any).callback_query.from;
   }

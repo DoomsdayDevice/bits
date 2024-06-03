@@ -1,7 +1,11 @@
 import type {
     TelegrafModuleAsyncOptions,
     TelegrafModuleOptions,
-  } from 'nestjs-telegraf';
+} from 'nestjs-telegraf';
+
+export interface UserService {
+  telegramId: string;
+}
 
 export interface TelegramModuleOptions extends TelegrafModuleOptions {
   botName: string;
@@ -9,7 +13,7 @@ export interface TelegramModuleOptions extends TelegrafModuleOptions {
 }
 
 export interface TelegramModuleAsyncOptions<
-  T extends { telegramId: string } = any,
+  T extends UserService = any,
 > extends TelegrafModuleAsyncOptions {
   botName: string;
   botToken: string;
