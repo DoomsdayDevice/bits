@@ -1,6 +1,6 @@
 {
   "name": "@bits/nestjs-config",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/s3#readme",
@@ -28,6 +28,6 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/backend": "^1.0.23"
+    "@bits/backend": "^1.0.24"
   }
 }
