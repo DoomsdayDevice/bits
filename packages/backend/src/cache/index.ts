@@ -16,7 +16,7 @@ type CacheCfg = {
   port: number;
   password: string;
 };
-interface CacheMethodOpts extends CacheOptions {
+export interface CacheMethodOpts extends CacheOptions {
   TransformModel?: Type<any>;
 }
 
