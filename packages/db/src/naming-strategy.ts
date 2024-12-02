@@ -98,7 +98,7 @@ export class CustomNamingStrategy
   }
 
   tableName(targetName: string, userSpecifiedName: string | undefined): string {
-    return userSpecifiedName || this.toCase(targetName.replace("Entity", ""));
+    return userSpecifiedName || snakeCase(targetName.replace("Entity", ""));
   }
 
   columnName(propertyName: string, customName: string | undefined): string {
