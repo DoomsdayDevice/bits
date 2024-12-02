@@ -1,7 +1,6 @@
-import { DefaultNamingStrategy, Table, NamingStrategyInterface } from "typeorm";
+import { camelCase, snakeCase } from "lodash";
+import { DefaultNamingStrategy, NamingStrategyInterface, Table } from "typeorm";
 import { RandomGenerator } from "typeorm/util/RandomGenerator";
-import { snakeCase } from "lodash";
-import StringUtils_1 from "typeorm/util/StringUtils";
 
 /**
  * https://github.com/typeorm/typeorm/blob/master/src/naming-strategy/DefaultNamingStrategy.ts
@@ -11,6 +10,14 @@ export class CustomNamingStrategy
   extends DefaultNamingStrategy
   implements NamingStrategyInterface
 {
+  private toCase: (str: string) => string;
+
+  constructor(private toCamelCase: boolean = false) {
+    super();
+
+    this.toCase = toCamelCase ? camelCase : snakeCase;
+  }
+
   protected getTableName(tableOrName: Table | string): string {
     const name = (
       typeof tableOrName === "string" ? tableOrName : tableOrName.name
@@ -74,7 +81,7 @@ export class CustomNamingStrategy
     return `REL_${key}`;
   }
   joinColumnName(relationName: string, referencedColumnName: string): string {
-    return snakeCase(relationName + "_" + referencedColumnName);
+    return this.toCase(relationName + "_" + referencedColumnName);
   }
 
   defaultConstraintName(
@@ -91,10 +98,10 @@ export class CustomNamingStrategy
   }
 
   tableName(targetName: string, userSpecifiedName: string | undefined): string {
-    return userSpecifiedName || snakeCase(targetName.replace("Entity", ""));
+    return userSpecifiedName || this.toCase(targetName.replace("Entity", ""));
   }
 
   columnName(propertyName: string, customName: string | undefined): string {
-    return snakeCase(customName || propertyName);
+    return this.toCase(customName || propertyName);
   }
 }
