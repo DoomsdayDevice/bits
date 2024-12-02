@@ -1,5 +1,5 @@
-import { Type, UsePipes, ValidationPipe } from "@nestjs/common";
 import { GMethodInput } from "@bits/core";
+import { Type, UsePipes, ValidationPipe } from "@nestjs/common";
 import { methodReflector } from "../constants";
 
 type MethodOptions = {
@@ -15,7 +15,11 @@ export function GrpcMethodDef({
 }: MethodOptions): MethodDecorator {
   return (target, propertyKey: string | symbol, descriptor) => {
     if (typeof propertyKey === "symbol") throw new Error("symbols not allowed");
-    UsePipes(new ValidationPipe())(target, propertyKey, descriptor);
+    UsePipes(new ValidationPipe({ transform: true }))(
+      target,
+      propertyKey,
+      descriptor
+    );
 
     const newMeth: GMethodInput = {
       name: name || propertyKey,
