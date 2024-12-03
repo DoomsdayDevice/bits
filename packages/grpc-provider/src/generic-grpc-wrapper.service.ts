@@ -11,9 +11,7 @@ export function getDefaultGrpcServiceWrapper<
   class GenericGrpcService implements OnModuleInit {
     public grpcSvc!: Service;
 
-    constructor(
-      @Inject(packageToken) private client: ClientGrpc // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
-    ) {}
+    @Inject(packageToken) private client!: ClientGrpc; // @InjectRepository(PushSubscriber) private subscriberRepository: Repository<PushSubscriber>,
 
     onModuleInit(): any {
       this.grpcSvc = promisify(this.client.getService<Service>(serviceName));
