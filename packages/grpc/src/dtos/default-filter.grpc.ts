@@ -119,6 +119,7 @@ export const getOrCreateDefaultFilter = memoize(
 
     for (const f of filterable) {
       let filterTypeFn;
+      console.log({ TYPE1: f.typeFn() });
       if (f.typeFn() === String) {
         filterTypeFn = () => StringFieldComparison;
       } else if (f.typeFn() === Date) {
@@ -128,8 +129,10 @@ export const getOrCreateDefaultFilter = memoize(
       } else {
         const enumName = f.typeFn();
         const foundEnum = grpcEnums.find((e) => e.name === enumName);
+        console.log({ foundEnum });
         if (foundEnum) {
           const enumComp = getEnumComparisonType(foundEnum, enumName);
+          console.log({ enumComp });
           filterTypeFn = () => enumComp;
         } else {
           let t: any;
@@ -142,6 +145,11 @@ export const getOrCreateDefaultFilter = memoize(
           }
           filterTypeFn = () => t;
         }
+      }
+      if (!filterTypeFn()) {
+        throw new Error(
+          `Didn't find the correct type for ${f.messageName} ${f.name} (probably some load order issue with enums or the like)`
+        );
       }
       GrpcFieldDef(filterTypeFn, {
         name: f.name,
