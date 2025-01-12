@@ -31,11 +31,13 @@
     "@bits/core": "^1.0.9",
     "@nestjs/common": "^9.3.9",
     "@nestjs/core": "^9.3.9",
+    "@nestjs/swagger": "^8.1.1",
     "@type-cacheable/core": "^11.0.1",
     "@type-cacheable/redis-adapter": "^14.0.2",
     "cache-manager": "^5.1.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "express-openapi-validator": "^5.4.2",
     "redis": "^4.6.5",
     "sharp": "^0.31.3"
   }
