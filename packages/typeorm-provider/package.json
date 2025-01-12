@@ -1,6 +1,6 @@
 {
   "name": "@bits/typeorm-provider",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/typeorm-provider#readme",
@@ -28,8 +28,8 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/backend": "^1.0.25",
-    "@bits/db": "^1.0.43",
+    "@bits/backend": "^1.0.26",
+    "@bits/db": "^1.0.44",
     "@nestjs/common": "^9.3.9"
   },
   "peerDependencies": {
