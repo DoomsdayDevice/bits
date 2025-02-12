@@ -65,16 +65,13 @@ export const loadSwagger = (
   app.use(bodyParser.json());
   const document = yaml.load(fs.readFileSync(yamlPath, "utf8")) as any;
 
-  console.dir(document, { depth: null });
   if (noAdditionalProperties) {
     setAdditionalPropertiesFalse(document);
   }
-  console.dir(document, { depth: null });
   const apiSpec = document;
   const validator = OpenApiValidator.middleware({
     apiSpec,
     ignorePaths: (path: string) => {
-      console.log("🚀 ~ ignorePaths ~ path:", path);
       return path.match(/^\/(swagger|custom-sw\.js)/);
     },
     validateRequests: {
