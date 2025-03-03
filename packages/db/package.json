@@ -1,6 +1,6 @@
 {
   "name": "@bits/db",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/db#readme",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@automapper/core": "^8.7.7",
     "@automapper/nestjs": "^8.8.1",
-    "@bits/backend": "^1.0.27",
+    "@bits/backend": "^1.0.28",
     "@bits/core": "^1.0.9",
     "@nestjs/typeorm": "^11.0.0",
     "bcrypt": "^5.1.0"
