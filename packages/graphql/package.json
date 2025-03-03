@@ -30,15 +30,15 @@
   "dependencies": {
     "@bits/backend": "^1.0.27",
     "@bits/core": "^1.0.9",
-    "@casl/ability": "^6.3.3",
-    "@types/lodash": "^4.17.0",
-    "class-validator": "^0.14.0",
+    "@casl/ability": "^6.7.3",
+    "@types/lodash": "^4.17.16",
+    "class-validator": "^0.14.1",
     "lodash": "^4.17.21"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.3.9",
-    "@nestjs/graphql": "^11.0.5",
-    "@nestjs/microservices": "^9.3.9",
+    "@nestjs/common": "^11.0.11",
+    "@nestjs/graphql": "^13.0.3",
+    "@nestjs/microservices": "^11.0.11",
     "dataloader": "^2.2.2",
     "graphql": "^16.6.0",
     "graphql-scalars": "^1.20.1",

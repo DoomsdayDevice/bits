@@ -25,15 +25,27 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@types/node": "^18.14.1",
-    "lerna": "^6.5.1",
+    "@types/node": "^22.13.8",
+    "lerna": "^8.2.0",
     "lodash": "^4.17.21",
-    "typescript": "^5.4.5"
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "@nestjs/common": "11.0.11"
   },
   "dependencies": {
-    "@nestjs/platform-express": "^9.4.0",
-    "patch-package": "^6.5.1",
-    "prettier": "^2.8.4",
-    "ts-morph": "^22.0.0"
+    "@nestjs/core": "^11.0.11",
+    "@nestjs/graphql": "^13.0.3",
+    "@nestjs/microservices": "^11.0.11",
+    "@nestjs/platform-express": "^11.0.11",
+    "@nestjs/typeorm": "^11.0.0",
+    "dataloader": "^2.2.3",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.1",
+    "patch-package": "^8.0.0",
+    "prettier": "^3.5.3",
+    "protobufjs": "^7.4.0",
+    "ts-morph": "^25.0.1",
+    "typeorm": "^0.3.21"
   }
 }

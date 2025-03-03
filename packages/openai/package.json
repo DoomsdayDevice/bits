@@ -24,6 +24,9 @@
   "bugs": {
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.11"
+  },
   "dependencies": {
     "openai": "^4.37.1"
   }

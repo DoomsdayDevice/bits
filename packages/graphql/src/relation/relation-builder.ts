@@ -42,7 +42,7 @@ export const populateLoaders = (app: any) => {
  */
 export function injectServices() {
   for (const { dto, resolver, svcName } of servicesToInjectIntoResolvers) {
-    const cls = crudServiceReflector.get(dto);
+    const cls: any = crudServiceReflector.get(dto);
     Inject(cls)(resolver.prototype, svcName);
   }
 }

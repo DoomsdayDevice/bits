@@ -32,8 +32,8 @@
     "@bits/core": "^1.0.9",
     "@bits/db": "^1.0.45",
     "@bits/grpc-common": "^1.0.4",
-    "@grpc/grpc-js": "^1.8.12",
-    "@nestjs/common": "^9.3.9",
+    "@grpc/grpc-js": "^1.12.6",
+    "@nestjs/common": "^11.0.11",
     "ts-toolbelt": "^9.6.0",
     "ts2json": "^1.1.0"
   },

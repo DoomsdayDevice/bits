@@ -30,10 +30,10 @@
   "dependencies": {
     "@bits/backend": "^1.0.27",
     "@bits/db": "^1.0.45",
-    "@nestjs/common": "^9.3.9"
+    "@nestjs/common": "^11.0.11"
   },
   "peerDependencies": {
-    "@nestjs/typeorm": "^9.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "typeorm": "^0.3.12"
   },
   "gitHead": "997212f2169687ac9bc5c919b04cddc135268a4f"
