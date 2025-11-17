@@ -1,4 +1,6 @@
 import * as cacheManager from "cache-manager";
+import { KeyvAdapter } from "cache-manager";
+import Keyv from "keyv";
 import { CacheOptions } from "@type-cacheable/core/dist/interfaces";
 import tcManager, { Cacheable } from "@type-cacheable/core";
 import { RedisAdapter, useAdapter } from "@type-cacheable/redis-adapter";
@@ -14,17 +16,24 @@ type CacheCfg = {
   enabled: boolean;
   host: string;
   port: number;
-  password: string;
+  password?: string;
+  database?: number;
 };
 export interface CacheMethodOpts extends CacheOptions {
   TransformModel?: Type<any>;
 }
 
-export const getCacheStuff = ({ enabled, host, port, password }) => {
+export const getCacheStuff = ({
+  enabled,
+  host,
+  port,
+  password,
+  database = 0,
+}: CacheCfg) => {
   let redisCache: RedisCache;
 
   const redisClient = Redis.createClient({
-    url: `redis://${host}:${port}`,
+    url: `redis://${host}:${port}/${database}`,
     password,
     // retry_strategy: enabled ? undefined : () => null,
   });
@@ -45,11 +54,14 @@ export const getCacheStuff = ({ enabled, host, port, password }) => {
 
   const myCacheManager = {
     async set(key: string, payload: string) {
-      redisCache = await cacheManager.caching(redisStore, {
-        url: `redis://${host}:${port}`,
+      const store = await redisStore({
+        url: `redis://${host}:${port}/${database}`,
         socket: { connectTimeout: 50000 },
       });
-      await redisCache.reset();
+      const keyvAdapter = new KeyvAdapter(store);
+      const keyv = new Keyv({ store: keyvAdapter });
+      redisCache = await cacheManager.createCache({ stores: [keyv] });
+      await redisCache.clear();
       await redisCache.set(key, payload);
     },
 

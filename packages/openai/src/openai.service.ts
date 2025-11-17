@@ -4,7 +4,10 @@ import { OpenAIModuleOptions } from "./types";
 
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import OpenAI from "openai";
-import type { APIPromise, Uploadable } from "openai/core";
+import type {
+  APIPromise,
+  Uploadable,
+} from "openai";
 import type {
   ChatCompletionChunk,
   ChatCompletionMessageParam,
@@ -153,7 +156,7 @@ export class OpenAiService {
       size: options.resolution,
     });
     console.log("created image");
-    if (!response.data[0].url) {
+    if (!response.data?.[0]?.url) {
       throw new Error("Something went wrong");
     }
     return response.data[0].url;
@@ -173,7 +176,7 @@ export class OpenAiService {
       n: 1,
       size: options.resolution,
     });
-    if (!response.data[0].url) {
+    if (!response.data?.[0]?.url) {
       throw new Error("Something went wrong");
     }
     return response.data[0].url;

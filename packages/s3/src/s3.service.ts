@@ -24,20 +24,20 @@ export class S3Service {
     objectName: string,
     stream: Readable | Buffer | string,
     metaData?: ItemBucketMetadata
-  ) {
-    return this.minioClient.putObject(bucketName, objectName, stream, metaData);
+  ): Promise<any> {
+    return this.minioClient.putObject(bucketName, objectName, stream, metaData as any);
   }
   async putPublicObject(
     bucketName: string,
     objectName: string,
     stream: Readable | Buffer | string,
     metaData?: ItemBucketMetadata
-  ) {
+  ): Promise<any> {
     return this.minioClient.putObject(
       bucketName,
       `public/${objectName}`,
       stream,
-      metaData
+      metaData as any
     );
   }
 

@@ -38,7 +38,7 @@
     "ts2json": "^1.1.0"
   },
   "peerDependencies": {
-    "protobufjs": "~7.2.2",
+    "protobufjs": "^7.2.2",
     "rxjs": "^7.8.0"
   },
   "gitHead": "997212f2169687ac9bc5c919b04cddc135268a4f"

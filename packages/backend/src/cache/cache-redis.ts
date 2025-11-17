@@ -13,13 +13,11 @@ import "@redis/json";
 import "@redis/search";
 import "@redis/time-series";
 
-import type { Cache, Store, Config } from "cache-manager";
+import type { Cache, CacheManagerStore, CreateCacheOptions } from "cache-manager";
 
 type Clients = RedisClientType | RedisClusterType;
 
-export type RedisCache<T extends Clients = RedisClientType> = Cache<
-  RedisStore<T>
->;
+export type RedisCache<T extends Clients = RedisClientType> = Cache;
 
 type Name<T extends Clients> = T extends RedisClientType
   ? "redis"
@@ -27,7 +25,7 @@ type Name<T extends Clients> = T extends RedisClientType
   ? "redis-cluster"
   : never;
 
-export interface RedisStore<T extends Clients = RedisClientType> extends Store {
+export interface RedisStore<T extends Clients = RedisClientType> extends CacheManagerStore {
   name: Name<T>;
   isCacheable: (value: unknown) => boolean;
   get client(): T;
@@ -40,7 +38,7 @@ function builder<T extends Clients>(
   name: Name<T>,
   reset: () => Promise<void>,
   keys: (pattern: string) => Promise<string[]>,
-  options?: Config
+  options?: { isCacheable?: (value: unknown) => boolean; ttl?: number }
 ) {
   const isCacheable =
     options?.isCacheable || ((value) => value !== undefined && value !== null);
@@ -58,24 +56,24 @@ function builder<T extends Clients>(
       const ttlOptions = t !== undefined ? { PX: t } : undefined;
       await redisCache.set(key, getVal(value), ttlOptions);
     },
-    async mset(args, ttl) {
+    async mset(args: Record<string, any>, ttl) {
       const t = ttl === undefined ? options?.ttl : ttl;
       if (t !== undefined) {
         const multi = redisCache.multi();
-        for (const [key, value] of args) {
+        for (const [key, value] of Object.entries(args)) {
           if (!isCacheable(value))
             throw new Error(`"${getVal(value)}" is not a cacheable value`);
           multi.set(key, getVal(value), { PX: t });
         }
         await multi.exec();
-      } else
-        await redisCache.mSet(
-          args.map(([key, value]) => {
-            if (!isCacheable(value))
-              throw new Error(`"${getVal(value)}" is not a cacheable value`);
-            return [key, getVal(value)] as [string, string];
-          })
-        );
+      } else {
+        const entries = Object.entries(args).map(([key, value]) => {
+          if (!isCacheable(value))
+            throw new Error(`"${getVal(value)}" is not a cacheable value`);
+          return [key, getVal(value)] as [string, string];
+        });
+        await redisCache.mSet(Object.fromEntries(entries));
+      }
     },
     mget: (...args) =>
       redisCache
@@ -105,7 +103,7 @@ function builder<T extends Clients>(
 }
 
 // TODO: past instance as option
-export async function redisStore(options?: RedisClientOptions & Config) {
+export async function redisStore(options?: RedisClientOptions & { isCacheable?: (value: unknown) => boolean; ttl?: number }) {
   const redisCache = createClient(options);
   await redisCache.connect();
 
@@ -115,7 +113,7 @@ export async function redisStore(options?: RedisClientOptions & Config) {
 /**
  * redisCache should be connected
  */
-export function redisInsStore(redisCache: RedisClientType, options?: Config) {
+export function redisInsStore(redisCache: RedisClientType, options?: { isCacheable?: (value: unknown) => boolean; ttl?: number }) {
   const reset = async () => {
     await redisCache.flushDb();
   };
@@ -125,11 +123,11 @@ export function redisInsStore(redisCache: RedisClientType, options?: Config) {
 }
 
 // TODO: coverage
-export async function redisClusterStore(options: RedisClusterOptions & Config) {
+export async function redisClusterStore(options: RedisClusterOptions & { isCacheable?: (value: unknown) => boolean; ttl?: number }) {
   const redisCache = createCluster(options);
   await redisCache.connect();
 
-  return redisClusterInsStore(redisCache, options);
+  return redisClusterInsStore(redisCache as any, options);
 }
 
 // TODO: coverage
@@ -138,7 +136,7 @@ export async function redisClusterStore(options: RedisClusterOptions & Config) {
  */
 export function redisClusterInsStore(
   redisCache: RedisClusterType,
-  options: RedisClusterOptions & Config
+  options: { isCacheable?: (value: unknown) => boolean; ttl?: number }
 ) {
   const reset = async () => {
     await Promise.all(

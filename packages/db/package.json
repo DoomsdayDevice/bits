@@ -33,7 +33,7 @@
     "@bits/backend": "^1.0.28",
     "@bits/core": "^1.0.9",
     "@nestjs/typeorm": "^11.0.0",
-    "bcrypt": "^5.1.0"
+    "bcrypt": "^6.0.0"
   },
   "peerDependencies": {
     "typeorm": "^0.3.12"
