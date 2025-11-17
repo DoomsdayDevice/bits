@@ -1,6 +1,6 @@
 {
   "name": "@bits/s3",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/s3#readme",
@@ -28,7 +28,7 @@
     "url": "https://github.com/DoomsdayDevice/bits/issues"
   },
   "dependencies": {
-    "@bits/nestjs-config": "^1.0.7",
+    "@bits/nestjs-config": "^1.0.8",
     "minio": "^8.0.6",
     "nestjs-minio": "^2.6.2",
     "parse-duration": "^2.1.4"
