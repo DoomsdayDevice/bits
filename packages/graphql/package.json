@@ -1,6 +1,6 @@
 {
   "name": "@bits/graphql",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "description": "> TODO: description",
   "author": "doomsday_device <lovesjuicypeaches@gmail.com>",
   "homepage": "https://github.com/DoomsdayDevice/bits/tree/main/packages/graphql#readme",
@@ -41,8 +41,8 @@
     "@nestjs/microservices": "^11.0.11",
     "dataloader": "^2.2.2",
     "graphql": "^16.6.0",
-    "graphql-scalars": "^1.20.1",
-    "ts-morph": "^22.0.0"
+    "graphql-scalars": "^1.24.0",
+    "ts-morph": "^27.0.2"
   },
   "gitHead": "997212f2169687ac9bc5c919b04cddc135268a4f"
 }
